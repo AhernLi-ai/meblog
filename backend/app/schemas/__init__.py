@@ -1,7 +1,7 @@
 from .user import UserCreate, UserLogin, UserResponse, Token, TokenData
 from .category import CategoryCreate, CategoryUpdate, CategoryResponse, ProjectCreate, ProjectUpdate, ProjectResponse
 from .tag import TagCreate, TagUpdate, TagResponse
-from .post import PostCreate, PostUpdate, PostResponse, PostListResponse, PostListItem
+from .post import PostCreate, PostUpdate, PostResponse, PostListResponse, PostListItem, LikeStatusResponse
 from .settings import UserSettingsUpdate, UserSettingsResponse, SiteSettingsResponse
 
 __all__ = [
@@ -9,7 +9,7 @@ __all__ = [
     "CategoryCreate", "CategoryUpdate", "CategoryResponse",
     "ProjectCreate", "ProjectUpdate", "ProjectResponse",
     "TagCreate", "TagUpdate", "TagResponse",
-    "PostCreate", "PostUpdate", "PostResponse", "PostListResponse", "PostListItem",
+    "PostCreate", "PostUpdate", "PostResponse", "PostListResponse", "PostListItem", "LikeStatusResponse",
     "UserSettingsUpdate", "UserSettingsResponse",
     "SiteSettingsResponse",
 ]

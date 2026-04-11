@@ -40,6 +40,7 @@ class PostListItem(BaseModel):
     slug: str
     summary: Optional[str]
     view_count: int
+    like_count: int
     status: str
     created_at: datetime
     project: Optional[ProjectInfo] = Field(None, validation_alias="project")
@@ -56,6 +57,7 @@ class PostResponse(BaseModel):
     content: str
     summary: Optional[str]
     view_count: int
+    like_count: int
     status: str
     created_at: datetime
     updated_at: datetime
@@ -91,3 +93,8 @@ class PostUpdate(BaseModel):
     project_id: Optional[int] = None
     tag_ids: Optional[List[int]] = None
     status: Optional[str] = None
+
+
+class LikeStatusResponse(BaseModel):
+    liked: bool  # 当前 visitor 是否点过赞
+    like_count: int  # 总点赞数
