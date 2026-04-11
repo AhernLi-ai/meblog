@@ -1,0 +1,71 @@
+import { useState } from 'react';
+import { HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import axios from 'axios';
+import clsx from 'clsx';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+
+interface LikeStatus {
+  liked: boolean;
+  like_count: number;
+}
+
+interface LikeButtonProps {
+  slug: string;
+  initialLiked?: boolean;
+  initialCount?: number;
+}
+
+export default function LikeButton({ slug, initialLiked = false, initialCount = 0 }: LikeButtonProps) {
+  const [liked, setLiked] = useState(initialLiked);
+  const [count, setCount] = useState(initialCount);
+  const [loading, setLoading] = useState(false);
+
+  const handleLike = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    // Optimistic update: immediately toggle
+    const prevLiked = liked;
+    const prevCount = count;
+    setLiked(!liked);
+    setCount(liked ? count - 1 : count + 1);
+
+    try {
+      const res = await axios.post<LikeStatus>(`${API_BASE}/posts/${slug}/like`);
+      // Sync with server response
+      setLiked(res.data.liked);
+      setCount(res.data.like_count);
+    } catch {
+      // Revert on error
+      setLiked(prevLiked);
+      setCount(prevCount);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleLike}
+      disabled={loading}
+      className={clsx(
+        'flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200',
+        'border focus:outline-none focus:ring-2 focus:ring-offset-2',
+        liked
+          ? 'border-red-300 bg-red-50 text-red-600 dark:bg-red-900/20 dark:border-red-700 dark:text-red-400 focus:ring-red-400'
+          : 'border-gray-300 bg-white text-gray-500 hover:border-red-300 hover:text-red-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:border-red-600 dark:hover:text-red-400 focus:ring-gray-400',
+        loading && 'opacity-60 cursor-not-allowed'
+      )}
+      aria-label={liked ? '取消点赞' : '点赞'}
+    >
+      {liked ? (
+        <HeartIconSolid className="w-5 h-5" />
+      ) : (
+        <HeartIcon className="w-5 h-5" />
+      )}
+      <span className="font-medium text-sm">{count}</span>
+    </button>
+  );
+}

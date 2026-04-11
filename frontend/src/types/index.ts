@@ -39,6 +39,7 @@ export interface PostListItem {
   slug: string;
   summary: string | null;
   view_count: number;
+  like_count: number;
   status: string;
   created_at: string;
   project: Project | null;

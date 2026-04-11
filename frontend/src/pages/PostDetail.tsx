@@ -5,6 +5,7 @@ import { postsApi } from '../api/posts';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import TableOfContents from '../components/TableOfContents';
 import WechatQR from '../components/WechatQR';
+import LikeButton from '../components/LikeButton';
 import { ListBulletIcon } from '@heroicons/react/24/outline';
 
 const SITE_URL = (import.meta as any).env?.VITE_SITE_URL || 'http://localhost:6000';
@@ -60,6 +61,12 @@ export default function PostDetail() {
   const { data: post, isLoading, error } = useQuery({
     queryKey: ['post', slug],
     queryFn: () => postsApi.getById(slug!),
+    enabled: !!slug,
+  });
+
+  const { data: likeStatus } = useQuery({
+    queryKey: ['postLike', slug],
+    queryFn: () => postsApi.getLikeStatus(slug!),
     enabled: !!slug,
   });
 
@@ -204,6 +211,17 @@ export default function PostDetail() {
         <div className="bg-white dark:bg-gray-900 rounded-lg p-6 md:p-8">
           <MarkdownRenderer content={post.content} />
         </div>
+
+        {/* Like Button at end of article */}
+        {slug && (
+          <div className="mt-8 flex justify-center">
+            <LikeButton
+              slug={slug}
+              initialLiked={likeStatus?.liked}
+              initialCount={likeStatus?.like_count ?? post?.like_count ?? 0}
+            />
+          </div>
+        )}
 
         {/* Wechat QR at end of article */}
         <WechatQR variant="article-end" />
