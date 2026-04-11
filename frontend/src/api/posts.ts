@@ -14,6 +14,11 @@ export interface GetPostsParams {
   q?: string;
 }
 
+export interface LikeStatus {
+  liked: boolean;
+  like_count: number;
+}
+
 export const postsApi = {
   getAll: async (params?: GetPostsParams): Promise<PostListResponse> => {
     const response = await api.get<PostListResponse>('/posts', { params });
@@ -37,5 +42,15 @@ export const postsApi = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/posts/${id}`);
+  },
+
+  getLikeStatus: async (slug: string): Promise<LikeStatus> => {
+    const response = await api.get<LikeStatus>(`/posts/${slug}/like`);
+    return response.data;
+  },
+
+  toggleLike: async (slug: string): Promise<LikeStatus> => {
+    const response = await api.post<LikeStatus>(`/posts/${slug}/like`);
+    return response.data;
   },
 };
