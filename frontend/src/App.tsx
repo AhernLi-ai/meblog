@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 
 // Pages
 import Home from './pages/Home';
+import About from './pages/About';
 import PostDetail from './pages/PostDetail';
 import CategoryPosts from './pages/CategoryPosts';
 import TagPosts from './pages/TagPosts';
@@ -57,6 +58,7 @@ function AppRoutes() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/post/:slug" element={<PostDetail />} />
         <Route path="/category/:slug" element={<CategoryPosts />} />
         <Route path="/tag/:slug" element={<TagPosts />} />

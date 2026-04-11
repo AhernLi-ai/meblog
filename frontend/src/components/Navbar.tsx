@@ -34,6 +34,7 @@ export default function Navbar() {
             <NavLink to="/" icon={<HomeIcon className="w-4 h-4" />} label="首页" />
             <NavLink to="/projects" icon={<FolderIcon className="w-4 h-4" />} label="项目" />
             <NavLink to="/tags" icon={<TagIcon className="w-4 h-4" />} label="标签" />
+            <NavLink to="/about" icon={<UserCircleIcon className="w-4 h-4" />} label="关于" />
 
             <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" />
 
@@ -173,6 +174,14 @@ function MobileMenu({ isAuthenticated }: { isAuthenticated: boolean }) {
                 <Link to="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-gray-50 dark:bg-gray-700' : ''}`}>
                   <TagIcon className="w-5 h-5" />
                   <span className="text-gray-700 dark:text-gray-300">标签</span>
+                </Link>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <Link to="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-gray-50 dark:bg-gray-700' : ''}`}>
+                  <UserCircleIcon className="w-5 h-5" />
+                  <span className="text-gray-700 dark:text-gray-300">关于</span>
                 </Link>
               )}
             </Menu.Item>
