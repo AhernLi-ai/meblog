@@ -18,3 +18,15 @@ class UserSettingsResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SiteSettingsResponse(BaseModel):
+    """Public site settings response (no auth required)."""
+    id: int
+    wechat_qr_url: Optional[str] = None
+    wechat_guide_text: str
+    wechat_show_on_article: bool
+    wechat_show_in_sidebar: bool
+
+    class Config:
+        from_attributes = True
