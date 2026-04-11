@@ -9,6 +9,14 @@ export interface UserSettings {
   updated_at: string;
 }
 
+export interface SiteSettings {
+  id: number;
+  wechat_qr_url: string | null;
+  wechat_guide_text: string;
+  wechat_show_on_article: boolean;
+  wechat_show_in_sidebar: boolean;
+}
+
 export const settingsApi = {
   get: async (): Promise<UserSettings> => {
     const response = await api.get<UserSettings>('/settings');
@@ -17,6 +25,13 @@ export const settingsApi = {
 
   update: async (data: { theme?: string; language?: string }): Promise<UserSettings> => {
     const response = await api.patch<UserSettings>('/settings', data);
+    return response.data;
+  },
+};
+
+export const siteSettingsApi = {
+  getSiteSettings: async (): Promise<SiteSettings> => {
+    const response = await api.get<SiteSettings>('/settings/site');
     return response.data;
   },
 };

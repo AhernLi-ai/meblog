@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { projectsApi } from '../api/projects';
 import { tagsApi } from '../api/tags';
 import Navbar from './Navbar';
+import WechatQR from './WechatQR';
 import { FolderIcon, TagIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -116,6 +117,9 @@ export default function Layout({ children }: LayoutProps) {
                 </p>
               </div>
             </div>
+
+            {/* Wechat QR Widget */}
+            <WechatQR variant="sidebar" />
           </aside>
         </div>
       </div>

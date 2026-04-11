@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { postsApi } from '../api/posts';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import TableOfContents from '../components/TableOfContents';
+import WechatQR from '../components/WechatQR';
 import { ListBulletIcon } from '@heroicons/react/24/outline';
 
 const SITE_URL = (import.meta as any).env?.VITE_SITE_URL || 'http://localhost:6000';
@@ -203,6 +204,9 @@ export default function PostDetail() {
         <div className="bg-white dark:bg-gray-900 rounded-lg p-6 md:p-8">
           <MarkdownRenderer content={post.content} />
         </div>
+
+        {/* Wechat QR at end of article */}
+        <WechatQR variant="article-end" />
 
         <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
           作者：{post.author.username}
