@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from typing import Optional, List
 import hashlib
 from ..database import get_db
-from ..schemas import PostCreate, PostUpdate, PostResponse, PostListResponse
+from ..schemas import PostCreate, PostUpdate, PostResponse, PostListResponse, LikeStatusResponse
 from ..crud import get_posts, get_post_by_id, get_post_by_slug, create_post, update_post, delete_post
 from ..utils.security import get_current_user
 from ..utils.logger import log_post_action
-from ..models import User, AccessLog
+from ..models import User, AccessLog, PostLike
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
@@ -120,3 +121,62 @@ def delete_existing_post(
     log_post_action("DELETE", post_id, current_user.id, f"title={existing.title}")
     delete_post(db, post_id)
     return None
+
+
+def _get_visitor_id(request: Request) -> str:
+    """Generate a visitor ID from IP + User-Agent[:100]"""
+    ip = request.client.host if request.client else "unknown"
+    ua = request.headers.get("user-agent", "")[:100]
+    return hashlib.md5(f"{ip}{ua}".encode()).hexdigest()
+
+
+@router.get("/{slug}/like", response_model=LikeStatusResponse)
+def get_like_status(
+    slug: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Get like status and count for a post."""
+    post = get_post_by_slug(db, slug, include_unpublished=False)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    visitor_id = _get_visitor_id(request)
+    liked = db.query(PostLike).filter(
+        and_(PostLike.post_id == post.id, PostLike.visitor_id == visitor_id)
+    ).first() is not None
+
+    return LikeStatusResponse(liked=liked, like_count=post.like_count)
+
+
+@router.post("/{slug}/like", response_model=LikeStatusResponse)
+def toggle_like(
+    slug: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Toggle like status for a post. Liking increments like_count, unliking decrements."""
+    post = get_post_by_slug(db, slug, include_unpublished=False)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    visitor_id = _get_visitor_id(request)
+    existing = db.query(PostLike).filter(
+        and_(PostLike.post_id == post.id, PostLike.visitor_id == visitor_id)
+    ).first()
+
+    if existing:
+        # Unlike: remove like record and decrement count
+        db.delete(existing)
+        post.like_count = max(0, post.like_count - 1)
+        liked = False
+    else:
+        # Like: add like record and increment count
+        new_like = PostLike(post_id=post.id, visitor_id=visitor_id)
+        db.add(new_like)
+        post.like_count = post.like_count + 1
+        liked = True
+
+    db.commit()
+    db.refresh(post)
+    return LikeStatusResponse(liked=liked, like_count=post.like_count)

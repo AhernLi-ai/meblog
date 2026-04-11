@@ -14,6 +14,7 @@ class Post(Base):
     content = Column(Text, nullable=False)
     summary = Column(Text, nullable=True)
     view_count = Column(Integer, default=0)
+    like_count = Column(Integer, default=0)
     status = Column(String(20), default="draft")  # draft / published
     is_deleted = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -25,3 +26,4 @@ class Post(Base):
     author = relationship("User", back_populates="posts")
     project = relationship("Project", back_populates="posts", foreign_keys=[project_id])
     tags = relationship("Tag", secondary=post_tags, back_populates="posts")
+    likes = relationship("PostLike", back_populates="post", cascade="all, delete-orphan")
