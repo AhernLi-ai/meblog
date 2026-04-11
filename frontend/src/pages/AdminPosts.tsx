@@ -62,7 +62,7 @@ export default function AdminPosts() {
                   状态
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  分类
+                  项目
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   创建时间
@@ -96,7 +96,7 @@ export default function AdminPosts() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
-                    {post.category.name}
+                    {post.project?.name || '-'}
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
                     {formatDate(post.created_at)}

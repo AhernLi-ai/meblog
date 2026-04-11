@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { postsApi } from '../api/posts';
+import { projectsApi } from '../api/projects';
 import PostCard from '../components/PostCard';
 import Pagination from '../components/Pagination';
 import { useState } from 'react';
@@ -9,9 +10,16 @@ export default function CategoryPosts() {
   const { slug } = useParams<{ slug: string }>();
   const [page, setPage] = useState(1);
 
+  // 获取所有分类，从列表中找到当前 slug 对应的分类
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: projectsApi.getAll,
+  });
+  const category = categories?.find(c => c.slug === slug);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['posts', { category: slug, page }],
-    queryFn: () => postsApi.getAll({ category: slug, page, size: 10 }),
+    queryFn: () => postsApi.getAll({ category: slug, page, size: 5 }),
     enabled: !!slug,
   });
 
@@ -31,13 +39,13 @@ export default function CategoryPosts() {
 
   return (
     <div>
-      {/* Category Header */}
+      {/* Project Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          分类：{data?.items[0]?.category?.name || slug}
+          项目：{category?.name || slug}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
-          共 {data?.total || 0} 篇文章
+          该项目下共 {data?.total || 0} 篇文章
         </p>
       </div>
 

@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import engine, Base
-from .routers import auth_router, posts_router, categories_router, tags_router
+from .routers import auth_router, posts_router, projects_router, tags_router, settings_router, stats_router
+from .routers.seo import router as seo_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -25,8 +26,13 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(posts_router, prefix=settings.API_V1_STR)
-app.include_router(categories_router, prefix=settings.API_V1_STR)
+app.include_router(projects_router, prefix=settings.API_V1_STR)
 app.include_router(tags_router, prefix=settings.API_V1_STR)
+app.include_router(settings_router, prefix=settings.API_V1_STR)
+app.include_router(stats_router, prefix=settings.API_V1_STR)
+
+# SEO endpoints at root level (not under /api/v1)
+app.include_router(seo_router)
 
 
 @app.get("/")

@@ -16,3 +16,4 @@ class User(Base):
 
     # Relationships
     posts = relationship("Post", back_populates="author")
+    settings = relationship("UserSettings", back_populates="user", uselist=False)

@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { postsApi } from '../api/posts';
+import { tagsApi } from '../api/tags';
 import PostCard from '../components/PostCard';
 import Pagination from '../components/Pagination';
 import { useState } from 'react';
@@ -9,9 +10,16 @@ export default function TagPosts() {
   const { slug } = useParams<{ slug: string }>();
   const [page, setPage] = useState(1);
 
+  // 获取所有标签，从列表中找到当前 slug 对应的标签
+  const { data: tags } = useQuery({
+    queryKey: ['tags'],
+    queryFn: tagsApi.getAll,
+  });
+  const tag = tags?.find(t => t.slug === slug);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['posts', { tag: slug, page }],
-    queryFn: () => postsApi.getAll({ tag: slug, page, size: 10 }),
+    queryFn: () => postsApi.getAll({ tag: slug, page, size: 5 }),
     enabled: !!slug,
   });
 
@@ -34,7 +42,7 @@ export default function TagPosts() {
       {/* Tag Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          标签：{data?.items[0]?.tags?.find(t => t.slug === slug)?.name || slug}
+          标签：{tag?.name || slug}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
           共 {data?.total || 0} 篇文章

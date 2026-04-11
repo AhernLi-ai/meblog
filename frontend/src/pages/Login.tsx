@@ -14,7 +14,8 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: async (data) => {
-      // Get user info
+      // Store token first, then get user info
+      localStorage.setItem('token', data.access_token);
       const user = await authApi.getMe();
       login(data.access_token, user);
       navigate('/admin');

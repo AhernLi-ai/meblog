@@ -11,14 +11,18 @@ export interface Token {
   token_type: string;
 }
 
-// Category & Tag types
-export interface Category {
+// Project types
+export interface Project {
   id: number;
   name: string;
   slug: string;
+  cover?: string;
   created_at: string;
   post_count?: number;
 }
+
+// Alias for backwards compatibility
+export type Category = Project;
 
 export interface Tag {
   id: number;
@@ -37,7 +41,7 @@ export interface PostListItem {
   view_count: number;
   status: string;
   created_at: string;
-  category: Category;
+  project: Project | null;
   tags: Tag[];
 }
 
@@ -62,7 +66,7 @@ export interface CreatePostData {
   title: string;
   content: string;
   summary?: string;
-  category_id: number;
+  project_id?: number;
   tag_ids?: number[];
   status: 'draft' | 'published';
 }
@@ -71,7 +75,7 @@ export interface UpdatePostData {
   title?: string;
   content?: string;
   summary?: string;
-  category_id?: number;
+  project_id?: number;
   tag_ids?: number[];
   status?: 'draft' | 'published';
 }

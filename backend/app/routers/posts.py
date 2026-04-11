@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from typing import Optional, List
+import hashlib
 from ..database import get_db
 from ..schemas import PostCreate, PostUpdate, PostResponse, PostListResponse
 from ..crud import get_posts, get_post_by_id, get_post_by_slug, create_post, update_post, delete_post
 from ..utils.security import get_current_user
-from ..models import User
+from ..utils.logger import log_post_action
+from ..models import User, AccessLog
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
@@ -20,7 +22,6 @@ def list_posts(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user)
 ):
-    # If user is authenticated, show all posts; otherwise only published
     include_unpublished = current_user is not None
     posts, total = get_posts(
         db, page=page, size=size,
@@ -38,16 +39,36 @@ def list_posts(
 
 
 @router.get("/{id_or_slug}", response_model=PostResponse)
-def get_post(id_or_slug: str, db: Session = Depends(get_db)):
-    # Try to get by ID first, then by slug
+def get_post(
+    id_or_slug: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user)
+):
+    include_unpublished = current_user is not None
     try:
         post_id = int(id_or_slug)
-        post = get_post_by_id(db, post_id)
+        post = get_post_by_id(db, post_id, include_unpublished)
     except ValueError:
-        post = get_post_by_slug(db, id_or_slug)
+        post = get_post_by_slug(db, id_or_slug, include_unpublished)
+
 
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Log access for statistics
+    if not include_unpublished:  # Only log for public (published) posts
+        ip = request.client.host if request.client else "unknown"
+        visitor_id = hashlib.md5(ip.encode()).hexdigest()[:16]
+        log = AccessLog(
+            post_id=post.id,
+            visitor_id=visitor_id,
+            user_agent=request.headers.get("user-agent", "")[:500],
+            referrer=request.headers.get("referer", "")[:500],
+        )
+        db.add(log)
+        db.commit()
+    
     return post
 
 
@@ -55,9 +76,13 @@ def get_post(id_or_slug: str, db: Session = Depends(get_db)):
 def create_new_post(
     post: PostCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
-    return create_post(db, post, current_user.id)
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    result = create_post(db, post, current_user.id)
+    log_post_action("CREATE", result.id, current_user.id, f"title={result.title}")
+    return result
 
 
 @router.put("/{post_id}", response_model=PostResponse)
@@ -65,28 +90,33 @@ def update_existing_post(
     post_id: int,
     post: PostUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
-    # Check ownership
-    existing = get_post_by_id(db, post_id)
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    existing = get_post_by_id(db, post_id, include_unpublished=True)
     if not existing:
         raise HTTPException(status_code=404, detail="Post not found")
     if existing.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to update this post")
-    return update_post(db, post_id, post)
+    result = update_post(db, post_id, post, include_unpublished=True)
+    log_post_action("UPDATE", post_id, current_user.id, f"title={result.title}")
+    return result
 
 
 @router.delete("/{post_id}", status_code=204)
 def delete_existing_post(
     post_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
-    # Check ownership
-    existing = get_post_by_id(db, post_id)
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    existing = get_post_by_id(db, post_id, include_unpublished=True)
     if not existing:
         raise HTTPException(status_code=404, detail="Post not found")
     if existing.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+    log_post_action("DELETE", post_id, current_user.id, f"title={existing.title}")
     delete_post(db, post_id)
     return None

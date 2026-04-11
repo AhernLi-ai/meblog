@@ -17,11 +17,11 @@ class Post(Base):
     status = Column(String(20), default="draft")  # draft / published
     is_deleted = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
     author = relationship("User", back_populates="posts")
-    category = relationship("Category", back_populates="posts")
+    project = relationship("Project", back_populates="posts", foreign_keys=[project_id])
     tags = relationship("Tag", secondary=post_tags, back_populates="posts")

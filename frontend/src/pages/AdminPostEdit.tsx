@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { postsApi } from '../api/posts';
-import { categoriesApi } from '../api/categories';
+import { projectsApi } from '../api/projects';
 import { tagsApi } from '../api/tags';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
 export default function AdminPostEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [summary, setSummary] = useState('');
@@ -25,7 +26,7 @@ export default function AdminPostEdit() {
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn: categoriesApi.getAll,
+    queryFn: projectsApi.getAll,
   });
 
   const { data: tags = [] } = useQuery({
@@ -38,7 +39,7 @@ export default function AdminPostEdit() {
       setTitle(post.title);
       setContent(post.content);
       setSummary(post.summary || '');
-      setCategoryId(post.category.id);
+      setCategoryId(post.project?.id || null);
       setTagIds(post.tags.map((t) => t.id));
       setStatus(post.status as 'draft' | 'published');
     }
@@ -47,6 +48,8 @@ export default function AdminPostEdit() {
   const updateMutation = useMutation({
     mutationFn: (data: any) => postsApi.update(Number(id), data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', id] });
       navigate('/admin/posts');
     },
     onError: (err: any) => {
@@ -56,16 +59,12 @@ export default function AdminPostEdit() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!categoryId) {
-      setError('请选择分类');
-      return;
-    }
     setError('');
     updateMutation.mutate({
       title,
       content,
       summary,
-      category_id: categoryId!,
+      project_id: categoryId,
       tag_ids: tagIds,
       status,
     });
@@ -108,18 +107,17 @@ export default function AdminPostEdit() {
           />
         </div>
 
-        {/* Category */}
+        {/* Project */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            分类
+            项目（可选）
           </label>
           <select
             value={categoryId || ''}
             onChange={(e) => setCategoryId(Number(e.target.value) || null)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-            required
           >
-            <option value="">选择分类</option>
+            <option value="">无项目</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}

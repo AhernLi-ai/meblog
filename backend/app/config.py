@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
 
+    # Site URL (used for sitemap, RSS feed, SEO)
+    SITE_URL: str = "http://localhost:6000"
+
     # Database
     DATABASE_URL: str = "sqlite:///./meblog.db"
 

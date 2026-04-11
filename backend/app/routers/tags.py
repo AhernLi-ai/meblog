@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import Optional, List
 from ..database import get_db
 from ..schemas import TagCreate, TagUpdate, TagResponse
 from ..crud import (
@@ -22,9 +22,14 @@ def list_tags(db: Session = Depends(get_db)):
 def create_new_tag(
     tag: TagCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
-    return create_tag(db, tag)
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        return create_tag(db, tag)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.put("/{tag_id}", response_model=TagResponse)
@@ -32,9 +37,14 @@ def update_existing_tag(
     tag_id: int,
     tag: TagUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
-    updated = update_tag(db, tag_id, tag)
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        updated = update_tag(db, tag_id, tag)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if not updated:
         raise HTTPException(status_code=404, detail="Tag not found")
     return updated
@@ -44,8 +54,10 @@ def update_existing_tag(
 def delete_existing_tag(
     tag_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     success = delete_tag(db, tag_id)
     if not success:
         raise HTTPException(status_code=404, detail="Tag not found")

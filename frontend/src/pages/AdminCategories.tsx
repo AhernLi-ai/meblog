@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { categoriesApi } from '../api/categories';
+import { projectsApi } from '../api/projects';
 
 export default function AdminCategories() {
   const queryClient = useQueryClient();
@@ -11,11 +11,11 @@ export default function AdminCategories() {
 
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['categories'],
-    queryFn: categoriesApi.getAll,
+    queryFn: projectsApi.getAll,
   });
 
   const createMutation = useMutation({
-    mutationFn: categoriesApi.create,
+    mutationFn: projectsApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       closeModal();
@@ -27,7 +27,7 @@ export default function AdminCategories() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, name }: { id: number; name: string }) =>
-      categoriesApi.update(id, { name }),
+      projectsApi.update(id, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       closeModal();
@@ -38,7 +38,7 @@ export default function AdminCategories() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: categoriesApi.delete,
+    mutationFn: projectsApi.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
@@ -78,7 +78,7 @@ export default function AdminCategories() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('确定要删除这个分类吗？')) {
+    if (confirm('确定要删除这个项目吗？')) {
       deleteMutation.mutate(id);
     }
   };
@@ -87,13 +87,13 @@ export default function AdminCategories() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          分类管理
+          项目管理
         </h1>
         <button
           onClick={() => openModal()}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          新建分类
+          新建项目
         </button>
       </div>
 
@@ -151,7 +151,7 @@ export default function AdminCategories() {
 
           {categories.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              暂无分类
+              暂无项目
             </div>
           )}
         </div>
@@ -162,7 +162,7 @@ export default function AdminCategories() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {editingId ? '编辑分类' : '新建分类'}
+              {editingId ? '编辑项目' : '新建项目'}
             </h2>
 
             {error && (
@@ -181,7 +181,7 @@ export default function AdminCategories() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  placeholder="分类名称"
+                  placeholder="项目名称"
                   autoFocus
                 />
               </div>

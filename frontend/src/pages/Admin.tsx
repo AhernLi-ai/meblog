@@ -16,7 +16,7 @@ export default function Admin() {
           欢迎回来，{user?.username}！
         </h2>
         <p className="text-gray-600 dark:text-gray-300">
-          这里是你博客的管理后台，可以管理文章、分类和标签。
+          这里是你博客的管理后台，可以管理文章、项目和标签。
         </p>
       </div>
 
@@ -35,14 +35,14 @@ export default function Admin() {
         </Link>
 
         <Link
-          to="/admin/categories"
+          to="/admin/projects"
           className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
         >
           <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
-            分类
+            项目
           </h3>
           <p className="text-gray-600 dark:text-gray-300">
-            管理文章分类
+            管理文章项目
           </p>
         </Link>
 
