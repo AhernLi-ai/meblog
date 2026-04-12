@@ -10,18 +10,18 @@ export default function TagsPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-12 text-gray-500">加载中...</div>
+      <div className="text-center py-12 text-[var(--color-foreground-secondary)]">加载中...</div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+      <h1 className="text-2xl font-bold text-[var(--color-foreground)] mb-8" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
         所有标签
       </h1>
 
       {tags?.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-[var(--color-foreground-secondary)]">
           暂无标签
         </div>
       ) : (
@@ -30,12 +30,12 @@ export default function TagsPage() {
             <Link
               key={tag.id}
               to={`/tag/${tag.slug}`}
-              className="bg-white dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
+              className="bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all p-6 border border-[var(--color-border)]"
             >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-xl font-semibold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
                 {tag.name}
               </h2>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-[var(--color-foreground-secondary)]">
                 {tag.post_count || 0} 篇文章
               </p>
             </Link>

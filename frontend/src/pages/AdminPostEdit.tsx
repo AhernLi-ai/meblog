@@ -48,7 +48,11 @@ export default function AdminPostEdit() {
   const updateMutation = useMutation({
     mutationFn: (data: any) => postsApi.update(Number(id), data),
     onSuccess: () => {
+      // Invalidate all related queries to ensure tag/project pages update
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
       queryClient.invalidateQueries({ queryKey: ['post', id] });
       navigate('/admin/posts');
     },

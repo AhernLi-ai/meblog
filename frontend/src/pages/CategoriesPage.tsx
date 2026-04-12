@@ -10,18 +10,18 @@ export default function CategoriesPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-12 text-gray-500">加载中...</div>
+      <div className="text-center py-12 text-[var(--color-foreground-secondary)]">加载中...</div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+      <h1 className="text-2xl font-bold text-[var(--color-foreground)] mb-8" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
         所有项目
       </h1>
 
       {categories?.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-[var(--color-foreground-secondary)]">
           暂无项目
         </div>
       ) : (
@@ -30,10 +30,10 @@ export default function CategoriesPage() {
             <Link
               key={cat.id}
               to={`/category/${cat.slug}`}
-              className="group bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-800"
+              className="group bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 overflow-hidden border border-[var(--color-border)]"
             >
               {/* Cover Image */}
-              <div className="aspect-video bg-gray-200 dark:bg-gray-800 overflow-hidden">
+              <div className="aspect-video bg-[var(--color-background-secondary)] overflow-hidden">
                 {cat.cover ? (
                   <img
                     src={cat.cover}
@@ -41,7 +41,7 @@ export default function CategoriesPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-[var(--color-foreground-secondary)] text-4xl">
                     📁
                   </div>
                 )}
@@ -49,10 +49,10 @@ export default function CategoriesPage() {
               
               {/* Content */}
               <div className="p-4">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-1" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
                   {cat.name}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-[var(--color-foreground-secondary)]">
                   {cat.post_count || 0} 篇文章
                 </p>
               </div>

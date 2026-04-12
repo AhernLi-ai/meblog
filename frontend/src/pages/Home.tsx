@@ -17,9 +17,9 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm">
-            <div className="w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <span className="text-gray-600 dark:text-gray-400">加载中...</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
+            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[var(--color-foreground-secondary)]">加载中...</span>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@ export default function Home() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="inline-flex items-center gap-2 px-6 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl">
+        <div className="inline-flex items-center gap-2 px-6 py-3 bg-red-500/10 text-red-500 rounded-[12px]">
           加载失败，请稍后重试
         </div>
       </div>
@@ -40,14 +40,14 @@ export default function Home() {
     <div>
       {/* Hero Header */}
       <div className="mb-10 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full text-sm text-blue-600 dark:text-blue-400">
+        <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 bg-[var(--color-primary)]/10 rounded-full text-sm text-[var(--color-primary)]">
           <SparklesIcon className="w-4 h-4" />
           <span>欢迎来到我的博客</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-foreground)] mb-4" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
           📝 Meblog
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        <p className="text-lg text-[var(--color-foreground-secondary)] max-w-2xl mx-auto">
           分享技术与生活，记录成长点滴
         </p>
       </div>
@@ -56,8 +56,8 @@ export default function Home() {
       {data?.items.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">📭</div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">暂无文章</h3>
-          <p className="text-gray-500 dark:text-gray-400">稍后再来看看吧</p>
+          <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">暂无文章</h3>
+          <p className="text-[var(--color-foreground-secondary)]">稍后再来看看吧</p>
         </div>
       ) : (
         <div className="space-y-6">

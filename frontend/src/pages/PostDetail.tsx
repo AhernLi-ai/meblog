@@ -31,19 +31,24 @@ function clearMetaTags() {
   });
 }
 
-// Extract headings from markdown content
+// Extract headings from markdown content (ignoring # in code blocks)
 function extractHeadings(content: string): { id: string; text: string; level: number }[] {
+  // 1. Remove code blocks first to avoid matching # comments inside code
+  const withoutCodeBlocks = content
+    .replace(/```[\s\S]*?```/g, '') // Remove ```...``` blocks
+    .replace(/`[^`\n]*`/g, '');     // Remove inline code like `...`
+  
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   const headings: { id: string; text: string; level: number }[] = [];
   let match;
 
-  while ((match = headingRegex.exec(content)) !== null) {
+  while ((match = headingRegex.exec(withoutCodeBlocks)) !== null) {
     const level = match[1].length;
     const text = match[2].trim();
-    // Generate slug matching the MarkdownRenderer's slugify
+    // Generate slug matching the MarkdownRenderer's slugify (keep Chinese chars)
     const id = text
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
+      .replace(/[^\w\s\u4e00-\u9fa5-]/g, '') // Keep Chinese characters
       .replace(/[\s_]+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-+|-+$/g, '');
@@ -103,7 +108,7 @@ export default function PostDetail() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-12 text-gray-500">加载中...</div>
+      <div className="text-center py-12 text-[var(--color-foreground-secondary)]">加载中...</div>
     );
   }
 
@@ -132,25 +137,25 @@ export default function PostDetail() {
       {headings.length > 0 && (
         <button
           onClick={() => setShowToc(!showToc)}
-          className="fixed right-4 top-24 z-50 p-3 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="fixed right-4 top-24 z-50 p-3 bg-[var(--color-background)] shadow-[var(--shadow-card-hover)] rounded-[8px] border border-[var(--color-border)] hover:bg-[var(--color-background-secondary)] transition-colors"
           title="文章目录"
         >
-          <ListBulletIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          <ListBulletIcon className="w-5 h-5 text-[var(--color-foreground-secondary)]" />
         </button>
       )}
 
       {/* TOC Panel */}
       <div
-        className={`fixed right-0 top-0 h-full w-72 bg-white dark:bg-gray-900 shadow-xl z-40 transform transition-transform duration-300 ${
+        className={`fixed right-0 top-0 h-full w-72 bg-[var(--color-background)] shadow-xl z-40 transform transition-transform duration-300 ${
           showToc ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="p-6 h-full overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white">文章目录</h3>
+            <h3 className="font-semibold text-[var(--color-foreground)]">文章目录</h3>
             <button
               onClick={() => setShowToc(false)}
-              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-lg"
+              className="text-[var(--color-foreground-secondary)] hover:text-[var(--color-foreground)] text-lg"
             >
               ✕
             </button>
@@ -171,21 +176,21 @@ export default function PostDetail() {
       <article className="max-w-4xl mx-auto">
         <Link
           to="/"
-          className="inline-block mb-6 text-blue-600 dark:text-blue-400 hover:underline"
+          className="inline-block mb-6 text-[var(--color-primary)] hover:underline"
         >
           ← 返回首页
         </Link>
 
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-4" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             {post.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-foreground-secondary)]">
             <span>{formatDate(post.created_at)}</span>
             <Link
               to={`/category/${post.project?.slug}`}
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-[var(--color-primary)] hover:underline"
             >
               {post.project?.name || '无项目'}
             </Link>
@@ -199,7 +204,7 @@ export default function PostDetail() {
                 <Link
                   key={tag.id}
                   to={`/tag/${tag.slug}`}
-                  className="text-sm px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
+                  className="text-sm px-2 py-1 bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] rounded-[6px] hover:bg-[var(--color-primary)] hover:text-white transition-colors"
                 >
                   #{tag.name}
                 </Link>
@@ -208,7 +213,7 @@ export default function PostDetail() {
           )}
         </header>
 
-        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 md:p-8">
+        <div className="bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] p-6 md:p-8 border border-[var(--color-border)]">
           <MarkdownRenderer content={post.content} />
         </div>
 
@@ -226,7 +231,7 @@ export default function PostDetail() {
         {/* Wechat QR at end of article */}
         <WechatQR variant="article-end" />
 
-        <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-8 text-sm text-[var(--color-foreground-secondary)]">
           作者：{post.author.username}
         </div>
       </article>

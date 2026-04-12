@@ -55,7 +55,7 @@ export default function LikeButton({ slug, initialLiked = false, initialCount = 
         'border focus:outline-none focus:ring-2 focus:ring-offset-2',
         liked
           ? 'border-red-300 bg-red-50 text-red-600 dark:bg-red-900/20 dark:border-red-700 dark:text-red-400 focus:ring-red-400'
-          : 'border-gray-300 bg-white text-gray-500 hover:border-red-300 hover:text-red-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:border-red-600 dark:hover:text-red-400 focus:ring-gray-400',
+          : 'border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground-secondary)] hover:border-red-300 hover:text-red-500 dark:hover:border-red-600 dark:hover:text-red-400 focus:ring-gray-400',
         loading && 'opacity-60 cursor-not-allowed'
       )}
       aria-label={liked ? '取消点赞' : '点赞'}

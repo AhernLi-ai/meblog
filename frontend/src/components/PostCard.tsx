@@ -25,18 +25,18 @@ export default function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <article className="group bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800">
+    <article className="group bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]">
       <div className="p-6">
         {/* Title */}
         <Link to={`/post/${post.slug}`}>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3 line-clamp-2">
+          <h2 className="text-xl font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors mb-3 line-clamp-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             {post.title}
           </h2>
         </Link>
 
         {/* Summary */}
         {post.summary && (
-          <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4 line-clamp-3">
+          <p className="text-[var(--color-foreground-secondary)] text-sm leading-relaxed mb-4 line-clamp-3">
             {post.summary}
           </p>
         )}
@@ -48,7 +48,7 @@ export default function PostCard({ post }: PostCardProps) {
               <Link
                 key={tag.id}
                 to={`/tag/${tag.slug}`}
-                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] rounded-[6px] hover:bg-[var(--color-primary)] hover:text-white transition-colors"
               >
                 #{tag.name}
               </Link>
@@ -57,7 +57,7 @@ export default function PostCard({ post }: PostCardProps) {
         )}
 
         {/* Meta row: 时间 | 分类 | 阅读数 | 阅读全文 */}
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between text-sm text-[var(--color-foreground-secondary)] pt-4 border-t border-[var(--color-border)]">
           {/* Left: 时间 | 分类 | 阅读数 */}
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
@@ -66,7 +66,7 @@ export default function PostCard({ post }: PostCardProps) {
             </span>
             <Link
               to={`/category/${post.project?.slug}`}
-              className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+              className="flex items-center gap-1 text-[var(--color-primary)] hover:underline"
             >
               {post.project?.name}
             </Link>
@@ -79,7 +79,7 @@ export default function PostCard({ post }: PostCardProps) {
           {/* Right: 阅读全文 */}
           <Link
             to={`/post/${post.slug}`}
-            className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-medium hover:gap-2 transition-all"
+            className="inline-flex items-center gap-1 text-[var(--color-primary)] font-medium hover:gap-2 transition-all"
           >
             阅读全文
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

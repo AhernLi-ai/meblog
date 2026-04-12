@@ -5,8 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 8080,
+    host: true,
+    allowedHosts: ['.trycloudflare.com', '.cloudflare.com'],
     proxy: {
+      // API 请求代理到后端
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,

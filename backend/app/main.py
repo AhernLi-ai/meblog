@@ -1,3 +1,6 @@
+# Copyright 2026 布谷布谷科技
+# Licensed under the Apache License, Version 2.0
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings

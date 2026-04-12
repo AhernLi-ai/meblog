@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..schemas import UserSettingsUpdate, UserSettingsResponse, SiteSettingsResponse
@@ -37,9 +39,15 @@ def get_or_create_site_settings(db: Session) -> SiteSettings:
 @router.get("", response_model=UserSettingsResponse)
 def get_settings(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
     """Get current user's settings."""
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return get_or_create_settings(db, current_user.id)
 
 
@@ -47,9 +55,15 @@ def get_settings(
 def update_settings(
     settings_update: UserSettingsUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
     """Update current user's settings."""
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     settings = get_or_create_settings(db, current_user.id)
     
     if settings_update.theme is not None:

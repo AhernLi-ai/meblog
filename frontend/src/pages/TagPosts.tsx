@@ -25,7 +25,7 @@ export default function TagPosts() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-12 text-gray-500">加载中...</div>
+      <div className="text-center py-12 text-[var(--color-foreground-secondary)]">加载中...</div>
     );
   }
 
@@ -41,10 +41,10 @@ export default function TagPosts() {
     <div>
       {/* Tag Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-[var(--color-foreground)]" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
           标签：{tag?.name || slug}
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-[var(--color-foreground-secondary)] mt-1">
           共 {data?.total || 0} 篇文章
         </p>
       </div>
@@ -56,7 +56,7 @@ export default function TagPosts() {
         ))}
 
         {data?.items.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-[var(--color-foreground-secondary)]">
             该标签下暂无文章
           </div>
         )}

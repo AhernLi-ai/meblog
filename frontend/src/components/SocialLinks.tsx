@@ -62,14 +62,14 @@ export default function SocialLinks({ github_url, zhihu_url, twitter_url, wechat
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 ${link.color} transition-all hover:bg-gray-200 dark:hover:bg-gray-700`}
+              className={`flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] ${link.color} transition-all hover:bg-[var(--color-border)]`}
               title={link.label}
             >
               {link.icon}
             </a>
           ) : (
             <div
-              className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 cursor-default"
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] cursor-default"
               title={link.label}
             >
               {link.icon}

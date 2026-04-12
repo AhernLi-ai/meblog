@@ -13,23 +13,23 @@ export default function AuthorCard({ username, avatar_url, bio }: AuthorCardProp
           <img
             src={avatar_url}
             alt={username}
-            className="w-28 h-28 rounded-full object-cover ring-4 ring-blue-100 dark:ring-blue-900/50 shadow-lg"
+            className="w-28 h-28 rounded-full object-cover ring-4 ring-[var(--color-primary)]/20 shadow-lg"
           />
         ) : (
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg ring-4 ring-blue-100 dark:ring-blue-900/50">
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] dark:from-[#60A5FA] dark:to-[#A78BFA] flex items-center justify-center text-white text-4xl font-bold shadow-lg ring-4 ring-[var(--color-primary)]/20">
             {username.charAt(0).toUpperCase()}
           </div>
         )}
       </div>
 
       {/* Username */}
-      <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
+      <h1 className="mt-4 text-2xl font-bold text-[var(--color-foreground)]" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
         {username}
       </h1>
 
       {/* Bio */}
       {bio && (
-        <p className="mt-2 text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
+        <p className="mt-2 text-[var(--color-foreground-secondary)] max-w-md leading-relaxed">
           {bio}
         </p>
       )}

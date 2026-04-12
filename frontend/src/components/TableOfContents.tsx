@@ -45,14 +45,23 @@ export default function TableOfContents({ headings, onClose }: TableOfContentsPr
   const handleClick = useCallback((id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      onClose?.();
+      // Account for sticky navbar (h-16 = 64px + some buffer)
+      const navbarHeight = 80;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - navbarHeight,
+        behavior: 'smooth'
+      });
+      // Close panel after scroll animation starts
+      setTimeout(() => {
+        onClose?.();
+      }, 150);
     }
   }, [onClose]);
 
   if (headings.length === 0) {
     return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-sm text-[var(--color-foreground-secondary)]">
         暂无目录
       </p>
     );
@@ -65,25 +74,21 @@ export default function TableOfContents({ headings, onClose }: TableOfContentsPr
           key={item.id}
           data-id={item.id}
           onClick={() => handleClick(item.id)}
-          className={`toc-item w-full text-left text-sm py-1.5 px-3 rounded transition-all flex items-start gap-1 hover:bg-gray-100 dark:hover:bg-gray-800`}
+          className={`toc-item w-full text-left text-sm py-1.5 px-3 rounded transition-all flex items-start gap-1 hover:bg-[var(--color-background-secondary)]`}
           style={{ paddingLeft: `${(item.level - 1) * 12 + 12}px` }}
         >
           <ChevronRightIcon className="w-3 h-3 mt-1.5 flex-shrink-0 opacity-50" />
-          <span className="line-clamp-2 text-gray-700 dark:text-gray-300">{item.text}</span>
+          <span className="line-clamp-2 text-[var(--color-foreground)]">{item.text}</span>
         </button>
       ))}
       
       <style>{`
         .toc-item.active {
-          color: #2563eb;
-          background-color: #eff6ff;
+          color: var(--color-primary);
+          background-color: var(--color-primary-light);
         }
         .toc-item.active span {
           font-weight: 500;
-        }
-        .dark .toc-item.active {
-          color: #60a5fa;
-          background-color: rgba(30, 58, 138, 0.3);
         }
       `}</style>
     </nav>

@@ -15,9 +15,9 @@ export default function About() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 rounded-2xl shadow-sm">
-            <div className="w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <span className="text-gray-600 dark:text-gray-400">加载中...</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
+            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[var(--color-foreground-secondary)]">加载中...</span>
           </div>
         </div>
       </div>
@@ -27,7 +27,7 @@ export default function About() {
   if (error || !data) {
     return (
       <div className="text-center py-12">
-        <div className="inline-flex items-center gap-2 px-6 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl">
+        <div className="inline-flex items-center gap-2 px-6 py-3 bg-red-500/10 text-red-500 rounded-[12px]">
           加载失败，请稍后重试
         </div>
       </div>
@@ -44,7 +44,7 @@ export default function About() {
       )}
 
       {/* Author Card */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-8 mb-6">
+      <div className="bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] border border-[var(--color-border)] p-8 mb-6">
         <AuthorCard
           username={data.username}
           avatar_url={data.avatar_url}
@@ -54,8 +54,8 @@ export default function About() {
 
       {/* Tech Stack */}
       {data.tech_stack && data.tech_stack.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
+        <div className="bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] border border-[var(--color-border)] p-6 mb-6">
+          <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-4 text-center" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             ⚡ 技术栈
           </h2>
           <TechStack tags={data.tech_stack} />
@@ -64,8 +64,8 @@ export default function About() {
 
       {/* Social Links */}
       {(data.github_url || data.zhihu_url || data.twitter_url || data.wechat_id) && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
+        <div className="bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] border border-[var(--color-border)] p-6 mb-6">
+          <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-4 text-center" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
             🔗 找到我
           </h2>
           <SocialLinks

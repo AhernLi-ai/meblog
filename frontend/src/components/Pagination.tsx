@@ -22,10 +22,10 @@ export default function Pagination({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={clsx(
-          'px-3 py-2 rounded-lg text-sm',
+          'px-3 py-2 rounded-[8px] text-sm',
           currentPage === 1
-            ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ? 'text-[var(--color-foreground-secondary)] cursor-not-allowed opacity-50'
+            : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
         )}
       >
         上一页
@@ -37,10 +37,10 @@ export default function Pagination({
           key={page}
           onClick={() => onPageChange(page)}
           className={clsx(
-            'w-10 h-10 rounded-lg text-sm',
+            'w-10 h-10 rounded-[8px] text-sm',
             page === currentPage
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+              ? 'bg-[var(--color-primary)] text-white'
+              : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
           )}
         >
           {page}
@@ -52,10 +52,10 @@ export default function Pagination({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={clsx(
-          'px-3 py-2 rounded-lg text-sm',
+          'px-3 py-2 rounded-[8px] text-sm',
           currentPage === totalPages
-            ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ? 'text-[var(--color-foreground-secondary)] cursor-not-allowed opacity-50'
+            : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
         )}
       >
         下一页

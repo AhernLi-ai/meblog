@@ -30,7 +30,11 @@ export default function AdminPostNew() {
   const createMutation = useMutation({
     mutationFn: postsApi.create,
     onSuccess: () => {
+      // Invalidate all related queries to ensure tag/project pages update
       queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
       navigate('/admin/posts');
     },
     onError: (err: any) => {
@@ -45,7 +49,7 @@ export default function AdminPostNew() {
       title,
       content,
       summary,
-      project_id: categoryId,
+      project_id: categoryId ?? undefined,
       tag_ids: tagIds,
       status,
     });
