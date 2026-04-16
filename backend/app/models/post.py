@@ -27,3 +27,4 @@ class Post(Base):
     project = relationship("Project", back_populates="posts", foreign_keys=[project_id])
     tags = relationship("Tag", secondary=post_tags, back_populates="posts")
     likes = relationship("PostLike", back_populates="post", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")

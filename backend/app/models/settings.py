@@ -33,3 +33,25 @@ class SiteSettings(Base):
     wechat_show_in_sidebar = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class AuthorSettings(Base):
+    """Single-row table storing the author profile for the About page.
+
+    Previously these fields lived in the `users` table but are moved here
+    since regular visitors never need user account data — only the author
+    profile shown on the About page.
+    """
+    __tablename__ = "author_settings"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    username = Column(String(50), nullable=False)
+    avatar_url = Column(Text, nullable=True)
+    bio = Column(Text, nullable=True)
+    tech_stack = Column(Text, nullable=True)  # JSON string of tags list
+    github_url = Column(String(500), nullable=True)
+    zhihu_url = Column(String(500), nullable=True)
+    twitter_url = Column(String(500), nullable=True)
+    wechat_id = Column(String(100), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

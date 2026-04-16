@@ -37,4 +37,4 @@ __pycache__/
 
 # UV
 uv.lock
-.openclaw
+.openclaw/
