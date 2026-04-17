@@ -1,21 +1,22 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
-import { postsApi } from '@/api/posts';
-import type { PostListItem, PostListResponse } from '@/types';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { postsApi } from '../api/posts';
+import type { PostListItem } from '../types';
+import { Link } from 'react-router-dom';
 
 interface GroupedPosts {
-  [key: string]: PostListItem[];
+  [key: string]: PostListItem[]; // key: "2026年4月" 格式
 }
 
 export default function Archive() {
-  const { data: response, isLoading } = useQuery<PostListResponse>({
-    queryKey: ['posts', 'archive'],
-    queryFn: () => postsApi.getAll({ size: 100 }),
-  });
+  const [posts, setPosts] = useState<PostListItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const posts = response?.items ?? [];
+  useEffect(() => {
+    postsApi.getAll({ size: 100 })
+      .then((res) => setPosts(res.items.filter(p => p.status === 'published')))
+      .catch(() => setPosts([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   // 按月份分组
   const groupedPosts: GroupedPosts = {};
@@ -33,41 +34,23 @@ export default function Archive() {
     return yearB - yearA || monthB - monthA;
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
-            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--color-foreground-secondary)]">加载中...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          归档
-        </h1>
-        <p className="text-[var(--color-foreground-secondary)]">
-          共 {posts.length} 篇文章
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold text-[var(--color-foreground)] mb-8">归档</h1>
 
-      {sortedKeys.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="text-6xl mb-4">📭</div>
-          <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">暂无文章</h3>
-          <p className="text-[var(--color-foreground-secondary)]">稍后再来看看吧</p>
+      {loading ? (
+        <div className="py-8 text-center text-[var(--color-foreground-secondary)]">
+          加载中...
+        </div>
+      ) : sortedKeys.length === 0 ? (
+        <div className="py-8 text-center text-[var(--color-foreground-secondary)]">
+          暂无文章
         </div>
       ) : (
         <div className="space-y-8">
           {sortedKeys.map((key) => (
             <div key={key}>
-              <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-4 flex items-center gap-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+              <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-4 flex items-center gap-2">
                 <span>{key}</span>
                 <span className="text-sm font-normal text-[var(--color-foreground-secondary)]">
                   ({groupedPosts[key].length} 篇)
@@ -77,7 +60,7 @@ export default function Archive() {
                 {groupedPosts[key].map((post) => (
                   <Link
                     key={post.id}
-                    href={`/post/${post.slug}`}
+                    to={`/posts/${post.slug}`}
                     className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-[var(--color-background-secondary)] transition-colors group"
                   >
                     <span className="text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors">

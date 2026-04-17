@@ -1,23 +1,19 @@
-'use client';
-
-import { usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import Link from 'next/link';
+import { Link, useLocation } from 'react-router-dom';
+import { projectsApi } from '../api/projects';
+import { tagsApi } from '../api/tags';
 import Navbar from './Navbar';
 import WechatQR from './WechatQR';
 import { FolderIcon, TagIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { projectsApi } from '@/api/projects';
-import { tagsApi } from '@/api/tags';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const pathname = usePathname();
-  
-  const { data: projects = [] } = useQuery({
-    queryKey: ['projects'],
+  const location = useLocation();
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
     queryFn: projectsApi.getAll,
   });
 
@@ -27,7 +23,7 @@ export default function Layout({ children }: LayoutProps) {
   });
 
   // Don't show sidebar on admin pages
-  const isAdminPage = pathname.startsWith('/admin');
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   if (isAdminPage) {
     return (
@@ -61,19 +57,19 @@ export default function Layout({ children }: LayoutProps) {
                 </h3>
               </div>
               <div className="p-4">
-                {projects.length === 0 ? (
+                {categories.length === 0 ? (
                   <p className="text-sm text-[var(--color-foreground-secondary)]">暂无项目</p>
                 ) : (
                   <ul className="space-y-1">
-                    {projects.map((proj) => (
-                      <li key={proj.id}>
+                    {categories.map((cat) => (
+                      <li key={cat.id}>
                         <Link
-                          href={`/project/${proj.slug}`}
+                          to={`/category/${cat.slug}`}
                           className="flex items-center justify-between px-3 py-2 text-sm rounded-[8px] text-[var(--color-foreground)] hover:bg-[var(--color-primary)] hover:text-white transition-colors"
                         >
-                          <span>{proj.name}</span>
+                          <span>{cat.name}</span>
                           <span className="px-2 py-0.5 text-xs bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] rounded-full">
-                            {proj.post_count || 0}
+                            {cat.post_count || 0}
                           </span>
                         </Link>
                       </li>
@@ -99,7 +95,7 @@ export default function Layout({ children }: LayoutProps) {
                     {tags.map((tag) => (
                       <Link
                         key={tag.id}
-                        href={`/tag/${tag.slug}`}
+                        to={`/tag/${tag.slug}`}
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] rounded-[8px] hover:bg-[var(--color-primary)] hover:text-white transition-colors"
                       >
                         <SparklesIcon className="w-3 h-3" />

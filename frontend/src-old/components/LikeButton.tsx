@@ -1,11 +1,10 @@
-'use client';
-
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { useQueryClient } from '@tanstack/react-query';
-import api from '@/api/client';
+import axios from 'axios';
 import clsx from 'clsx';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 interface LikeStatus {
   liked: boolean;
@@ -14,28 +13,14 @@ interface LikeStatus {
 
 interface LikeButtonProps {
   slug: string;
-  queryKey?: string[];
   initialLiked?: boolean;
   initialCount?: number;
 }
 
-export default function LikeButton({ slug, queryKey = ['postLike', slug], initialLiked = false, initialCount = 0 }: LikeButtonProps) {
+export default function LikeButton({ slug, initialLiked = false, initialCount = 0 }: LikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
-  const queryClient = useQueryClient();
-
-  // Use ref to track if this is the initial render
-  const isFirstRender = useRef(true);
-
-  // Only sync with server state on initial render to prevent overwrites after user interaction
-  useEffect(() => {
-    if (isFirstRender.current) {
-      setLiked(initialLiked);
-      setCount(initialCount);
-      isFirstRender.current = false;
-    }
-  }, [initialLiked, initialCount]);
 
   const handleLike = async () => {
     if (loading) return;
@@ -48,12 +33,10 @@ export default function LikeButton({ slug, queryKey = ['postLike', slug], initia
     setCount(liked ? count - 1 : count + 1);
 
     try {
-      const res = await api.post<LikeStatus>(`/posts/${slug}/like`);
+      const res = await axios.post<LikeStatus>(`${API_BASE}/posts/${slug}/like`);
       // Sync with server response
       setLiked(res.data.liked);
       setCount(res.data.like_count);
-      // Invalidate the query to ensure consistency
-      queryClient.invalidateQueries({ queryKey });
     } catch {
       // Revert on error
       setLiked(prevLiked);

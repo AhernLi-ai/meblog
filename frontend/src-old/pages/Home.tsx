@@ -1,21 +1,16 @@
-'use client';
-
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { postsApi } from '@/api/posts';
-import PostCard from '@/components/PostCard';
-import Pagination from '@/components/Pagination';
+import { postsApi } from '../api/posts';
+import PostCard from '../components/PostCard';
+import Pagination from '../components/Pagination';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
-export default function CategoryPosts() {
-  const params = useParams();
-  const slug = params.slug as string;
+export default function Home() {
   const [page, setPage] = useState(1);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['posts', 'category', slug, { page }],
-    queryFn: () => postsApi.getAll({ category: slug, page, size: 5 }),
-    enabled: !!slug,
+    queryKey: ['posts', { page }],
+    queryFn: () => postsApi.getAll({ page, size: 5 }),
   });
 
   if (isLoading) {
@@ -43,20 +38,26 @@ export default function CategoryPosts() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          📂 {data?.items[0]?.project?.name || slug}
+      {/* Hero Header */}
+      <div className="mb-10 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 bg-[var(--color-primary)]/10 rounded-full text-sm text-[var(--color-primary)]">
+          <SparklesIcon className="w-4 h-4" />
+          <span>欢迎来到我的博客</span>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-foreground)] mb-4" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+          📝 Meblog
         </h1>
-        <p className="text-[var(--color-foreground-secondary)]">
-          共 {data?.total || 0} 篇文章
+        <p className="text-lg text-[var(--color-foreground-secondary)] max-w-2xl mx-auto">
+          分享技术与生活，记录成长点滴
         </p>
       </div>
 
+      {/* Posts */}
       {data?.items.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">📭</div>
           <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">暂无文章</h3>
-          <p className="text-[var(--color-foreground-secondary)]">该分类下还没有文章</p>
+          <p className="text-[var(--color-foreground-secondary)]">稍后再来看看吧</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -66,6 +67,7 @@ export default function CategoryPosts() {
         </div>
       )}
 
+      {/* Pagination */}
       {data && data.pages > 1 && (
         <Pagination
           currentPage={page}

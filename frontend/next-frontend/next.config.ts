@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Enable strict mode for better React practices
   reactStrictMode: true,
-  
+
   // Image optimization - use remotePatterns instead of deprecated domains
   images: {
     remotePatterns: [
@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: true,
   },
-  
+
   // Headers for API proxy
   async rewrites() {
     return [
@@ -22,11 +22,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  
-  // Fix lockfile warning
-  turbopack: {
-    root: '/Users/ahern/code/projects/meblog/frontend/next-frontend',
-  },
+
 };
 
 export default nextConfig;

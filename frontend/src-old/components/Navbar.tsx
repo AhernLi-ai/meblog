@@ -1,9 +1,6 @@
-'use client';
-
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import ThemeToggle from '@/components/ThemeToggle';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import {
@@ -19,29 +16,29 @@ import {
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
-  const pathname = usePathname();
+  const location = useLocation();
 
   return (
-    <nav className="bg-[var(--color-background)] border-b border-[var(--color-border)] sticky top-0 z-50 h-16 flex items-center shadow-[var(--shadow-navbar)]">
+    <nav className="bg-[var(--color-background)] border-b border-[var(--color-border)] sticky top-0 z-50 h-16 flex items-center" style={{ boxShadow: 'var(--shadow-navbar)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex justify-between items-center h-full">
-          {/* Logo - Fixed width to prevent layout shift when switching tabs */}
+          {/* Logo */}
           <Link
-            href="/"
-            className="flex items-center gap-2 text-xl font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity w-[100px]"
+            to="/"
+            className="flex items-center gap-2 text-xl font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
             style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
           >
-            <span className="text-2xl inline-block min-w-[24px] text-center">📝</span>
-            <span className="inline-block min-w-[52px] text-left">Meblog</span>
+            <span className="text-2xl">📝</span>
+            <span>Meblog</span>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
-            <NavLink href="/" icon={<HomeIcon className="w-4 h-4" strokeWidth={1.5} />} label="首页" pathname={pathname} />
-            <NavLink href="/projects" icon={<FolderIcon className="w-4 h-4" strokeWidth={1.5} />} label="项目" pathname={pathname} />
-            <NavLink href="/tags" icon={<TagIcon className="w-4 h-4" strokeWidth={1.5} />} label="标签" pathname={pathname} />
-            <NavLink href="/archive" icon={<ClockIcon className="w-4 h-4" strokeWidth={1.5} />} label="归档" pathname={pathname} />
-            <NavLink href="/about" icon={<UserCircleIcon className="w-4 h-4" strokeWidth={1.5} />} label="关于" pathname={pathname} />
+            <NavLink to="/" icon={<HomeIcon className="w-4 h-4" />} label="首页" isActive={location.pathname === '/'} />
+            <NavLink to="/projects" icon={<FolderIcon className="w-4 h-4" />} label="项目" isActive={location.pathname === '/projects'} />
+            <NavLink to="/tags" icon={<TagIcon className="w-4 h-4" />} label="标签" isActive={location.pathname === '/tags'} />
+            <NavLink to="/archive" icon={<ClockIcon className="w-4 h-4" />} label="归档" isActive={location.pathname === '/archive'} />
+            <NavLink to="/about" icon={<UserCircleIcon className="w-4 h-4" />} label="关于" isActive={location.pathname === '/about'} />
 
             <div className="w-px h-6 bg-[var(--color-border)] mx-2" />
 
@@ -58,8 +55,8 @@ export default function Navbar() {
           {isAuthenticated && (
             <div className="hidden md:flex items-center gap-3">
               <Menu as="div" className="relative">
-                <Menu.Button className="flex items-center gap-2 text-sm text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors rounded-lg px-2 py-1">
-                  <UserCircleIcon className="w-6 h-6" strokeWidth={1.5} />
+                <Menu.Button className="flex items-center gap-2 text-sm text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors">
+                  <UserCircleIcon className="w-6 h-6" />
                   <span className="font-medium">{user?.username}</span>
                 </Menu.Button>
                 <Transition
@@ -79,11 +76,9 @@ export default function Navbar() {
                       <Menu.Item>
                         {({ active }) => (
                           <Link
-                            href="/admin"
+                            to="/admin"
                             className={`flex items-center gap-2 px-4 py-2 text-sm ${
-                              active
-                                ? 'bg-[var(--color-primary)] text-white'
-                                : 'text-[var(--color-foreground)]'
+                              active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'
                             }`}
                           >
                             <Cog6ToothIcon className="w-4 h-4" />
@@ -96,9 +91,7 @@ export default function Navbar() {
                           <button
                             onClick={logout}
                             className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-left ${
-                              active
-                                ? 'bg-red-500 text-white'
-                                : 'text-[var(--color-foreground)]'
+                              active ? 'bg-red-500 text-white' : 'text-[var(--color-foreground)]'
                             }`}
                           >
                             <ArrowRightOnRectangleIcon className="w-4 h-4" />
@@ -118,21 +111,22 @@ export default function Navbar() {
   );
 }
 
-// Nav link component - 修复样式：选中时蓝色字体+浅蓝背景，未选中时黑色字体
-function NavLink({ href, icon, label, pathname }: { href: string; icon: React.ReactNode; label: string; pathname: string }) {
-  const isActive = pathname === href;
-
+// Nav link component
+function NavLink({ to, icon, label, isActive }: { to: string; icon: React.ReactNode; label: string; isActive?: boolean }) {
   return (
     <Link
-      href={href}
-      className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-[8px] transition-all no-underline ${
-        isActive
-          ? '!text-[var(--color-primary)] bg-[var(--color-primary)]/10'
-          : '!text-[var(--color-foreground)] hover:!text-[var(--color-primary)] hover:bg-[var(--color-background-secondary)]'
+      to={to}
+      className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-[8px] transition-all ${
+        isActive 
+          ? 'text-[var(--color-primary)] bg-[var(--color-primary)]/10' 
+          : 'text-[var(--color-foreground)] hover:text-[var(--color-primary)] hover:bg-[var(--color-background-secondary)]'
       }`}
     >
       {icon}
       {label}
+      {isActive && (
+        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-primary)] rounded-full" />
+      )}
     </Link>
   );
 }
@@ -157,7 +151,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
           <div className="py-2">
             <Menu.Item>
               {({ active }) => (
-                <Link href="/" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link to="/" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <HomeIcon className="w-5 h-5" />
                   首页
                 </Link>
@@ -165,7 +159,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href="/projects" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link to="/projects" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <FolderIcon className="w-5 h-5" />
                   项目
                 </Link>
@@ -173,7 +167,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link to="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <TagIcon className="w-5 h-5" />
                   标签
                 </Link>
@@ -181,12 +175,13 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link to="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <UserCircleIcon className="w-5 h-5" />
                   关于
                 </Link>
               )}
             </Menu.Item>
+            
           </div>
         </Menu.Items>
       </Transition>

@@ -3,7 +3,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { tagsApi } from '@/api/tags';
 import Link from 'next/link';
-import { SparklesIcon } from '@heroicons/react/24/outline';
 
 export default function TagsPage() {
   const { data: tags = [], isLoading, error } = useQuery({
@@ -38,7 +37,7 @@ export default function TagsPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          🏷️ 标签列表
+          所有标签
         </h1>
         <p className="text-[var(--color-foreground-secondary)]">
           共 {tags.length} 个标签
@@ -52,20 +51,23 @@ export default function TagsPage() {
           <p className="text-[var(--color-foreground-secondary)]">稍后再来看看吧</p>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tags.map((tag) => (
             <Link
               key={tag.id}
               href={`/tag/${tag.slug}`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 group"
+              className="bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all p-6 border border-[var(--color-border)] group"
             >
-              <SparklesIcon className="w-4 h-4 text-[var(--color-primary)] group-hover:text-white transition-colors" />
-              <span className="text-[var(--color-foreground)] group-hover:text-white transition-colors font-medium">
-                {tag.name}
-              </span>
-              <span className="px-2 py-0.5 text-xs bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] group-hover:bg-white/20 group-hover:text-white rounded-full transition-colors">
-                {tag.post_count || 0}
-              </span>
+              <div className="flex items-center gap-3 mb-3">
+                <div>
+                  <h2 className="text-xl font-semibold text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+                    {tag.name}
+                  </h2>
+                  <p className="text-sm text-[var(--color-foreground-secondary)]">
+                    {tag.post_count || 0} 篇文章
+                  </p>
+                </div>
+              </div>
             </Link>
           ))}
         </div>

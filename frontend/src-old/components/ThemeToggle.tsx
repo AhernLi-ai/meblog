@@ -1,8 +1,6 @@
-'use client';
-
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
-import { settingsApi } from '@/api/settings';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { settingsApi } from '../api/settings';
 import { useMutation } from '@tanstack/react-query';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
@@ -29,13 +27,13 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={handleToggle}
-      className="p-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200 hover:scale-105 active:scale-95"
+      className="p-2.5 rounded-[8px] bg-[var(--color-background-secondary)] hover:bg-[var(--color-border)] transition-all duration-200 hover:scale-105 active:scale-95"
       title={`当前: ${resolvedTheme === 'dark' ? '深色' : '浅色'}模式，点击切换`}
     >
       {resolvedTheme === 'dark' ? (
         <SunIcon className="w-5 h-5 text-yellow-500" />
       ) : (
-        <MoonIcon className="w-5 h-5 text-gray-600" />
+        <MoonIcon className="w-5 h-5 text-[var(--color-foreground-secondary)]" />
       )}
     </button>
   );
