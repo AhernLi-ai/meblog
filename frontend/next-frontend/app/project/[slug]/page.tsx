@@ -1,15 +1,24 @@
 import ProjectClient from './ProjectClient';
+import projectSlugs from '@/project-slugs.json';
+import type { Project } from '@/types';
 
-// Pre-defined project slugs for static generation
-const PROJECT_SLUGS = [
-  'sheng-huo',
-  'ji-zhu',
-];
+export const dynamic = 'force-dynamic';
 
-export function generateStaticParams() {
-  return PROJECT_SLUGS.map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  return (projectSlugs as string[]).map((slug) => ({ slug }));
 }
 
-export default function ProjectPage({ params }: { params: { slug: string } }) {
-  return <ProjectClient initialProjectSlug={params.slug} />;
+export default async function ProjectPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string }> }) {
+  const { slug } = await params;
+  const { page: pageStr } = await searchParams;
+  const page = parseInt(pageStr || '1', 10);
+
+  return (
+    <ProjectClient
+      initialProjectSlug={slug}
+      initialCategory={null as unknown as Project}
+      initialData={{ items: [], total: 0, page: 1, size: 5, pages: 1 }}
+      initialPage={page}
+    />
+  );
 }

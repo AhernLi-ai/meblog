@@ -1,9 +1,8 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useEffect, useCallback } from 'react';
 import DOMPurify from 'dompurify';
 import { postsApi } from '@/api/posts';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -43,7 +42,7 @@ function extractHeadings(content: string): { id: string; text: string; level: nu
   const withoutCodeBlocks = content
     .replace(/```[\s\S]*?```/g, '')
     .replace(/`[^`\n]*`/g, '');
-  
+
   const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   const headings: { id: string; text: string; level: number }[] = [];
   let match;
@@ -64,30 +63,45 @@ function extractHeadings(content: string): { id: string; text: string; level: nu
 }
 
 interface PostDetailClientProps {
-  initialPost?: any;
-  initialSlug?: string;
+  initialPost: any;
+  initialSlug: string;
 }
 
 export default function PostDetailClient({ initialPost, initialSlug }: PostDetailClientProps) {
-  // Use initialSlug from server component (for SSG), or useParams for client navigation
-  const params = useParams();
-  const slug = initialSlug || (params.slug as string);
+  const slug = initialSlug;
+  const [post, setPost] = useState(initialPost);
+  const [loading, setLoading] = useState(!initialPost);
+
+  // Fetch post data on client side if not provided - use polling to ensure it loads
+  useEffect(() => {
+    if (!initialPost && slug) {
+      setLoading(true);
+      const fetchPost = async () => {
+        try {
+          const res = await fetch(`/api/v1/posts/${slug}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          setPost(data);
+          setLoading(false);
+        } catch (err) {
+          console.error('Failed to fetch post:', err);
+          setLoading(false);
+        }
+      };
+      fetchPost();
+    }
+  }, [initialPost, slug]);
 
   const [showToc, setShowToc] = useState(false);
   const [headings, setHeadings] = useState<{ id: string; text: string; level: number }[]>([]);
 
-  // Use post from server if available, otherwise query
-  const { data: post, isLoading, error } = useQuery({
-    queryKey: ['post', slug],
-    queryFn: () => postsApi.getById(slug),
-    enabled: !initialPost, // Only enable query if no initialPost
-    initialData: initialPost,
-  });
-
+  // Only fetch like status initially, then rely on LikeButton component to handle state
   const { data: likeStatus } = useQuery({
     queryKey: ['postLike', slug],
     queryFn: () => postsApi.getLikeStatus(slug),
     enabled: !!slug,
+    staleTime: Infinity, // Prevent refetching
+    gcTime: 1000 * 60 * 60, // Keep data for 1 hour
   });
 
   // Extract headings and set SEO meta tags when post changes
@@ -120,21 +134,13 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
     setShowToc(false);
   }, []);
 
-  if (isLoading && !post) {
+  if (!post || loading) {
     return (
-      <div className="text-center py-12 text-[var(--color-foreground-secondary)]">加载中...</div>
-    );
-  }
-
-  if ((error || !post) && !isLoading) {
-    return (
-      <div className="text-center py-12 text-red-500">
-        文章不存在或加载失败
+      <div className="text-center py-12 text-gray-500">
+        文章加载中...
       </div>
     );
   }
-
-  if (!post) return null;
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('zh-CN', {
@@ -236,7 +242,7 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
                     href={`/tag/${tag.slug}`}
                     className="text-[var(--color-primary)] hover:underline ml-1"
                   >
-                    #{tag.name}
+                    {tag.name}
                   </Link>
                 ))}
               </div>

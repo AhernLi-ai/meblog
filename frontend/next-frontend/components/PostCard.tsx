@@ -50,7 +50,9 @@ export default function PostCard({ post }: PostCardProps) {
                 href={`/tag/${tag.slug}`}
                 className="px-2.5 py-1 text-xs font-medium bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] rounded-[6px] hover:bg-[var(--color-primary)] hover:text-white transition-colors whitespace-nowrap"
               >
-                #{tag.name}
+                #{tag.name.split(' ').map(word =>
+                  word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ')}
               </Link>
             ))}
           </div>

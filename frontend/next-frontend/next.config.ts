@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enable standalone output for Docker
+  output: 'standalone',
+
   // Enable strict mode for better React practices
   reactStrictMode: true,
 
@@ -18,7 +21,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
+        destination: 'http://meblog-backend:8000/api/:path*',
       },
     ];
   },

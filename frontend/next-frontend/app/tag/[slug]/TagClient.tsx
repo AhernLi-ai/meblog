@@ -1,32 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { postsApi } from '@/api/posts';
+import { useState, useEffect } from 'react';
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
+import type { PostListResponse } from '@/types';
 
-interface TagPostsClientProps {
-  initialTagSlug?: string;
+interface TagClientProps {
+  initialTagSlug: string;
+  initialData: PostListResponse;
+  initialPage: number;
 }
 
-export default function TagClient({ initialTagSlug }: TagPostsClientProps) {
-  const params = useParams();
-  const slug = initialTagSlug || params.slug as string;
-  const [page, setPage] = useState(1);
+export default function TagClient({ initialTagSlug, initialData, initialPage }: TagClientProps) {
+  const slug = initialTagSlug;
+  const [page, setPage] = useState(initialPage);
+  const [postsData, setPostsData] = useState(initialData);
+  const [loading, setLoading] = useState(!initialData.items.length);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['posts', 'tag', slug, { page }],
-    queryFn: () => postsApi.getAll({ tag: slug, page, size: 5 }),
-    enabled: !!slug,
-  });
+  useEffect(() => {
+    fetch(`/api/v1/posts?tag=${slug}&page=${page}&size=5`)
+      .then(res => res.json())
+      .then(data => {
+        setPostsData(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [slug, page]);
 
-  const tagName = data?.items
-    ?.flatMap(p => p.tags)
-    .find(t => t.slug === slug)?.name ?? slug;
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -39,28 +40,24 @@ export default function TagClient({ initialTagSlug }: TagPostsClientProps) {
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-flex items-center gap-2 px-6 py-3 bg-red-500/10 text-red-500 rounded-[12px]">
-          加载失败，请稍后重试
-        </div>
-      </div>
-    );
-  }
+  // Convert slug to a more readable format, e.g. 'python' -> 'Python'
+  const tagName = slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          🏷️ #{tagName}
+          🏷️ {tagName}
         </h1>
         <p className="text-[var(--color-foreground-secondary)]">
-          共 {data?.total || 0} 篇文章
+          共 {postsData?.total || 0} 篇文章
         </p>
       </div>
 
-      {data?.items.length === 0 ? (
+      {postsData?.items.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">📭</div>
           <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">暂无文章</h3>
@@ -68,16 +65,16 @@ export default function TagClient({ initialTagSlug }: TagPostsClientProps) {
         </div>
       ) : (
         <div className="space-y-6">
-          {data?.items.map((post) => (
+          {postsData?.items.map((post) => (
             <PostCard key={post.id} post={post} />
           ))}
         </div>
       )}
 
-      {data && data.pages > 1 && (
+      {postsData && postsData.pages > 1 && (
         <Pagination
           currentPage={page}
-          totalPages={data.pages}
+          totalPages={postsData.pages}
           onPageChange={setPage}
         />
       )}

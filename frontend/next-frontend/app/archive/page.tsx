@@ -1,21 +1,22 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
 import { postsApi } from '@/api/posts';
-import type { PostListItem, PostListResponse } from '@/types';
+import type { PostListItem } from '@/types';
 import Link from 'next/link';
+
+export const dynamic = 'force-static';
+export const revalidate = 86400;
 
 interface GroupedPosts {
   [key: string]: PostListItem[];
 }
 
-export default function Archive() {
-  const { data: response, isLoading } = useQuery<PostListResponse>({
-    queryKey: ['posts', 'archive'],
-    queryFn: () => postsApi.getAll({ size: 100 }),
-  });
-
-  const posts = response?.items ?? [];
+export default async function Archive() {
+  let posts: PostListItem[] = [];
+  try {
+    const response = await postsApi.getAll({ size: 100 });
+    posts = response?.items ?? [];
+  } catch {
+    // 构建时后端不可用
+  }
 
   // 按月份分组
   const groupedPosts: GroupedPosts = {};
@@ -32,19 +33,6 @@ export default function Archive() {
     const [yearB, monthB] = b.match(/(\d+)年(\d+)月/)!.slice(1).map(Number);
     return yearB - yearA || monthB - monthA;
   });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
-            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--color-foreground-secondary)]">加载中...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
