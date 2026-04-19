@@ -1,5 +1,5 @@
 from .user import User
-from .category import Project
+from .project import Project
 from .tag import Tag
 from .post import Post, post_tags
 from .settings import UserSettings, SiteSettings, AuthorSettings

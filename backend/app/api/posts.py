@@ -15,13 +15,13 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 def list_posts(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
-    category: Optional[str] = None,
+    project: Optional[str] = None,
     tag: Optional[str] = None,
     q: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user)
 ):
-    return list_posts_service(db, page=page, size=size, category=category, tag=tag, q=q, current_user=current_user)
+    return list_posts_service(db, page=page, size=size, project=project, tag=tag, q=q, current_user=current_user)
 
 
 @router.get("/{id_or_slug}", response_model=PostResponse)

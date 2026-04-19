@@ -3,7 +3,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .config import settings
+from configs import settings
 from .database import engine, Base
 from .api import auth_router, posts_router, projects_router, tags_router, settings_router, stats_router, about_router, comments_router
 from .api.seo import router as seo_router

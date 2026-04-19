@@ -8,7 +8,7 @@ from ..schemas import UserCreate, UserResponse, Token
 from ..dao import get_user_by_username, get_user_by_email, create_user
 from ..utils.security import verify_password, create_access_token
 from ..utils.logger import log_user_login
-from ..config import settings
+from configs import settings
 
 
 def register_service(db: Session, user: UserCreate) -> UserResponse:

@@ -17,7 +17,7 @@ from .post import (
     create_post,
     update_post,
     delete_post,
-    get_post_count_by_category,
+    get_post_count_by_project,
     get_post_count_by_tag,
 )
 
@@ -90,7 +90,7 @@ __all__ = [
     "create_post",
     "update_post",
     "delete_post",
-    "get_post_count_by_category",
+    "get_post_count_by_project",
     "get_post_count_by_tag",
     # Tag
     "get_tags",

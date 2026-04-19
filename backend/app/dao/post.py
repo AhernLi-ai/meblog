@@ -10,7 +10,7 @@ def get_posts(
     db: Session,
     page: int = 1,
     size: int = 10,
-    category_slug: Optional[str] = None,
+    project_slug: Optional[str] = None,
     tag_slug: Optional[str] = None,
     q: Optional[str] = None,
     include_unpublished: bool = False
@@ -24,8 +24,8 @@ def get_posts(
     if not include_unpublished:
         query = query.filter(Post.status == "published")
 
-    if category_slug:
-        query = query.filter(Post.project.has(Project.slug == category_slug))
+    if project_slug:
+        query = query.filter(Post.project.has(Project.slug == project_slug))
 
     if tag_slug:
         query = query.filter(Post.tags.any(Tag.slug == tag_slug))
@@ -136,7 +136,7 @@ def delete_post(db: Session, post_id: int) -> bool:
     return True
 
 
-def get_post_count_by_category(db: Session, project_id: int) -> int:
+def get_post_count_by_project(db: Session, project_id: int) -> int:
     return db.query(Post).filter(
         Post.project_id == project_id,
         Post.is_deleted == False,

@@ -29,9 +29,7 @@ def get_project_by_slug(db: Session, slug: str):
     return db.query(Project).filter(Project.slug == slug).first()
 
 
-# Aliases for backwards compatibility
-get_category_by_id = get_project_by_id
-get_category_by_slug = get_project_by_slug
+
 
 
 def create_project(db: Session, project: ProjectCreate):
@@ -47,8 +45,7 @@ def create_project(db: Session, project: ProjectCreate):
     return db_project
 
 
-# Alias
-create_category = create_project
+
 
 
 def update_project(db: Session, project_id: int, project: ProjectUpdate):
@@ -72,8 +69,7 @@ def update_project(db: Session, project_id: int, project: ProjectUpdate):
     return db_project
 
 
-# Alias
-update_category = update_project
+
 
 
 def delete_project(db: Session, project_id: int):
@@ -92,5 +88,4 @@ def delete_project(db: Session, project_id: int):
     return True
 
 
-# Alias
-delete_category = delete_project
+

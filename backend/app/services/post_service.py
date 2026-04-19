@@ -21,7 +21,7 @@ def list_posts_service(
     db: Session,
     page: int = 1,
     size: int = 10,
-    category: Optional[str] = None,
+    project: Optional[str] = None,
     tag: Optional[str] = None,
     q: Optional[str] = None,
     current_user: Optional[User] = None
@@ -30,7 +30,7 @@ def list_posts_service(
     include_unpublished = current_user is not None
     posts, total = get_posts(
         db, page=page, size=size,
-        category_slug=category, tag_slug=tag, q=q,
+        project_slug=project, tag_slug=tag, q=q,
         include_unpublished=include_unpublished
     )
     pages = (total + size - 1) // size if total > 0 else 1

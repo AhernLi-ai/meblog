@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import List
 from ..database import get_db
 from ..models import Post, Project, Tag, post_tags
-from ..config import settings
+from configs import settings
 
 router = APIRouter(tags=["SEO"])
 
@@ -74,7 +74,7 @@ def get_sitemap(db: Session = Depends(get_db)):
     for project in projects:
         urls.append(
             f"  <url>\n"
-            f"    <loc>{escape_xml(site_url + '/category/' + project.slug)}</loc>\n"
+            f"    <loc>{escape_xml(site_url + '/project/' + project.slug)}</loc>\n"
             f"    <changefreq>weekly</changefreq>\n"
             f"    <priority>0.5</priority>\n"
             f"  </url>"
