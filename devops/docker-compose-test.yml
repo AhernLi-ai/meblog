@@ -15,9 +15,9 @@ services:
     networks:
       - common-network
     ports:
-      - "8003:8000"
+      - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://memblog:memblog@common-postgres:5432/memblog
+      - DATABASE_URL=postgresql://admin:admin@common-postgres:5432/meblog_test
       - REDIS_URL=redis://common-redis:6379/0
       - NODE_ENV=production
     restart: unless-stopped
@@ -37,10 +37,10 @@ services:
     networks:
       - common-network
     ports:
-      - "8002:3000"
+      - "8001:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_BASE_URL=http://memblog-backend-test:8000/api/v1
+      - NEXT_PUBLIC_API_BASE_URL=http://116.62.176.216:8000/api/v1
     restart: unless-stopped
     depends_on:
       meblog-backend-test:
