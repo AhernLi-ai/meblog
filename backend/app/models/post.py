@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
-from .tag import post_tags
 
 
 class Post(Base):
@@ -21,10 +19,3 @@ class Post(Base):
     project_id = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-    # Relationships (without foreign key constraints)
-    author = relationship("User", back_populates="posts")
-    project = relationship("Project", back_populates="posts")
-    tags = relationship("Tag", secondary=post_tags, back_populates="posts")
-    likes = relationship("PostLike", back_populates="post", cascade="all, delete-orphan")
-    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")

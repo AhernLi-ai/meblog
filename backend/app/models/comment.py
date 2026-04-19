@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
 
@@ -16,8 +15,3 @@ class Comment(Base):
     content = Column(Text, nullable=False)
     visitor_id = Column(String(64), nullable=False, index=True)  # MD5 of IP+UA
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relationships (without foreign key constraints)
-    post = relationship("Post", back_populates="comments")
-    parent = relationship("Comment", remote_side=[id], back_populates="replies")
-    replies = relationship("Comment", back_populates="parent", cascade="all, delete-orphan")

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import DOMPurify from 'dompurify';
@@ -68,7 +69,11 @@ interface PostDetailClientProps {
 }
 
 export default function PostDetailClient({ initialPost, initialSlug }: PostDetailClientProps) {
-  const slug = initialSlug;
+  console.log('PostDetailClient rendered with slug:', initialSlug);
+  const pathname = usePathname();
+  const slugFromUrl = pathname ? pathname.split('/').pop() : null;
+  const slug = initialSlug || slugFromUrl || '';
+  console.log('Final slug:', slug);
   const [post, setPost] = useState(initialPost);
   const [loading, setLoading] = useState(!initialPost);
 
@@ -78,13 +83,15 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
       setLoading(true);
       const fetchPost = async () => {
         try {
-          const res = await fetch(`/api/v1/posts/${slug}`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
+          console.log('Fetching post with slug:', slug);
+          const data = await postsApi.getById(slug);
+          console.log('Post data received:', data);
           setPost(data);
           setLoading(false);
-        } catch (err) {
+        } catch (err: any) {
           console.error('Failed to fetch post:', err);
+          console.error('Error message:', err.message);
+          console.error('Error response:', err.response);
           setLoading(false);
         }
       };
@@ -138,6 +145,7 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
     return (
       <div className="text-center py-12 text-gray-500">
         文章加载中...
+        <div>Debug: slug={slug}</div>
       </div>
     );
   }

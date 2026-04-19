@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
 
@@ -16,6 +15,3 @@ class PostLike(Base):
     __table_args__ = (
         UniqueConstraint("post_id", "visitor_id", name="uq_post_visitor"),
     )
-
-    # Relationship
-    post = relationship("Post", back_populates="likes")

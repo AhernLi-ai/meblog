@@ -7,7 +7,8 @@ export async function generateStaticParams() {
   return (postSlugs as string[]).map((slug) => ({ slug }));
 }
 
-export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default function PostPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+  console.log('PostPage called with slug:', slug);
   return <PostDetailClient initialPost={null} initialSlug={slug} />;
 }

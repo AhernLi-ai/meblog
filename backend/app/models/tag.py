@@ -19,6 +19,3 @@ class Tag(Base):
     name = Column(String(50), unique=True, nullable=False)
     slug = Column(String(50), unique=True, nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relationships
-    posts = relationship("Post", secondary=post_tags, back_populates="tags")
