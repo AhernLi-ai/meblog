@@ -32,7 +32,8 @@ RUN addgroup --system --gid 1001 app && \
     adduser --system --uid 1001 --ingroup app app
 
 # Install only runtime system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.aliyun.com/debian|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
