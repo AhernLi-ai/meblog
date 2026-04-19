@@ -1,12 +1,11 @@
 """API layer for Projects - HTTP handling."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Optional, List
-from ..database import get_db
-from ..schemas import ProjectCreate, ProjectUpdate, ProjectResponse
-from ..services import list_projects_service, get_project_by_slug_service, create_project_service, update_project_service, delete_project_service
-from ..utils.security import get_current_user
-from ..models import User
+from app.database import get_db
+from app.schemas import ProjectCreate, ProjectUpdate, ProjectResponse
+from app.services import list_projects_service, get_project_by_slug_service, create_project_service, update_project_service, delete_project_service
+from app.utils.security import get_current_user
+from app.models import User
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 

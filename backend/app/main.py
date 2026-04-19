@@ -4,9 +4,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from configs import settings
-from .database import engine, Base
-from .api import auth_router, posts_router, projects_router, tags_router, settings_router, stats_router, about_router, comments_router
-from .api.seo import router as seo_router
+from app.database import engine, Base
+from app.api import auth_router, posts_router, projects_router, tags_router, settings_router, stats_router, about_router, comments_router
+from app.api.seo import router as seo_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)

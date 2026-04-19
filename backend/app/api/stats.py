@@ -2,16 +2,16 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from typing import Optional
-from ..database import get_db
-from ..services import (
+from app.database import get_db
+from app.services import (
     log_access_service,
     get_unique_visitors_service,
     get_trends_service,
     get_popular_posts_service,
     get_summary_service,
 )
-from ..utils.security import get_current_user
-from ..models import User
+from app.utils.security import get_current_user
+from app.models import User
 
 router = APIRouter(prefix="/stats", tags=["Statistics"])
 

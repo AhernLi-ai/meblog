@@ -2,10 +2,9 @@
 import hashlib
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from typing import Optional, Tuple, List
-from ..models import Comment, Post, User
-from ..schemas.comment import CommentCreate, CommentResponse, CommentListResponse
-from ..dao import get_comments_by_post_slug, create_comment, delete_comment
+from app.models import Comment, Post, User
+from app.schemas.comment import CommentCreate, CommentResponse, CommentListResponse
+from app.dao import get_comments_by_post_slug, create_comment, delete_comment
 
 
 def get_visitor_id(request) -> str:

@@ -1,12 +1,11 @@
 """API layer for Settings - HTTP handling."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Optional
-from ..database import get_db
-from ..schemas import UserSettingsUpdate, UserSettingsResponse, SiteSettingsResponse
-from ..services import get_settings_service, update_settings_service, get_site_settings_service
-from ..utils.security import get_current_user
-from ..models import User
+from app.database import get_db
+from app.schemas import UserSettingsUpdate, UserSettingsResponse, SiteSettingsResponse
+from app.services import get_settings_service, update_settings_service, get_site_settings_service
+from app.utils.security import get_current_user
+from app.models import User
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
 

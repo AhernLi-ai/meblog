@@ -1,9 +1,9 @@
 """API layer for Comments - HTTP handling."""
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from ..database import get_db
-from ..schemas.comment import CommentCreate, CommentResponse, CommentListResponse
-from ..services import get_comments_service, add_comment_service, remove_comment_service
+from app.database import get_db
+from app.schemas.comment import CommentCreate, CommentResponse, CommentListResponse
+from app.services import get_comments_service, add_comment_service, remove_comment_service
 
 router = APIRouter(prefix="/comments", tags=["Comments"])
 
