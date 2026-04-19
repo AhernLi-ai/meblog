@@ -1,6 +1,7 @@
 import { postsApi } from '@/api/posts';
 import type { PostListResponse } from '@/types';
-import ClientPosts from '@/components/ClientPosts';
+import PostCard from '@/components/PostCard';
+import Pagination from '@/components/Pagination';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 
 export const revalidate = 3600;
@@ -12,15 +13,15 @@ interface HomeProps {
 export default async function Home({ searchParams }: HomeProps) {
   const { page: pageStr } = await searchParams;
   const page = parseInt(pageStr || '1', 10);
-  
-  // 尝试在构建时获取数据（可选，用于SEO）
-  let initialData: PostListResponse | null = null;
+  let data: PostListResponse = { items: [], total: 0, page, size: 5, pages: 1 };
+  let error = false;
+
   try {
     const result = await postsApi.getAll({ page, size: 5 });
-    initialData = result;
+    if (result) data = result;
   } catch {
-    // 构建时后端不可用，没关系，客户端会处理
-    initialData = null;
+    // 构建时后端不可用，返回空数据，让客户端处理
+    error = true;
   }
 
   return (
@@ -39,8 +40,35 @@ export default async function Home({ searchParams }: HomeProps) {
         </p>
       </div>
 
-      {/* Posts - 使用客户端组件 */}
-      <ClientPosts initialData={initialData} currentPage={page} />
+      {/* Posts */}
+      {!error && data?.items.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">📭</div>
+          <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">暂无文章</h3>
+          <p className="text-[var(--color-foreground-secondary)]">稍后再来看看吧</p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">⏳</div>
+          <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">正在加载文章...</h3>
+          <p className="text-[var(--color-foreground-secondary)]">请稍候，我们正在获取最新内容</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {data?.items.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!error && data && data.pages > 1 && (
+        <Pagination
+          currentPage={page}
+          totalPages={data.pages}
+          onPageChange={() => {}}
+        />
+      )}
     </div>
   );
 }
