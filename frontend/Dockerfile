@@ -4,10 +4,12 @@ FROM node:20-alpine AS base
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY package.json pnpm-lock.yaml* ./
 # Use npm mirror for faster downloads in China
-RUN npm config set registry https://registry.npmmirror.com && \
-    npm ci --prefer-offline --no-audit --no-fund
+RUN corepack enable && \
+    corepack prepare pnpm@latest --activate && \
+    pnpm config set registry https://registry.npmmirror.com && \
+    pnpm install --frozen-lockfile --prefer-offline
 
 # Rebuild the source code only when needed
 FROM base AS builder
