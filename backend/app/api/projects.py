@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas import ProjectCreate, ProjectUpdate, ProjectResponse
-from app.services import list_projects_service, get_project_by_slug_service, create_project_service, update_project_service, delete_project_service
+from app.services import ProjectService
 from app.utils.security import get_current_user
 from app.models import User
 
@@ -12,12 +12,12 @@ router = APIRouter(prefix="/projects", tags=["Projects"])
 
 @router.get("", response_model=List[ProjectResponse])
 def list_projects(db: Session = Depends(get_db)):
-    return list_projects_service(db)
+    return ProjectService.list_projects(db)
 
 
 @router.get("/{slug}", response_model=ProjectResponse)
 def get_project_by_slug_endpoint(slug: str, db: Session = Depends(get_db)):
-    return get_project_by_slug_service(db, slug)
+    return ProjectService.get_project_by_slug(db, slug)
 
 
 @router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
@@ -28,7 +28,7 @@ def create_new_project(
 ):
     if current_user is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    return create_project_service(db, project)
+    return ProjectService.create_project(db, project)
 
 
 @router.put("/{project_id}", response_model=ProjectResponse)
@@ -40,7 +40,7 @@ def update_existing_project(
 ):
     if current_user is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    return update_project_service(db, project_id, project)
+    return ProjectService.update_project(db, project_id, project)
 
 
 @router.delete("/{project_id}", status_code=204)
@@ -51,5 +51,5 @@ def delete_existing_project(
 ):
     if current_user is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    delete_project_service(db, project_id)
+    ProjectService.delete_project(db, project_id)
     return None

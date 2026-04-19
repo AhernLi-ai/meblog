@@ -1,51 +1,39 @@
-import logging
+"""
+Loguru configuration for the application.
+"""
 import sys
-from datetime import datetime
-from pathlib import Path
+from loguru import logger
 
-# Configure logger
-logger = logging.getLogger("meblog")
-logger.setLevel(logging.INFO)
+# Remove default handler
+logger.remove()
 
-# Console handler
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
-
-# File handler - log to backend/logs/app.log
-log_dir = Path(__file__).parent.parent.parent / "logs"
-log_dir.mkdir(exist_ok=True)
-file_handler = logging.FileHandler(log_dir / "app.log", encoding="utf-8")
-file_handler.setLevel(logging.INFO)
-
-# Formatter
-formatter = logging.Formatter(
-    "%(asctime)s | %(levelname)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+# Add console handler with colorized output
+logger.add(
+    sys.stdout,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    level="INFO",
+    colorize=True
 )
-console_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
 
-logger.addHandler(console_handler)
-logger.addHandler(file_handler)
+# Add file handler for error logs
+logger.add(
+    "logs/error.log",
+    rotation="500 MB",
+    retention="10 days",
+    level="ERROR",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
+    encoding="utf-8"
+)
 
+# Add file handler for all logs
+logger.add(
+    "logs/app.log",
+    rotation="500 MB",
+    retention="7 days",
+    level="DEBUG",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
+    encoding="utf-8"
+)
 
-def log_user_login(username: str, success: bool, ip: str = "unknown"):
-    """Log user login attempt."""
-    level = "INFO" if success else "WARNING"
-    logger.log(logging.INFO if success else logging.WARNING, 
-        f"LOGIN | user={username} | success={success} | ip={ip}")
-
-
-def log_post_action(action: str, post_id: int, user_id: int, details: str = ""):
-    """Log post create/update/delete actions."""
-    logger.info(f"POST_{action.upper()} | post_id={post_id} | user_id={user_id} | {details}")
-
-
-def log_project_action(action: str, project_id: int, user_id: int, details: str = ""):
-    """Log project create/update/delete actions."""
-    logger.info(f"PROJECT_{action.upper()} | project_id={project_id} | user_id={user_id} | {details}")
-
-
-def log_tag_action(action: str, tag_id: int, user_id: int, details: str = ""):
-    """Log tag create/update/delete actions."""
-    logger.info(f"TAG_{action.upper()} | tag_id={tag_id} | user_id={user_id} | {details}")
+# Export logger instance
+__all__ = ["logger"]
