@@ -1,12 +1,15 @@
 # Use official node image 
 FROM node:20-alpine AS base
 
-# Install Bun 
-RUN apk add --no-cache curl && \
-    curl -fsSL https://bun.sh/install | bash && \
-    echo 'export PATH="$HOME/.bun/bin:$PATH"' >> /root/.bashrc
+# Install Bun using precompiled binary (more reliable)
+RUN apk add --no-cache curl unzip && \
+    curl -fsSL https://github.com/oven-sh/bun/releases/download/bun-v1.3.12/bun-linux-x64.zip -o /tmp/bun.zip && \
+    unzip /tmp/bun.zip -d /usr/local && \
+    rm /tmp/bun.zip && \
+    ln -s /usr/local/bun/bin/bun /usr/local/bin/bun
 
-ENV PATH="/root/.bun/bin:$PATH"
+# Verify installation
+RUN bun --version
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -17,7 +20,7 @@ RUN bun install --frozen-lockfile --prefer-offline
 
 # Rebuild the source code only when needed
 FROM base AS builder
-WORKDIR /app
+WORKDIR / app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
