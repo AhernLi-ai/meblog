@@ -1,0 +1,53 @@
+version: '3.8'
+
+networks:
+  common-network:
+    name: common-network
+    external: true
+
+services:
+  # Backend service (FastAPI) - Test Environment
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ./backend/Dockerfile
+    container_name: meblog-backend
+    networks:
+      - common-network
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://meblog:meblog@common-postgres:5432/meblog_test
+      - REDIS_URL=redis://common-redis:6379/0
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Frontend service (Next.js) - Test Environment
+  frontend:
+    build:
+      context: ../frontend/next-frontend
+      dockerfile: ./frontend/Dockerfile
+    container_name: meblog-frontend
+    networks:
+      - common-network
+    ports:
+      - "8001:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=http://memblog-backend:8000/api/v1
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s

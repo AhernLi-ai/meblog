@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { postsApi } from '@/api/posts';
 import type { PostListResponse, PostListItem } from '@/types';
 import Link from 'next/link';
@@ -13,29 +13,51 @@ interface ClientPostsProps {
 
 export default function ClientPosts({ initialData, currentPage }: ClientPostsProps) {
   const [data, setData] = useState<PostListResponse | null>(initialData || null);
-  const [loading, setLoading] = useState(!initialData);
+  const [loading, setLoading] = useState<boolean>(!initialData);
   const [error, setError] = useState<string | null>(null);
+  const hasInitialDataRef = useRef(!!initialData);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchPosts = async () => {
-      if (initialData) return; // 如果已经有初始数据，不需要重新获取
-      
+      // 如果已经有初始数据，直接返回，不再重复请求
+      if (hasInitialDataRef.current) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
-      
+
       try {
         const result = await postsApi.getAll({ page: currentPage, size: 5 });
-        setData(result);
+        if (!cancelled) {
+          setData(result);
+          hasInitialDataRef.current = true; // 标记已获取初始数据
+        }
       } catch (err) {
-        console.error('Failed to fetch posts:', err);
-        setError('加载文章列表失败');
+        if (!cancelled) {
+          console.error('Failed to fetch posts:', err);
+          setError('加载文章列表失败');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchPosts();
-  }, [currentPage, initialData]);
+    // 仅当没有初始数据时才获取数据
+    if (!hasInitialDataRef.current) {
+      fetchPosts();
+    }
+
+    // 清理函数，防止组件卸载后状态更新
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage]); // 只依赖于 currentPage
 
   if (loading && !data) {
     return <div className="text-center py-8">加载中...</div>;

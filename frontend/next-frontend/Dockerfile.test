@@ -1,19 +1,18 @@
-FROM node:20-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
-# 复制整个 standalone 目录结构
-COPY .next/standalone ./standalone
+# Copy package files
+COPY package*.json ./
 
-# 复制静态资源
-COPY .next/static ./.next/static
-COPY public ./public
+# Install dependencies
+RUN npm install --production
 
-ENV NODE_ENV=test
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
+# Copy build artifacts and server file
+COPY .next/ ./.next/
+COPY public/ ./public/
+COPY server.js ./
 
 EXPOSE 3000
 
-# 启动命令需要指向正确的路径
-CMD ["node", "standalone/next-frontend/server.js"]
+CMD ["node", "server.js"]

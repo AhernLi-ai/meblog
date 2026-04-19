@@ -1,0 +1,32 @@
+# Frontend Runner Dockerfile
+# Only contains runtime environment, no build tools
+# Mount .next directory as volume
+
+FROM node:20-alpine AS base
+
+# System user setup
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+WORKDIR /app
+
+# Copy only the runner files (no source code)
+COPY --chown=nextjs:nodejs package*.json ./
+COPY --chown=nextjs:nodejs next.config.ts ./
+
+# Install only production dependencies
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm ci --only=production --prefer-offline --no-audit --no-fund
+
+# Security: non-root user
+USER nextjs
+
+# Environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+EXPOSE 3000
+
+# Expect .next directory to be mounted as volume
+CMD ["node", "server.js"]
