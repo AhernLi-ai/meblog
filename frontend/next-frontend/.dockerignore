@@ -1,28 +1,46 @@
-# dependencies
-node_modules
+# Node.js
+node_modules/
 npm-debug.log
 yarn-error.log
+yarn-debug.log
+.pnpm-debug.log
+.npm
+.yarn
 
-# build outputs
-.next
-out
-dist
-build
+# Build files
+.next/
+out/
+build/
+dist/
 
-# logs
-*.log
-npm-debug.log*
+# Testing
+coverage/
+.nyc_output/
 
-# OS files
+# Debugging
+.nyc_output/
+.grunt/
+.venv/
+.env.local
+.env.development
+.env.test
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
 
-# IDE
-.idea
-.vscode
-*.swp
-*.swo
-
-# git
-.git
+# Git
+.git/
 .gitignore
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.vercel
