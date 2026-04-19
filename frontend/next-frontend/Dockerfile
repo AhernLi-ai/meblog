@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 # Use npm mirror for faster downloads in China
 RUN npm config set registry https://registry.npmmirror.com && \
-    npm ci --prefer-offline
+    npm ci --prefer-offline --no-audit --no-fund
 
 # Rebuild the source code only when needed
 FROM base AS builder
