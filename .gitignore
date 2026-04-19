@@ -36,5 +36,4 @@ __pycache__/
 .pytest_cache/
 
 # UV
-uv.lock
 .openclaw/
