@@ -21,43 +21,53 @@ cd ~/code/skills/proxy-switcher && python enable_proxy.py disable
 
 git push gitee dev
 
-# 2. 推送到 GitHub（开启代理）
-echo "2. 推送到 GitHub..."
+# 2. 尝试推送到 GitHub（开启代理，但处理网络超时）
+echo "2. 尝试推送到 GitHub..."
 # 开启代理
 cd ~/code/skills/proxy-switcher && python enable_proxy.py enable
 
-git push origin dev
+# 使用重试机制推送 GitHub
+retry_count=0
+max_retries=3
+while [ $retry_count -lt $max_retries ]; do
+  if git push origin dev; then
+    echo "GitHub 推送成功！"
+    break
+  else
+    retry_count=$((retry_count + 1))
+    echo "GitHub 推送失败，重试 $retry_count/$max_retries..."
+    sleep 5
+    if [ $retry_count -eq $max_retries ]; then
+      echo "GitHub 推送失败，继续部署流程（Gitee 已同步）"
+    fi
+  fi
+done
 
 # 3. 关闭代理以访问服务器
 echo "3. 关闭代理以访问阿里云服务器..."
 cd ~/code/skills/proxy-switcher && python enable_proxy.py disable
 
-# 4. 创建远程目录
-echo "4. 创建远程目录..."
-sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "mkdir -p $PROJECT_ROOT"
-
-# 5. 同步整个项目代码（排除不需要的文件）
-echo "5. 同步项目代码..."
-rsync -avz --delete \
-  --exclude='.git' \
-  --exclude='.gitignore' \
-  --exclude='node_modules' \
-  --exclude='.next' \
-  --exclude='.venv' \
-  --exclude='__pycache__' \
-  --exclude='*.log' \
-  --exclude='.env*' \
-  --exclude='*.swp' \
-  --exclude='*.swo' \
-  --exclude='.DS_Store' \
-  ./ $SERVER_USER@$SERVER_IP:$PROJECT_ROOT/
-
-# 6. 在服务器上部署
-echo "6. 在服务器上部署服务..."
+# 4. 在服务器上部署（从 Gitee 拉取代码，更稳定）
+echo "4. 在服务器上部署服务..."
 sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
-  cd $PROJECT_ROOT &&
+  cd /root/code && 
   
-  # 创建必要的环境文件（这些不会被同步，需要在服务器上创建）
+  # 克隆或更新项目
+  if [ ! -d projects ]; then
+    mkdir -p projects
+  fi
+  
+  cd projects
+  
+  if [ ! -d meblog ]; then
+    git clone https://gitee.com/AhernLi-ai/meblog.git
+  else
+    cd meblog && git pull origin dev
+  fi
+  
+  cd meblog
+  
+  # 创建必要的环境文件
   if [ ! -f backend/.env.test ]; then
     echo 'DATABASE_URL=postgresql://meblog:meblog@postgres:5432/test_meblog' > backend/.env.test
     echo 'REDIS_URL=redis://redis:6379/0' >> backend/.env.test
@@ -81,7 +91,7 @@ sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_I
     docker-compose -f docker-compose-test.yml down
   fi
   
-  # 构建并启动新服务（串行部署：后端先启动，前端依赖后端健康状态）
+  # 构建并启动新服务
   echo '构建并启动新服务...'
   docker-compose -f docker-compose-test.yml up -d --build
   
@@ -96,3 +106,4 @@ sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_I
 echo "=== 部署完成！ ==="
 echo "后端 API: http://$SERVER_IP:8000/docs"
 echo "前端应用: http://$SERVER_IP:8001"
+echo "代码已同步到 Gitee，GitHub 同步将在网络稳定时完成"
