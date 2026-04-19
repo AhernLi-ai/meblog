@@ -18,10 +18,13 @@ const nextConfig: NextConfig = {
 
   // Headers for API proxy
   async rewrites() {
+    const isDev = process.env.NODE_ENV === 'development';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://meblog-backend:8000/api/:path*',
+        destination: isDev 
+          ? 'http://localhost:8000/api/:path*'
+          : 'http://meblog-backend:8000/api/:path*',
       },
     ];
   },

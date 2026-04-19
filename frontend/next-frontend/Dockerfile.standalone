@@ -1,0 +1,14 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 复制 standalone 目录中的所有内容到根目录
+COPY .next/standalone/next-frontend/ .
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
