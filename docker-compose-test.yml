@@ -60,7 +60,7 @@ services:
   # Frontend service (Next.js) for test environment
   frontend:
     build:
-      context: ./frontend/next-frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: meblog-frontend
     restart: unless-stopped
