@@ -119,13 +119,14 @@ export default function Navbar() {
 }
 
 // Nav link component - 修复样式：选中时蓝色字体+浅蓝背景，未选中时黑色字体
+// 确保所有状态下的尺寸完全一致，防止布局偏移
 function NavLink({ href, icon, label, pathname }: { href: string; icon: React.ReactNode; label: string; pathname: string }) {
   const isActive = pathname === href;
 
   return (
     <Link
       href={href}
-      className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-[8px] transition-all no-underline ${
+      className={`flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-[8px] transition-all no-underline min-w-[80px] h-9 ${
         isActive
           ? '!text-[var(--color-primary)] bg-[var(--color-primary)]/10'
           : '!text-[var(--color-foreground)] hover:!text-[var(--color-primary)] hover:bg-[var(--color-background-secondary)]'

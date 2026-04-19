@@ -78,9 +78,8 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
       setLoading(true);
       const fetchPost = async () => {
         try {
-          const res = await fetch(`/api/v1/posts/${slug}`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
+          // 使用 API 客户端而不是直接 fetch，确保使用正确的 API_BASE_URL
+          const data = await postsApi.getById(slug);
           setPost(data);
           setLoading(false);
         } catch (err) {
