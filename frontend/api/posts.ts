@@ -9,7 +9,7 @@ import type {
 export interface GetPostsParams {
   page?: number;
   size?: number;
-  category?: string;
+  project?: string;
   tag?: string;
   q?: string;
 }

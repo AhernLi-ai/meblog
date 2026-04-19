@@ -15,24 +15,24 @@ interface ProjectClientProps {
 export default function ProjectClient({ initialProjectSlug, initialCategory, initialData, initialPage }: ProjectClientProps) {
   const slug = initialProjectSlug;
   const [page, setPage] = useState(initialPage);
-  const [category, setCategory] = useState(initialCategory);
+  const [project, setProject] = useState(initialCategory);
   const [postsData, setPostsData] = useState(initialData);
   const [loading, setLoading] = useState(!initialCategory || !initialData.items.length);
 
   useEffect(() => {
-    if (!category) {
+    if (!project) {
       fetch(`/api/v1/projects/${slug}`)
         .then(res => res.json())
         .then(data => {
-          setCategory(data);
+          setProject(data);
           setLoading(false);
         })
         .catch(() => setLoading(false));
     }
-  }, [slug, category]);
+  }, [slug, project]);
 
   useEffect(() => {
-    fetch(`/api/v1/posts?category=${slug}&page=${page}&size=5`)
+    fetch(`/api/v1/posts?project=${slug}&page=${page}&size=5`)
       .then(res => res.json())
       .then(data => {
         setPostsData(data);
@@ -54,7 +54,7 @@ export default function ProjectClient({ initialProjectSlug, initialCategory, ini
     );
   }
 
-  if (!category) {
+  if (!project) {
     return (
       <div className="text-center py-12">
         <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
@@ -69,7 +69,7 @@ export default function ProjectClient({ initialProjectSlug, initialCategory, ini
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          {category?.name || slug}
+          {project?.name || slug}
         </h1>
         <p className="text-[var(--color-foreground-secondary)]">
           共 {postsData?.total || 0} 篇文章
