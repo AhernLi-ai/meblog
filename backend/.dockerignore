@@ -58,4 +58,3 @@ Dockerfile.optimized
 
 # Other
 migrations/
-uv.lock
