@@ -8,6 +8,7 @@ from .user import UserDao
 from .comment import CommentDao
 from .settings import SettingsDao
 from .stats import StatsDao
+from .about import AboutDao
 
 __all__ = [
     "ProjectDao",
@@ -16,5 +17,6 @@ __all__ = [
     "UserDao",
     "CommentDao",
     "SettingsDao",
-    "StatsDao"
+    "StatsDao",
+    "AboutDao"
 ]
