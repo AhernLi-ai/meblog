@@ -63,7 +63,7 @@ class PostResponse(BaseModel):
     updated_at: datetime
     project: Optional[ProjectInfo] = Field(None, validation_alias="project")
     tags: List[TagInfo] = []
-    author: AuthorInfo
+    author: Optional[AuthorInfo] = None
 
     class Config:
         from_attributes = True

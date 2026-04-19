@@ -3,13 +3,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.database import get_db
-from app.services import (
-    log_access_service,
-    get_unique_visitors_service,
-    get_trends_service,
-    get_popular_posts_service,
-    get_summary_service,
-)
+from app.services import StatsService
 from app.utils.security import get_current_user
 from app.models import User
 
@@ -23,7 +17,7 @@ def log_access(
     db: Session = Depends(get_db)
 ):
     """Log a page access for statistics."""
-    return log_access_service(db, post_id, request)
+    return StatsService.log_access_service(db, post_id, request)
 
 
 @router.get("/post/{post_id}/unique-visitors")
@@ -33,7 +27,7 @@ def get_unique_visitors(
     db: Session = Depends(get_db)
 ):
     """Get unique visitor count for a post."""
-    return get_unique_visitors_service(db, post_id, days)
+    return StatsService.get_unique_visitors_service(db, post_id, days)
 
 
 @router.get("/trends")
@@ -42,7 +36,7 @@ def get_trends(
     db: Session = Depends(get_db)
 ):
     """Get access trends for the last N days."""
-    return get_trends_service(db, days)
+    return StatsService.get_trends_service(db, days)
 
 
 @router.get("/popular-posts")
@@ -52,7 +46,7 @@ def get_popular_posts(
     db: Session = Depends(get_db)
 ):
     """Get most popular posts by unique visitors."""
-    return get_popular_posts_service(db, days, limit)
+    return StatsService.get_popular_posts_service(db, days, limit)
 
 
 @router.get("/summary")
@@ -61,4 +55,4 @@ def get_summary(
     current_user: Optional[User] = Depends(get_current_user)
 ):
     """Get overall statistics summary. Requires authentication."""
-    return get_summary_service(db, current_user)
+    return StatsService.get_summary_service(db, current_user)

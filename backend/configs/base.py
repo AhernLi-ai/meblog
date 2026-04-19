@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import Optional, List
 
 
 class BaseSettingsConfig(BaseSettings):
@@ -18,14 +18,22 @@ class BaseSettingsConfig(BaseSettings):
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"
+    ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
     
+    # CORS
+    BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
+    
+    # Application
+    APP_ENV: str = "development"
+
     class Config:
         case_sensitive = True
         env_file_encoding = "utf-8"
+        env_file = ".env"
 
 
 # Create settings instance

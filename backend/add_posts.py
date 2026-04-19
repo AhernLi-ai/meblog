@@ -4,7 +4,7 @@
      4|from sqlalchemy import create_engine
      5|from sqlalchemy.orm import sessionmaker
      6|from app.models.post import Post
-     7|from app.models.category import Category
+     7|from app.models.project import Project
      8|from app.models.tag import Tag
      9|from app.models.user import User
     10|from app.models.tag import post_tags

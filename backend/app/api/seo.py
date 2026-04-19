@@ -6,7 +6,7 @@ from sqlalchemy import func
 from datetime import datetime
 from typing import List
 from ..database import get_db
-from ..models import Post, Project, Tag, post_tags
+from ..models import Post, Project, Tag
 from configs import settings
 
 router = APIRouter(tags=["SEO"])

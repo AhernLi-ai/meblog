@@ -4,7 +4,8 @@ DAO layer for Tag - database CRUD operations.
 import re
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from app.models import Tag, Post, post_tags
+from app.models import Tag, Post
+from app.models.tag import post_tags
 from app.schemas import TagCreate, TagUpdate
 from app.utils.logger import logger
 

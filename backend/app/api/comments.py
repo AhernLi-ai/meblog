@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.comment import CommentCreate, CommentResponse, CommentListResponse
-from app.services import get_comments_service, add_comment_service, remove_comment_service
+from app.services import CommentService
 
 router = APIRouter(prefix="/comments", tags=["Comments"])
 
@@ -18,7 +18,7 @@ def get_comments(
     Get comments for a post by slug.
     Email field is only visible to admin users.
     """
-    return get_comments_service(db, post_slug, request)
+    return CommentService.get_comments_service(db, post_slug, request)
 
 
 @router.post("", response_model=CommentResponse, status_code=201)
@@ -30,7 +30,7 @@ def add_comment(
     """
     Submit a new comment. No login required.
     """
-    return add_comment_service(db, comment_data, request)
+    return CommentService.add_comment_service(db, comment_data, request)
 
 
 @router.delete("/{comment_id}", status_code=204)
@@ -42,5 +42,5 @@ def remove_comment(
     """
     Delete a comment. Only admin users can delete comments.
     """
-    remove_comment_service(db, comment_id, request)
+    CommentService.remove_comment_service(db, comment_id, request)
     return None

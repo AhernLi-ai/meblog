@@ -65,6 +65,30 @@ def get_current_user(
     return user
 
 
+def get_current_user_from_request(request: Request, db: Session) -> Optional[User]:
+    """Get current user from JWT token without Depends. Returns None if not authenticated."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    
+    token = auth_header.split(" ")[1]
+    
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
+            return None
+        try:
+            user_id = int(user_id_str)
+        except (ValueError, TypeError):
+            return None
+    except JWTError:
+        return None
+
+    user = db.query(User).filter(User.id == user_id).first()
+    return user
+
+
 def get_current_admin_user(
     current_user: Optional[User] = Depends(get_current_user),
 ) -> User:

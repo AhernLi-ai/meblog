@@ -72,8 +72,8 @@ class TestListPosts:
         data = response.json()
         assert data["total"] == 3  # All posts
 
-    def test_list_posts_filter_by_category(self, client, admin_user, admin_headers, db, test_project):
-        """Test filtering posts by category/project."""
+    def test_list_posts_filter_by_project(self, client, admin_user, admin_headers, db, test_project):
+        """Test filtering posts by project."""
         from app.models import Post
         # Create posts with different projects
         p1 = Post(title="P1", slug="p1", content="C1", status="published", user_id=admin_user.id, project_id=test_project.id)
@@ -81,7 +81,7 @@ class TestListPosts:
         db.add_all([p1, p2])
         db.commit()
 
-        response = client.get(f"/api/v1/posts?category={test_project.slug}")
+        response = client.get(f"/api/v1/posts?project={test_project.slug}")
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 1

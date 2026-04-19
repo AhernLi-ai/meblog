@@ -1,6 +1,7 @@
 """API layer for Projects - HTTP handling."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List, Optional
 from app.database import get_db
 from app.schemas import ProjectCreate, ProjectUpdate, ProjectResponse
 from app.services import ProjectService
