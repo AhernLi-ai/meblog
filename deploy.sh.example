@@ -73,52 +73,14 @@ sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_I
   
   cd meblog
   
-  # 创建必要的环境文件
+  # 选择正确的 compose 文件
   if [ \"$ENVIRONMENT\" = \"test\" ]; then
     COMPOSE_FILE=\"docker-compose-test.yml\"
-    
-    if [ ! -f backend/.env.test ]; then
-      echo 'DATABASE_URL=postgresql://admin:admin@common-postgres:6001/memblog_test' > backend/.env.test
-      echo 'REDIS_URL=redis://common-redis:6379/0' >> backend/.env.test
-      echo 'API_V1_STR=/api/v1' >> backend/.env.test
-      echo 'PROJECT_NAME=Meblog API' >> backend/.env.test
-      echo 'VERSION=1.0.0' >> backend/.env.test
-      echo 'SECRET_KEY=your-test-secret-key-here' >> backend/.env.test
-      echo 'BACKEND_CORS_ORIGINS=[\"http://localhost:3000\",\"http://116.62.176.216:8001\"]' >> backend/.env.test
-      echo 'ALLOWED_HOSTS=localhost,127.0.0.1,116.62.176.216' >> backend/.env.test
-      echo 'DEBUG=true' >> backend/.env.test
-    fi
-    
-    if [ ! -f frontend/next-frontend/.env.test ]; then
-      echo 'NEXT_PUBLIC_API_BASE_URL=http://116.62.176.216:8000/api/v1' > frontend/next-frontend/.env.test
-    fi
   else
     COMPOSE_FILE=\"docker-compose-production.yml\"
-    
-    if [ ! -f backend/.env.production ]; then
-      echo 'DATABASE_URL=postgresql://memblog:memblog@common-postgres:5432/memblog' > backend/.env.production
-      echo 'REDIS_URL=redis://common-redis:6379/0' >> backend/.env.production
-      echo 'API_V1_STR=/api/v1' >> backend/.env.production
-      echo 'PROJECT_NAME=Meblog API' >> backend/.env.production
-      echo 'VERSION=1.0.0' >> backend/.env.production
-      echo 'SECRET_KEY=your-production-secret-key-here' >> backend/.env.production
-      echo 'BACKEND_CORS_ORIGINS=[\"https://yourdomain.com\"]' >> backend/.env.production
-      echo 'ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com' >> backend/.env.production
-      echo 'DEBUG=false' >> backend/.env.production
-    fi
-    
-    if [ ! -f frontend/next-frontend/.env.production ]; then
-      echo 'NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com' > frontend/next-frontend/.env.production
-    fi
   fi
   
-  # 停止现有服务
-  if docker-compose -f \$COMPOSE_FILE ps | grep -q 'Up'; then
-    echo '停止现有服务...'
-    docker-compose -f \$COMPOSE_FILE down
-  fi
-  
-  # 构建并启动新服务
+  # 构建并启动新服务（Docker Compose 会自动处理容器重启）
   echo '构建并启动新服务...'
   docker-compose -f \$COMPOSE_FILE up -d --build
   
