@@ -6,6 +6,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: meblog-backend-production:latest
     container_name: meblog-backend-production
     restart: unless-stopped
     ports:
@@ -28,6 +29,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: meblog-frontend-production:latest
     container_name: meblog-frontend-production
     restart: unless-stopped
     ports:
