@@ -14,7 +14,7 @@ class BaseSettingsConfig(BaseSettings):
     SITE_URL: str = "http://localhost:6000"
     
     # Database
-    DATABASE_URL: str = "sqlite:///./meblog.db"
+    DATABASE_URL: str = "postgresql://test:test@116.62.176.216:6001/meblog_test"
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"
@@ -34,6 +34,7 @@ class BaseSettingsConfig(BaseSettings):
         case_sensitive = True
         env_file_encoding = "utf-8"
         env_file = ".env"
+        extra = "ignore"
 
 
 # Create settings instance
