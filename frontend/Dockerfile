@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # 在基础镜像中安装 Bun 一次，供所有阶段使用
 RUN npm config set registry https://registry.npmmirror.com && \
