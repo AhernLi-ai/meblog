@@ -1,5 +1,5 @@
 # Build stage - install dependencies with uv
-FROM python:3.12-slim AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/library/python:3.12-slim AS builder
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv pip install --system --no-cache-dir --index-url https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple --find-links https://pypi.tuna.tsinghua.edu.cn/simple .
 
 # Production stage
-FROM python:3.12-slim AS runner
+FROM registry.cn-hangzhou.aliyuncs.com/library/python:3.12-slim AS runner
 
 WORKDIR /app
 
