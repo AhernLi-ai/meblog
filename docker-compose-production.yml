@@ -10,8 +10,8 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
-    env_file:
-      - ./backend/.env.production
+    # Copy .env.production to .env during startup
+    command: sh -c "cp /app/.env.production /app/.env && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"
     depends_on:
       common-postgres:
         condition: service_healthy
@@ -25,6 +25,8 @@ services:
       start_period: 30s
     networks:
       - meblog-network
+    volumes:
+      - ./backend:/app
 
   # Frontend service (Next.js) for production environment
   frontend:
@@ -35,13 +37,15 @@ services:
     restart: unless-stopped
     ports:
       - "8001:3000"
-    env_file:
-      - ./frontend/.env.production
+    # Copy .env.production to .env during startup
+    command: sh -c "cp /app/.env.production /app/.env && exec bun server.js"
     depends_on:
       backend:
         condition: service_healthy
     networks:
       - meblog-network
+    volumes:
+      - ./frontend:/app
 
 networks:
   meblog-network:
