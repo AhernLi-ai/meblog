@@ -1,5 +1,5 @@
-# 使用 Node.js 18 Alpine 镜像（兼容 Next.js 16）
-FROM node:18-alpine
+# 使用 Node.js 20 Alpine 镜像（兼容 Next.js 16，满足最低版本要求 Node.js 20.9.0+）
+FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-alpine
 
 # 设置工作目录
 WORKDIR /app
