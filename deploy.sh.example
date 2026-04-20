@@ -82,7 +82,7 @@ sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_I
   
   # 构建并启动新服务（Docker Compose 会自动处理容器重启）
   echo '构建并启动新服务...'
-  docker-compose -f \$COMPOSE_FILE up -d --build
+  timeout 600 docker-compose -f \$COMPOSE_FILE up -d --build
   
   echo '等待服务启动...'
   sleep 10
