@@ -5,7 +5,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.simple
     image: meblog-backend-test:latest
     container_name: meblog-backend-test
     restart: unless-stopped
