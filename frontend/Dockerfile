@@ -1,35 +1,38 @@
-FROM node:20-alpine AS base
+FROM node:18-alpine AS base
 
-# Install dependencies only when needed
+# 安装 Bun 通过阿里云 npm 镜像
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json pnpm-lock.yaml* ./
-# Use npm mirror for faster downloads in China
-RUN corepack enable && \
-    corepack prepare pnpm@latest --activate && \
-    pnpm config set registry https://registry.npmmirror.com && \
-    pnpm install --frozen-lockfile --prefer-offline
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm install -g bun
+ENV PATH="/root/.npm-global/bin:$PATH"
 
-# Rebuild the source code only when needed
+WORKDIR /app
+COPY package*.json ./
+RUN bun install --frozen-lockfile
+
+# 构建阶段
 FROM base AS builder
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm install -g bun
+ENV PATH="/root/.npm-global/bin:$PATH"
+
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm run build
+RUN bun run build
 
-# Production image, copy all the files and run next
+# 运行阶段
 FROM base AS runner
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm install -g bun
+ENV PATH="/root/.npm-global/bin:$PATH"
+
 WORKDIR /app
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-USER nextjs
+COPY --from=builder /app/package*.json ./
+COPY server.js ./
+
 EXPOSE 3000
-ENV PORT=3000
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]
