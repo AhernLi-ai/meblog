@@ -10,11 +10,8 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://memblog:memblog@common-postgres:5432/memblog
-      - REDIS_URL=redis://common-redis:6379/0
-      - ALLOWED_HOSTS=116.62.176.216,localhost
-      - DEBUG=false
+    env_file:
+      - ./backend/.env.production
     depends_on:
       common-postgres:
         condition: service_healthy
@@ -28,8 +25,6 @@ services:
       start_period: 30s
     networks:
       - meblog-network
-    volumes:
-      - ./backend/.env.production:/app/.env:ro
 
   # Frontend service (Next.js) for production environment
   frontend:
@@ -40,9 +35,8 @@ services:
     restart: unless-stopped
     ports:
       - "8001:3000"
-    environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://116.62.176.216:8000/api/v1
-      - NODE_ENV=production
+    env_file:
+      - ./frontend/.env.production
     depends_on:
       backend:
         condition: service_healthy
