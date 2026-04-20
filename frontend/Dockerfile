@@ -1,23 +1,31 @@
-FROM node:18-alpine
+FROM node:18-alpine AS base
 
-# 安装 Bun 通过阿里云 npm 镜像
+# 在基础镜像中安装 Bun 一次，供所有阶段使用
 RUN npm config set registry https://registry.npmmirror.com && \
     npm install -g bun
 ENV PATH="/root/.npm-global/bin:$PATH"
 
 WORKDIR /app
 
-# 复制依赖文件并安装
+# 依赖安装阶段
+FROM base AS deps
 COPY package*.json ./
 RUN bun install --frozen-lockfile
 
-# 复制源代码并构建
+# 构建阶段  
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN bun run build
 
-# 生产环境配置
+# 运行阶段（生产）
+FROM base AS runner
 ENV NODE_ENV=production
-EXPOSE 3000
+WORKDIR /app
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
+COPY server.js ./
 
-# 启动应用
+EXPOSE 3000
 CMD ["bun", "server.js"]
