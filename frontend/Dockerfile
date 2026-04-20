@@ -1,31 +1,30 @@
-FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-alpine AS base
+# 使用 Node.js 18 Alpine 镜像（兼容 Next.js 16）
+FROM node:18-alpine
 
-# 在基础镜像中安装 Bun 一次，供所有阶段使用
-RUN npm config set registry https://registry.npmmirror.com && \
-    npm install -g bun
-ENV PATH="/root/.npm-global/bin:$PATH"
-
+# 设置工作目录
 WORKDIR /app
 
-# 依赖安装阶段
-FROM base AS deps
+# 复制 package.json 和 bun.lockb（如果使用 Bun）
 COPY package*.json ./
-RUN bun install --frozen-lockfile
 
-# 构建阶段  
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+# 安装依赖（使用 npm，因为服务器可能无法访问 Bun 源）
+RUN npm install
+
+# 复制源代码
 COPY . .
-RUN bun run build
 
-# 运行阶段（生产）
-FROM base AS runner
-ENV NODE_ENV=production
-WORKDIR /app
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-COPY server.js ./
+# 构建应用
+RUN npm run build
 
+# 创建非 root 用户以提高安全性
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# 更改应用目录的所有权
+USER nextjs
+
+# 暴露端口
 EXPOSE 3000
-CMD ["bun", "server.js"]
+
+# 启动命令
+CMD ["npm", "start"]
