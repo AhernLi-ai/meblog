@@ -1,7 +1,7 @@
 # Multi-stage build for Next.js frontend with Bun
 
 # Build stage
-FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-alpine AS builder
+FROM docker.m.daocloud.io/library/node:20-alpine AS builder
 
 # Install Bun (ultra-fast JavaScript runtime and package manager)
 RUN npm install -g bun
@@ -21,7 +21,7 @@ COPY . .
 RUN bun run build
 
 # Production stage
-FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-alpine AS runner
+FROM docker.m.daocloud.io/library/node:20-alpine AS runner
 
 # Install Bun in production
 RUN npm install -g bun
