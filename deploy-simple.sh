@@ -1,34 +1,23 @@
 #!/bin/bash
 
-# 简化版部署脚本 - 仅用于测试环境
+# 简化版部署脚本 - 仅用于测试
 set -e
 
-echo "=== 部署 meblog 到 test 环境 ==="
+echo "=== 简化部署 meblog 到 test 环境 ==="
+
+# 关闭代理
+cd ~/code/skills/proxy-switcher && python enable_proxy.py disable
+
+# 推送到 Gitee
+cd ~/code/projects/meblog
+git push gitee dev
 
 # 在服务器上部署
+echo "在服务器上部署..."
 sshpass -p "Ahern.123456" ssh -o StrictHostKeyChecking=no root@116.62.176.216 "
-  cd /root/code/projects/meblog && 
-  git reset --hard HEAD && 
+  cd /root/code/projects/meblog &&
   git pull origin dev &&
-  
-  # 确保环境文件存在
-  if [ ! -f backend/.env.test ]; then
-    echo 'DATABASE_URL=postgresql://admin:admin@common-postgres:5432/memblog_test' > backend/.env.test
-    echo 'REDIS_URL=redis://common-redis:6379/0' >> backend/.env.test
-    echo 'API_V1_STR=/api/v1' >> backend/.env.test
-    echo 'PROJECT_NAME=Meblog API' >> backend/.env.test
-    echo 'VERSION=1.0.0' >> backend/.env.test
-    echo 'SECRET_KEY=your-secret-key-here' >> backend/.env.test
-    echo 'BACKEND_CORS_ORIGINS=[\"http://localhost:3000\",\"http://116.62.176.216:8001\"]' >> backend/.env.test
-    echo 'ALLOWED_HOSTS=localhost,116.62.176.216' >> backend/.env.test
-    echo 'DEBUG=true' >> backend/.env.test
-  fi
-  
-  if [ ! -f frontend/.env.test ]; then
-    echo 'NEXT_PUBLIC_API_BASE_URL=http://116.62.176.216:8000/api/v1' > frontend/.env.test
-  fi
-  
-  # 构建并启动服务
+  docker-compose -f docker-compose-test.yml down &&
   docker-compose -f docker-compose-test.yml up -d --build
 "
 
