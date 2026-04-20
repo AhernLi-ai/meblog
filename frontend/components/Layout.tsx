@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Navbar from './Navbar';
 import WechatQR from './WechatQR';
 import { FolderIcon, TagIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { projectsApi } from '@/api/projects';
+import { projectsApi } from '@/api/project';
 import { tagsApi } from '@/api/tags';
 
 interface LayoutProps {

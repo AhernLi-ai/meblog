@@ -1,4 +1,4 @@
-import { projectsApi } from '@/api/projects';
+import { projectsApi } from '@/api/project';
 import Link from 'next/link';
 
 export const dynamic = 'force-static';

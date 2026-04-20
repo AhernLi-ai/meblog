@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { FolderIcon, TagIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { projectsApi } from '@/api/projects';
+import { projectsApi } from '@/api/project';
 import { tagsApi } from '@/api/tags';
 import WechatQR from './WechatQR';
 
