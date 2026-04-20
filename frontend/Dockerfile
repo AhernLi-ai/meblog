@@ -14,12 +14,6 @@ RUN bun install --frozen-lockfile
 
 # 构建阶段  
 FROM base AS builder
-# 接收构建参数
-ARG NEXT_PUBLIC_API_BASE_URL
-ARG NEXT_PUBLIC_ENV
-ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
-ENV NEXT_PUBLIC_ENV=${NEXT_PUBLIC_ENV}
-
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN bun run build
