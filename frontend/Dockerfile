@@ -1,33 +1,36 @@
 # ==========================
-# 构建阶段
+# 构建阶段（极速 pnpm）
 # ==========================
 FROM docker.m.daocloud.io/library/node:20-alpine AS builder
-WORKDIR /app
-# 👇 全国内源，100%不卡
+# 启用国内镜像
 RUN npm config set registry https://registry.npmmirror.com
-# 依赖
-COPY package*.json ./
-RUN npm install --frozen-lockfile
-# 构建
+# 核心：启用 corepack 安装 pnpm（比 npm 快 5 倍！）
+RUN corepack enable && corepack prepare pnpm@latest --activate
+WORKDIR /app
+# 依赖缓存
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com
+# 构建 Next.js
 COPY . .
-RUN npm run build
+RUN pnpm run build
 # ==========================
 # 运行阶段
 # ==========================
 FROM docker.m.daocloud.io/library/node:20-alpine AS runner
-WORKDIR /app
-# 国内源
 RUN npm config set registry https://registry.npmmirror.com
-# 非root
+RUN corepack enable && corepack prepare pnpm@latest --activate
+WORKDIR /app
+# 非root用户
 RUN addgroup -g 1001 -S nodejs && \
 adduser -S nextjs -u 1001
 # 复制产物
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/server.js ./
 # 生产依赖
-RUN npm install --production --frozen-lockfile
+RUN pnpm install --production --frozen-lockfile --registry https://registry.npmmirror.com
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 EXPOSE 3000
