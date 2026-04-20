@@ -23,8 +23,6 @@ services:
       start_period: 30s
     networks:
       - common-network
-    volumes:
-      - ./backend:/app
 
   # Frontend service (Next.js) for test environment
   frontend:
@@ -43,8 +41,6 @@ services:
         condition: service_healthy
     networks:
       - common-network
-    volumes:
-      - ./frontend:/app
 
 networks:
   common-network:
