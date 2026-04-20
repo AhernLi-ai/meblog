@@ -13,11 +13,11 @@ if [[ "$ENVIRONMENT" != "test" && "$ENVIRONMENT" != "production" ]]; then
   exit 1
 fi
 
-# 服务器配置
-SERVER_IP="116.62.176.216"
-SERVER_USER="root"
-SERVER_PASS="Ahern.123456"
-PROJECT_ROOT="/root/code/projects/meblog"
+# 服务器配置 - 请在 deploy.sh 中填写实际值
+SERVER_IP="your-server-ip"
+SERVER_USER="your-username"
+SERVER_PASS="your-password"
+PROJECT_ROOT="/path/to/your/project"
 
 echo "=== 部署 meblog 到 $ENVIRONMENT 环境 ==="
 
@@ -78,28 +78,26 @@ sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_I
     COMPOSE_FILE=\"docker-compose-test.yml\"
     
     if [ ! -f backend/.env.test ]; then
-      echo 'DATABASE_URL=postgresql://meblog:meblog@postgres:5432/test_meblog' > backend/.env.test
-      echo 'REDIS_URL=redis://redis:6379/0' >> backend/.env.test
+      echo 'DATABASE_URL=postgresql://admin:admin@common-postgres:6001/memblog_test' > backend/.env.test
+      echo 'REDIS_URL=redis://common-redis:6379/0' >> backend/.env.test
       echo 'API_V1_STR=/api/v1' >> backend/.env.test
-      echo 'PROJECT_NAME=Meblog API (Test)' >> backend/.env.test
+      echo 'PROJECT_NAME=Meblog API' >> backend/.env.test
       echo 'VERSION=1.0.0' >> backend/.env.test
-      echo 'SECRET_KEY=test-secret-key-change-in-production' >> backend/.env.test
-      echo 'BACKEND_CORS_ORIGINS=[\"*\"]' >> backend/.env.test
-      echo 'ALLOWED_HOSTS=*' >> backend/.env.test
+      echo 'SECRET_KEY=your-production-secret-key-here' >> backend/.env.test
+      echo 'BACKEND_CORS_ORIGINS=[\"http://localhost:3000\",\"http://116.62.176.216:8001\"]' >> backend/.env.test
+      echo 'ALLOWED_HOSTS=localhost,127.0.0.1,116.62.176.216' >> backend/.env.test
       echo 'DEBUG=true' >> backend/.env.test
     fi
     
     if [ ! -f frontend/next-frontend/.env.test ]; then
-      echo 'NEXT_PUBLIC_API_BASE_URL=http://meblog-backend:8000' > frontend/next-frontend/.env.test
-      echo 'NEXT_PUBLIC_ENV=test' >> frontend/next-frontend/.env.test
+      echo 'NEXT_PUBLIC_API_BASE_URL=http://116.62.176.216:8000/api/v1' > frontend/next-frontend/.env.test
     fi
-    
   else
     COMPOSE_FILE=\"docker-compose-production.yml\"
     
     if [ ! -f backend/.env.production ]; then
-      echo 'DATABASE_URL=postgresql://memblog:memblog@postgres:5432/memblog' > backend/.env.production
-      echo 'REDIS_URL=redis://redis:6379/0' >> backend/.env.production
+      echo 'DATABASE_URL=postgresql://memblog:memblog@common-postgres:5432/memblog' > backend/.env.production
+      echo 'REDIS_URL=redis://common-redis:6379/0' >> backend/.env.production
       echo 'API_V1_STR=/api/v1' >> backend/.env.production
       echo 'PROJECT_NAME=Meblog API' >> backend/.env.production
       echo 'VERSION=1.0.0' >> backend/.env.production
