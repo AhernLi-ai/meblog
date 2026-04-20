@@ -12,9 +12,6 @@ services:
       - "8000:8000"
     # Copy .env.production to .env during startup
     command: sh -c "cp /app/.env.production /app/.env && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"
-    # Use external PostgreSQL container (no Redis)
-    environment:
-      - DATABASE_URL=postgresql://memblog:memblog@common-postgres:5432/memblog
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
