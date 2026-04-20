@@ -68,7 +68,7 @@ sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_I
   if [ ! -d meblog ]; then
     git clone https://gitee.com/AhernLi-ai/meblog.git
   else
-    cd meblog && git pull origin dev
+    cd meblog && git reset --hard HEAD && git pull origin dev
   fi
   
   cd meblog
