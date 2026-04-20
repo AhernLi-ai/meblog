@@ -6,7 +6,7 @@ apt-get update && apt-get install -y --no-install-recommends build-essential lib
 rm -rf /var/lib/apt/lists/*
 # 安装 uv（使用 pip + 清华镜像）
 RUN pip install uv --index-url https://pypi.tuna.tsinghua.edu.cn/simple
-ENV PATH="/root/.local/bin:$PATH"
+ENV PATH="/app/.venv/bin:/root/.local/bin:$PATH"
 # 依赖
 COPY pyproject.toml uv.lock ./
 # ✅ 安装到项目虚拟环境，不装系统
