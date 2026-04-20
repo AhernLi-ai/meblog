@@ -1,32 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL database for test environment
-  postgres:
-    image: postgres:15-alpine
-    container_name: common-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: test_meblog
-      POSTGRES_USER: meblog
-      POSTGRES_PASSWORD: meblog
-    ports:
-      - "6001:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - meblog-network
-
-  # Redis cache for test environment
-  redis:
-    image: redis:7-alpine
-    container_name: common-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    networks:
-      - meblog-network
-
   # Backend service (FastAPI) for test environment
   backend:
     build:
@@ -37,14 +11,14 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://meblog:meblog@postgres:5432/test_meblog
-      - REDIS_URL=redis://redis:6379/0
-      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgresql://admin:admin@common-postgres:5432/memblog_test
+      - REDIS_URL=redis://common-redis:6379/0
+      - ALLOWED_HOSTS=116.62.176.216,localhost
       - DEBUG=true
     depends_on:
-      postgres:
+      common-postgres:
         condition: service_healthy
-      redis:
+      common-redis:
         condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -55,7 +29,7 @@ services:
     networks:
       - meblog-network
     volumes:
-      - ./backend/.env.test:/app/.env:ro
+      - ./backend/.env:/app/.env:ro
 
   # Frontend service (Next.js) for test environment
   frontend:
@@ -67,8 +41,7 @@ services:
     ports:
       - "8001:3000"
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://meblog-backend:8000
-      - NEXT_PUBLIC_ENV=test
+      - NEXT_PUBLIC_API_BASE_URL=http://116.62.176.216:8000/api/v1
       - NODE_ENV=production
     depends_on:
       backend:
@@ -78,7 +51,4 @@ services:
 
 networks:
   meblog-network:
-    driver: bridge
-
-volumes:
-  postgres_data:
+    external: true
