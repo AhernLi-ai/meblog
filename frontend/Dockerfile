@@ -1,30 +1,52 @@
-# 使用 Node.js 20 Alpine 镜像（兼容 Next.js 16，满足最低版本要求 Node.js 20.9.0+）
-FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-alpine
+# Multi-stage build for Next.js frontend with Bun
 
-# 设置工作目录
+# Build stage
+FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-alpine AS builder
+
+# Install Bun (ultra-fast JavaScript runtime and package manager)
+RUN npm install -g bun
+
 WORKDIR /app
 
-# 复制 package.json 和 bun.lockb（如果使用 Bun）
+# Copy package files
 COPY package*.json ./
 
-# 安装依赖（使用 npm，因为服务器可能无法访问 Bun 源）
-RUN npm install
+# Install dependencies with Bun
+RUN bun install
 
-# 复制源代码
+# Copy source code
 COPY . .
 
-# 构建应用
-RUN npm run build
+# Build the Next.js application
+RUN bun run build
 
-# 创建非 root 用户以提高安全性
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Production stage
+FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-alpine AS runner
 
-# 更改应用目录的所有权
+# Install Bun in production
+RUN npm install -g bun
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Copy built files from builder stage
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/server.js ./server.js
+
+# Install only production dependencies with Bun
+RUN bun install --production
+
+# Change ownership to non-root user
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-# 暴露端口
+# Expose port
 EXPOSE 3000
 
-# 启动命令
-CMD ["npm", "start"]
+# Start command
+CMD ["bun", "server.js"]
