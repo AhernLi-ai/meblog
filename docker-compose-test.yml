@@ -12,7 +12,9 @@ services:
     ports:
       - "8000:8000"
     # Copy .env.test to .env during startup
-    command: sh -c "cp /app/.env.test /app/.env && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    environment:
+      - PATH=/app/.venv/bin:/root/.local/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/sbin:/bin
+    command: sh -c "cp /app/.env.test /app/.env && exec /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
