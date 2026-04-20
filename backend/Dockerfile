@@ -12,7 +12,7 @@ RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.aliyun.com/debian|g' 
 
 # Upgrade pip and install dependencies from requirements.txt using Chinese mirrors
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -f https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple .
+    pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -f https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple -r requirements-minimal.txt
 
 # Production stage
 FROM python:3.12-slim AS runner
