@@ -12,11 +12,9 @@ services:
       - "8000:8000"
     # Copy .env.test to .env during startup
     command: sh -c "cp /app/.env.test /app/.env && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"
-    depends_on:
-      common-postgres:
-        condition: service_healthy
-      common-redis:
-        condition: service_started
+    # Use external PostgreSQL container (no Redis)
+    environment:
+      - DATABASE_URL=postgresql://admin:admin@common-postgres:5432/memblog_test
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -24,7 +22,7 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - meblog-network
+      - common-network
     volumes:
       - ./backend:/app
 
@@ -43,10 +41,10 @@ services:
       backend:
         condition: service_healthy
     networks:
-      - meblog-network
+      - common-network
     volumes:
       - ./frontend:/app
 
 networks:
-  meblog-network:
+  common-network:
     external: true
