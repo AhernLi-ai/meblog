@@ -1,0 +1,36 @@
+# ==========================
+# meblog 后端 (FastAPI) - 生产环境
+# 使用: docker compose -f docker-compose-backend-production.yml up -d
+# ==========================
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: meblog-backend-prod:latest
+    container_name: meblog-backend-prod
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PATH=/app/.venv/bin:/root/.local/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/sbin:/bin
+      - DATABASE_URL=postgresql://admin:admin@common-postgres:5432/meblog
+      - REDIS_URL=redis://common-redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,meblog.bugooai.cn
+      - DEBUG=false
+      - ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - common-network
+
+networks:
+  common-network:
+    external: true
