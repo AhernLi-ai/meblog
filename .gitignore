@@ -5,6 +5,7 @@ node_modules/
 # Build output
 dist/
 build/
+frontend/.next/
 
 # Environment
 .env
@@ -39,3 +40,6 @@ __pycache__/
 
 # UV
 .openclaw/
+
+# TypeScript build cache
+frontend/tsconfig.tsbuildinfo
