@@ -1,23 +1,25 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr, Field
 
 
-class UserCreate(BaseModel):
+class AdminCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=20, pattern=r"^\w+$")
     email: EmailStr
     password: str = Field(..., min_length=8)
 
 
-class UserLogin(BaseModel):
+class AdminLogin(BaseModel):
     username: str
     password: str
 
 
-class UserResponse(BaseModel):
-    id: int
+class AdminResponse(BaseModel):
+    id: str
     username: str
     email: str
+    last_login_at: Optional[datetime] = None
     created_at: datetime
 
     class Config:
@@ -30,4 +32,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    user_id: Optional[int] = None
+    admin_id: Optional[str] = None

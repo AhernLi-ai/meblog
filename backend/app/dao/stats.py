@@ -1,53 +1,52 @@
 """DAO layer for Stats - database CRUD operations."""
-from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timedelta
-from ..models import AccessLog, Post
+from app.models import PostViewEvent, Post
 
 
 class StatsDao:
     @staticmethod
-    def log_access(db: Session, post_id: int, visitor_id: str, user_agent: str = None, referrer: str = None):
-        """Log a page access for statistics."""
-        log = AccessLog(
+    async def log_access(db: AsyncSession, post_id: str, visitor_id: str, user_agent: str = None, referrer: str = None):
+        log = PostViewEvent(
             post_id=post_id,
             visitor_id=visitor_id,
             user_agent=user_agent,
             referrer=referrer,
         )
         db.add(log)
-        db.commit()
+        await db.commit()
 
     @staticmethod
-    def get_unique_visitors_count(db: Session, post_id: int, days: int = 7) -> int:
-        """Get unique visitor count for a post."""
+    async def get_unique_visitors_count(db: AsyncSession, post_id: str, days: int = 7) -> int:
         since = datetime.now() - timedelta(days=days)
-        result = db.query(
-            func.count(func.distinct(AccessLog.visitor_id))
-        ).filter(
-            AccessLog.post_id == post_id,
-            AccessLog.accessed_at >= since
-        ).scalar()
+        result = (
+            await db.execute(
+                select(func.count(func.distinct(PostViewEvent.visitor_id))).where(
+                    PostViewEvent.post_id == post_id,
+                    PostViewEvent.accessed_at >= since,
+                )
+            )
+        ).scalar_one()
         return result or 0
 
     @staticmethod
-    def get_trends_data(db: Session, days: int = 30):
-        """Get access trends for the last N days."""
+    async def get_trends_data(db: AsyncSession, days: int = 30):
         since = datetime.now() - timedelta(days=days)
-        
-        # Get daily unique visitors
-        daily = db.query(
-            func.date(AccessLog.accessed_at).label('date'),
-            func.count(func.distinct(AccessLog.visitor_id)).label('visitors'),
-            func.count(AccessLog.id).label('views')
-        ).filter(
-            AccessLog.accessed_at >= since
-        ).group_by(
-            func.date(AccessLog.accessed_at)
-        ).order_by(
-            func.date(AccessLog.accessed_at)
+
+        daily = (
+            await db.execute(
+                select(
+                    func.date(PostViewEvent.accessed_at).label("date"),
+                    func.count(func.distinct(PostViewEvent.visitor_id)).label("visitors"),
+                    func.count(PostViewEvent.id).label("views"),
+                )
+                .where(PostViewEvent.accessed_at >= since)
+                .group_by(func.date(PostViewEvent.accessed_at))
+                .order_by(func.date(PostViewEvent.accessed_at))
+            )
         ).all()
-        
+
         return {
             "days": days,
             "total_visitors": sum(d.visitors for d in daily),
@@ -56,26 +55,28 @@ class StatsDao:
         }
 
     @staticmethod
-    def get_popular_posts_data(db: Session, days: int = 30, limit: int = 10):
-        """Get most popular posts by unique visitors."""
+    async def get_popular_posts_data(db: AsyncSession, days: int = 30, limit: int = 10):
         since = datetime.now() - timedelta(days=days)
-        
-        results = db.query(
-            AccessLog.post_id,
-            func.count(func.distinct(AccessLog.visitor_id)).label('visitors'),
-            func.count(AccessLog.id).label('views')
-        ).filter(
-            AccessLog.accessed_at >= since
-        ).group_by(
-            AccessLog.post_id
-        ).order_by(
-            func.count(func.distinct(AccessLog.visitor_id)).desc()
-        ).limit(limit).all()
-        
-        # Get post details
+
+        results = (
+            await db.execute(
+                select(
+                    PostViewEvent.post_id,
+                    func.count(func.distinct(PostViewEvent.visitor_id)).label("visitors"),
+                    func.count(PostViewEvent.id).label("views"),
+                )
+                .where(PostViewEvent.accessed_at >= since)
+                .group_by(PostViewEvent.post_id)
+                .order_by(func.count(func.distinct(PostViewEvent.visitor_id)).desc())
+                .limit(limit)
+            )
+        ).all()
+
         posts_data = []
         for r in results:
-            post = db.query(Post).filter(Post.id == r.post_id).first()
+            if r.post_id is None:
+                continue
+            post = (await db.execute(select(Post).where(Post.id == r.post_id))).scalar_one_or_none()
             if post:
                 posts_data.append({
                     "id": post.id,
@@ -88,22 +89,25 @@ class StatsDao:
         return {"days": days, "posts": posts_data}
 
     @staticmethod
-    def get_summary_data(db: Session):
-        """Get overall statistics summary."""
-        # Total stats
-        total_posts = db.query(Post).filter(Post.is_deleted == False, Post.status == "published").count()
-        total_views = db.query(func.sum(Post.view_count)).scalar() or 0
-        
-        # This month stats
+    async def get_summary_data(db: AsyncSession):
+        total_posts = (
+            await db.execute(
+                select(func.count(Post.id)).where(Post.is_deleted.is_(False), Post.status == "published")
+            )
+        ).scalar_one()
+        total_views = (await db.execute(select(func.sum(Post.view_count)))).scalar_one() or 0
+
         month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        month_visitors = db.query(
-            func.count(func.distinct(AccessLog.visitor_id))
-        ).filter(AccessLog.accessed_at >= month_start).scalar() or 0
-        
-        month_views = db.query(AccessLog).filter(
-            AccessLog.accessed_at >= month_start
-        ).count()
-        
+        month_visitors = (
+            await db.execute(
+                select(func.count(func.distinct(PostViewEvent.visitor_id))).where(PostViewEvent.accessed_at >= month_start)
+            )
+        ).scalar_one() or 0
+
+        month_views = (
+            await db.execute(select(func.count(PostViewEvent.id)).where(PostViewEvent.accessed_at >= month_start))
+        ).scalar_one()
+
         return {
             "total_posts": total_posts,
             "total_views": total_views,

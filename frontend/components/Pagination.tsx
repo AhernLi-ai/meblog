@@ -1,65 +1,78 @@
 import clsx from 'clsx';
+import Link from 'next/link';
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
+  getPageHref?: (page: number) => string;
 }
 
 export default function Pagination({
   currentPage,
   totalPages,
   onPageChange,
+  getPageHref,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const hasHref = typeof getPageHref === 'function';
+
+  const renderPageControl = (page: number, label: string, disabled = false, isActive = false) => {
+    const className = clsx(
+      label === '上一页' || label === '下一页' ? 'px-3 py-2 rounded-[8px] text-sm' : 'w-10 h-10 rounded-[8px] text-sm',
+      disabled
+        ? 'text-[var(--color-foreground-secondary)] cursor-not-allowed opacity-50'
+        : isActive
+          ? 'bg-[var(--color-primary)] text-white'
+          : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
+    );
+
+    if (hasHref) {
+      const href = getPageHref!(page);
+      return (
+        <Link
+          href={disabled ? '#' : href}
+          aria-disabled={disabled}
+          className={clsx(className, disabled && 'pointer-events-none')}
+        >
+          {label}
+        </Link>
+      );
+    }
+
+    return (
+      <button
+        onClick={() => onPageChange?.(page)}
+        disabled={disabled}
+        className={className}
+      >
+        {label}
+      </button>
+    );
+  };
 
   return (
     <nav className="flex justify-center gap-2 mt-8">
       {/* Previous */}
-      <button
-        onClick={() => onPageChange(Math.max(1, Math.min(currentPage - 1, totalPages)))}
-        disabled={currentPage === 1}
-        className={clsx(
-          'px-3 py-2 rounded-[8px] text-sm',
-          currentPage === 1
-            ? 'text-[var(--color-foreground-secondary)] cursor-not-allowed opacity-50'
-            : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
-        )}
-      >
-        上一页
-      </button>
+      {renderPageControl(
+        Math.max(1, Math.min(currentPage - 1, totalPages)),
+        '上一页',
+        currentPage === 1
+      )}
 
       {/* Page numbers */}
       {pages.map((page) => (
-        <button
-          key={page}
-          onClick={() => onPageChange(page)}
-          className={clsx(
-            'w-10 h-10 rounded-[8px] text-sm',
-            page === currentPage
-              ? 'bg-[var(--color-primary)] text-white'
-              : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
-          )}
-        >
-          {page}
-        </button>
+        <span key={page}>{renderPageControl(page, String(page), false, page === currentPage)}</span>
       ))}
 
       {/* Next */}
-      <button
-        onClick={() => onPageChange(Math.max(1, Math.min(currentPage + 1, totalPages)))}
-        disabled={currentPage === totalPages}
-        className={clsx(
-          'px-3 py-2 rounded-[8px] text-sm',
-          currentPage === totalPages
-            ? 'text-[var(--color-foreground-secondary)] cursor-not-allowed opacity-50'
-            : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
-        )}
-      >
-        下一页
-      </button>
+      {renderPageControl(
+        Math.max(1, Math.min(currentPage + 1, totalPages)),
+        '下一页',
+        currentPage === totalPages
+      )}
     </nav>
   );
 }

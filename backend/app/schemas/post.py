@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class ProjectInfo(BaseModel):
-    id: int
+    id: str
     name: str
     slug: str
     cover: Optional[str] = None
@@ -18,7 +18,7 @@ CategoryInfo = ProjectInfo
 
 
 class TagInfo(BaseModel):
-    id: int
+    id: str
     name: str
     slug: str
 
@@ -27,7 +27,7 @@ class TagInfo(BaseModel):
 
 
 class AuthorInfo(BaseModel):
-    id: int
+    id: str
     username: str
 
     class Config:
@@ -35,13 +35,15 @@ class AuthorInfo(BaseModel):
 
 
 class PostListItem(BaseModel):
-    id: int
+    id: str
     title: str
     slug: str
     summary: Optional[str]
     view_count: int
     like_count: int
     status: str
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
     created_at: datetime
     project: Optional[ProjectInfo] = Field(None, validation_alias="project")
     tags: List[TagInfo] = []
@@ -51,7 +53,7 @@ class PostListItem(BaseModel):
 
 
 class PostResponse(BaseModel):
-    id: int
+    id: str
     title: str
     slug: str
     content: str
@@ -59,6 +61,8 @@ class PostResponse(BaseModel):
     view_count: int
     like_count: int
     status: str
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     project: Optional[ProjectInfo] = Field(None, validation_alias="project")
@@ -81,8 +85,8 @@ class PostCreate(BaseModel):
     title: str = Field(..., max_length=200)
     content: str
     summary: Optional[str] = Field(None, max_length=500)
-    project_id: Optional[int] = None
-    tag_ids: List[int] = []
+    project_id: Optional[str] = None
+    tag_ids: List[str] = []
     status: str = "draft"
 
 
@@ -90,8 +94,8 @@ class PostUpdate(BaseModel):
     title: Optional[str] = Field(None, max_length=200)
     content: Optional[str] = None
     summary: Optional[str] = Field(None, max_length=500)
-    project_id: Optional[int] = None
-    tag_ids: Optional[List[int]] = None
+    project_id: Optional[str] = None
+    tag_ids: Optional[List[str]] = None
     status: Optional[str] = None
 
 

@@ -9,14 +9,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_ENV: ${NEXT_PUBLIC_ENV:-production}
     image: meblog-frontend-prod:latest
     container_name: meblog-frontend-prod
     restart: unless-stopped
     ports:
       - "8001:3000"
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=https://meblog.bugooai.cn/api/v1
-      - NEXT_PUBLIC_ENV=production
+      - NEXT_PUBLIC_ENV=${NEXT_PUBLIC_ENV:-production}
     networks:
       - common-network
 

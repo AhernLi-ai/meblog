@@ -1,20 +1,20 @@
 """
 DAO layer exports - all Data Access Objects.
 """
-from .project import ProjectDao
-from .post import PostDao
-from .tag import TagDao
-from .user import UserDao
-from .comment import CommentDao
-from .settings import SettingsDao
-from .stats import StatsDao
-from .about import AboutDao
+from app.dao.project import ProjectDao
+from app.dao.post import PostDao
+from app.dao.tag import TagDao
+from app.dao.admin import AdminDao
+from app.dao.comment import CommentDao
+from app.dao.settings import SettingsDao
+from app.dao.stats import StatsDao
+from app.dao.about import AboutDao
 
 __all__ = [
     "ProjectDao",
     "PostDao", 
     "TagDao",
-    "UserDao",
+    "AdminDao",
     "CommentDao",
     "SettingsDao",
     "StatsDao",

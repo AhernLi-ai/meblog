@@ -4,6 +4,9 @@
 FROM docker.m.daocloud.io/library/node:20-alpine AS builder
 # 启用国内镜像
 RUN npm config set registry https://registry.npmmirror.com
+# 构建时环境选择：test / production / 默认 local
+ARG NEXT_PUBLIC_ENV=local
+ENV NEXT_PUBLIC_ENV=${NEXT_PUBLIC_ENV}
 # 核心：启用 corepack 安装 pnpm（比 npm 快 5 倍！）
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
@@ -18,6 +21,8 @@ RUN pnpm run build
 # ==========================
 FROM docker.m.daocloud.io/library/node:20-alpine AS runner
 RUN npm config set registry https://registry.npmmirror.com
+ARG NEXT_PUBLIC_ENV=local
+ENV NEXT_PUBLIC_ENV=${NEXT_PUBLIC_ENV}
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 # 非root用户

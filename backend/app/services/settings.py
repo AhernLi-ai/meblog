@@ -1,21 +1,33 @@
 """Service layer for Settings - business logic."""
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from ..schemas import SiteSettingsResponse
-from ..models import SiteSettings
-from ..dao import SettingsDao
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas import SiteSettingsResponse, SiteSettingsUpdate
+from app.models import SiteSettings, Admin
+from app.dao import SettingsDao
 
 
 class SettingsService:
     @staticmethod
-    def get_or_create_site_settings(db: Session) -> SiteSettings:
-        """Get site settings or create default if not exists."""
-        settings = SettingsDao.get_site_settings(db)
+    async def get_or_create_site_settings(db: AsyncSession) -> SiteSettings:
+        settings = await SettingsDao.get_site_settings(db)
         if not settings:
-            settings = SettingsDao.create_site_settings(db)
+            settings = await SettingsDao.create_site_settings(db)
         return settings
 
     @staticmethod
-    def get_site_settings_service(db: Session) -> SiteSettingsResponse:
-        """Get public site settings (no auth required)."""
-        return SettingsService.get_or_create_site_settings(db)
+    async def update_site_settings_service(
+        db: AsyncSession,
+        payload: SiteSettingsUpdate,
+        current_admin: Admin,
+    ) -> SiteSettingsResponse:
+        try:
+            settings = await SettingsService.get_or_create_site_settings(db)
+            updated = await SettingsDao.update_site_settings(
+                db,
+                settings,
+                payload,
+                admin_id=current_admin.id,
+            )
+            return SiteSettingsResponse.model_validate(updated)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to update site settings: {e}")

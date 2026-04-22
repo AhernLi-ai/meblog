@@ -73,65 +73,44 @@ sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_I
   
   cd meblog
   
-  # 创建必要的环境文件
+  # 选择后端/前端 compose 文件，并按环境注入变量
   if [ \"$ENVIRONMENT\" = \"test\" ]; then
-    COMPOSE_FILE=\"docker-compose-test.yml\"
-    
-    # 删除旧的环境文件，确保使用正确的配置
-    rm -f backend/.env.test backend/.env.production
-    
-    if [ ! -f backend/.env.test ]; then
-      echo 'DATABASE_URL=postgresql://test:***@common-postgres:5432/meblog_test' > backend/.env.test
-      echo 'REDIS_URL=redis://common-redis:6379/0' >> backend/.env.test
-      echo 'API_V1_STR=/api/v1' >> backend/.env.test
-      echo 'PROJECT_NAME=Meblog API' >> backend/.env.test
-      echo 'VERSION=1.0.0' >> backend/.env.test
-      echo 'SECRET_KEY=your-test-secret-key-here' >> backend/.env.test
-      echo 'BACKEND_CORS_ORIGINS=[\"http://localhost:3000\",\"http://116.62.176.216:8001\"]' >> backend/.env.test
-      echo 'ALLOWED_HOSTS=localhost,127.0.0.1,116.62.176.216' >> backend/.env.test
-      echo 'DEBUG=true' >> backend/.env.test
-    fi
-    
-    if [ ! -f frontend/.env.test ]; then
-      echo 'NEXT_PUBLIC_API_BASE_URL=http://116.62.176.216:8000/api/v1' > frontend/.env.test
-    fi
+    BACKEND_COMPOSE_FILE=\"docker-compose-backend-test.yml\"
+    FRONTEND_COMPOSE_FILE=\"docker-compose-frontend-test.yml\"
+    APP_ENV_VALUE=\"test\"
+    NEXT_PUBLIC_ENV_VALUE=\"test\"
   else
-    COMPOSE_FILE=\"docker-compose-production.yml\"
-    
-    if [ ! -f backend/.env.production ]; then
-      echo 'DATABASE_URL=postgresql://memblog:memblog@common-postgres:5432/memblog' > backend/.env.production
-      echo 'REDIS_URL=redis://common-redis:6379/0' >> backend/.env.production
-      echo 'API_V1_STR=/api/v1' >> backend/.env.production
-      echo 'PROJECT_NAME=Meblog API' >> backend/.env.production
-      echo 'VERSION=1.0.0' >> backend/.env.production
-      echo 'SECRET_KEY=your-production-secret-key-here' >> backend/.env.production
-      echo 'BACKEND_CORS_ORIGINS=[\"https://yourdomain.com\"]' >> backend/.env.production
-      echo 'ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com' >> backend/.env.production
-      echo 'DEBUG=false' >> backend/.env.production
-    fi
-    
-    if [ ! -f frontend/.env.production ]; then
-      echo 'NEXT_PUBLIC_API_BASE_URL=https://116.62.176.216:8000/api/v1' > frontend/.env.production
-    fi
+    BACKEND_COMPOSE_FILE=\"docker-compose-backend-production.yml\"
+    FRONTEND_COMPOSE_FILE=\"docker-compose-frontend-production.yml\"
+    APP_ENV_VALUE=\"production\"
+    NEXT_PUBLIC_ENV_VALUE=\"production\"
   fi
-  
-  # 停止现有服务
-  if docker compose -f \$COMPOSE_FILE ps | grep -q 'Up'; then
-    echo '停止现有服务...'
-    docker compose -f \$COMPOSE_FILE down
-  fi
-  
-  # 构建并启动新服务（Docker Compose 会自动处理容器重启）
-  echo '构建并启动新服务...'
-  nohup docker compose -f \$COMPOSE_FILE up -d --build > deploy.log 2>&1 &
-  echo '部署已在后台启动，请稍后检查 deploy.log 文件查看进度'
-  
-  echo '等待服务启动...'
-  sleep 10
-  
-  # 检查服务状态
+
+  # 先部署后端
+  echo '部署后端服务...'
+  APP_ENV=\$APP_ENV_VALUE docker compose -f \$BACKEND_COMPOSE_FILE up -d --build
+
+  # 后端健康检查，成功后再部署前端
+  echo '等待后端健康检查通过...'
+  for i in \$(seq 1 20); do
+    if curl -fsS http://localhost:8000/health >/dev/null; then
+      echo '后端健康检查通过'
+      break
+    fi
+    if [ \$i -eq 20 ]; then
+      echo '后端健康检查失败，部署终止'
+      exit 1
+    fi
+    sleep 3
+  done
+
+  # 再部署前端
+  echo '部署前端服务...'
+  NEXT_PUBLIC_ENV=\$NEXT_PUBLIC_ENV_VALUE docker compose -f \$FRONTEND_COMPOSE_FILE up -d --build
+
   echo '服务状态:'
-  docker compose -f \$COMPOSE_FILE ps
+  docker compose -f \$BACKEND_COMPOSE_FILE ps
+  docker compose -f \$FRONTEND_COMPOSE_FILE ps
 "
 
 echo "=== 部署完成！ ==="

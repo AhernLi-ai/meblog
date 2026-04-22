@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import DOMPurify from 'dompurify';
 import { postsApi } from '@/api/posts';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import TableOfContents from '@/components/TableOfContents';
@@ -12,31 +11,6 @@ import WechatQR from '@/components/WechatQR';
 import LikeButton from '@/components/LikeButton';
 import { ListBulletIcon } from '@heroicons/react/24/outline';
 import Comments from '@/components/Comments';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:6000';
-
-function setMetaTag(property: string, content: string, isName = false) {
-  if (typeof document === 'undefined') return;
-  const attr = isName ? 'name' : 'property';
-  let el = document.querySelector(`meta[${attr}="${property}"]`);
-  if (!el) {
-    el = document.createElement('meta');
-    (el as HTMLMetaElement).setAttribute(attr, property);
-    document.head.appendChild(el);
-  }
-  (el as HTMLMetaElement).content = content;
-}
-
-function clearMetaTags() {
-  if (typeof document === 'undefined') return;
-  ['og:title', 'og:description', 'og:image', 'og:url',
-   'twitter:card', 'twitter:title', 'twitter:description', 'twitter:image',
-   'description'].forEach(p => {
-    const el = document.querySelector(`meta[property="${p}"]`) ||
-              document.querySelector(`meta[name="${p}"]`);
-    if (el) el.remove();
-  });
-}
 
 // Extract headings from markdown content (ignoring # in code blocks)
 function extractHeadings(content: string): { id: string; text: string; level: number }[] {
@@ -69,11 +43,9 @@ interface PostDetailClientProps {
 }
 
 export default function PostDetailClient({ initialPost, initialSlug }: PostDetailClientProps) {
-  console.log('PostDetailClient rendered with slug:', initialSlug);
   const pathname = usePathname();
   const slugFromUrl = pathname ? pathname.split('/').pop() : null;
   const slug = initialSlug || slugFromUrl || '';
-  console.log('Final slug:', slug);
   const [post, setPost] = useState(initialPost);
   const [loading, setLoading] = useState(!initialPost);
 
@@ -83,9 +55,7 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
       setLoading(true);
       const fetchPost = async () => {
         try {
-          console.log('Fetching post with slug:', slug);
           const data = await postsApi.getById(slug);
-          console.log('Post data received:', data);
           setPost(data);
           setLoading(false);
         } catch (err: any) {
@@ -111,30 +81,12 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
     gcTime: 1000 * 60 * 60, // Keep data for 1 hour
   });
 
-  // Extract headings and set SEO meta tags when post changes
+  // Extract headings when post changes
   useEffect(() => {
     if (post?.content) {
       const extracted = extractHeadings(post.content);
       setHeadings(extracted);
     }
-    if (post) {
-      const title = post.title;
-      const description = post.summary || post.content.replace(/[#*`_~\[\]]/g, '').slice(0, 200);
-      const postUrl = `${SITE_URL}/post/${post.slug}`;
-      const ogImage = post.project?.cover || `${SITE_URL}/og-default.png`;
-
-      document.title = title;
-      setMetaTag('og:title', DOMPurify.sanitize(title));
-      setMetaTag('og:description', DOMPurify.sanitize(description));
-      setMetaTag('og:image', DOMPurify.sanitize(ogImage));
-      setMetaTag('og:url', DOMPurify.sanitize(postUrl));
-      setMetaTag('description', DOMPurify.sanitize(description));
-      setMetaTag('twitter:card', 'summary_large_image');
-      setMetaTag('twitter:title', DOMPurify.sanitize(title));
-      setMetaTag('twitter:description', DOMPurify.sanitize(description));
-      setMetaTag('twitter:image', DOMPurify.sanitize(ogImage));
-    }
-    return () => clearMetaTags();
   }, [post]);
 
   const handleCloseToc = useCallback(() => {
@@ -145,7 +97,6 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
     return (
       <div className="text-center py-12 text-gray-500">
         文章加载中...
-        <div>Debug: slug={slug}</div>
       </div>
     );
   }

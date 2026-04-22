@@ -1,19 +1,21 @@
 # meblog
 
-A personal tech blog built with React + FastAPI.
+A personal tech blog built with Next.js + FastAPI.
 
 ## Tech Stack
 
 **Frontend**
-- React 18 + TypeScript
-- Vite
-- TailwindCSS
-- React Query
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Tailwind CSS 4
+- TanStack Query
+- pnpm
 
 **Backend**
 - FastAPI
-- SQLAlchemy
-- SQLite / PostgreSQL
+- SQLAlchemy (async)
+- PostgreSQL / SQLite
+- uv
 
 ## Features
 
@@ -28,14 +30,55 @@ A personal tech blog built with React + FastAPI.
 ```bash
 # Frontend
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 
 # Backend
 cd backend
 uv sync
-uvicorn app.main:app --reload
+APP_ENV=local uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+本地开发统一使用 `local`：
+- 后端：`APP_ENV=local`，读取 `backend/.env.local`
+- 前端：`NEXT_PUBLIC_ENV` 不设置或为 `local`，默认读取 `frontend/.env.local`
+
+## Deployment
+
+`deploy.sh` 建议基于 `deploy.sh.example` 创建，并通过环境变量传入部署配置，不在脚本中硬编码敏感信息。
+
+```bash
+# 1) 准备脚本
+cp deploy.sh.example deploy.sh
+chmod +x deploy.sh
+
+# 2) 注入部署参数（按你的服务器实际值修改）
+export SERVER_IP="x.x.x.x"
+export SERVER_USER="root"
+export SERVER_PASS="your-password"
+export PROJECT_ROOT="/root/code/projects/meblog"
+
+# 3) 执行部署（脚本会先部署后端，再部署前端）
+./deploy.sh test
+# 或
+./deploy.sh production
+```
+
+环境选择规则：
+
+后端按 `APP_ENV` 自动读取：
+- `APP_ENV=local` -> `backend/.env.local`
+- `APP_ENV=test` -> `backend/.env.test`
+- `APP_ENV=production` -> `backend/.env.production`
+
+前端按 `NEXT_PUBLIC_ENV` 自动读取：
+- `NEXT_PUBLIC_ENV=test` -> `frontend/.env.test`
+- `NEXT_PUBLIC_ENV=production` -> `frontend/.env.production`
+- 默认（未设置或其他值）-> `frontend/.env.local`
+
+推荐约定：
+- 本地开发：`local`
+- 服务器部署：`test` / `production`
 
 ## API Endpoints
 

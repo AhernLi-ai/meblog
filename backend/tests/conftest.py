@@ -10,20 +10,22 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from configs import settings
 from app.main import app
 from app.database import Base, get_db
-from app.models import User
+from app.models import Admin
 from app.utils.security import get_password_hash
 
 
-# Create in-memory SQLite database for testing
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+# Create test database from centralized settings
+SQLALCHEMY_DATABASE_URL = settings.TEST_DATABASE_URL
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+engine_kwargs = {}
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+    engine_kwargs["poolclass"] = StaticPool
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, **engine_kwargs)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -56,16 +58,17 @@ def client(db):
 
 @pytest.fixture(scope="function")
 def admin_user(db):
-    """Create an admin user for testing."""
-    user = User(
+    """Create an admin account for testing."""
+    admin = Admin(
         username="admin",
         email="admin@test.com",
-        password_hash=get_password_hash("admin123")
+        password_hash=get_password_hash("admin123"),
+        is_admin=True,
     )
-    db.add(user)
+    db.add(admin)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(admin)
+    return admin
 
 
 @pytest.fixture(scope="function")

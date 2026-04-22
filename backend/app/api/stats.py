@@ -1,58 +1,53 @@
 """API layer for Stats - HTTP handling."""
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from app.database import get_db
 from app.services import StatsService
 from app.utils.security import get_current_user
-from app.models import User
+from app.models import Admin
 
 router = APIRouter(prefix="/stats", tags=["Statistics"])
 
 
 @router.post("/log/{post_id}")
-def log_access(
-    post_id: int,
+async def log_access(
+    post_id: str,
     request: Request,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    """Log a page access for statistics."""
-    return StatsService.log_access_service(db, post_id, request)
+    return await StatsService.log_access_service(db, post_id, request)
 
 
 @router.get("/post/{post_id}/unique-visitors")
-def get_unique_visitors(
-    post_id: int,
+async def get_unique_visitors(
+    post_id: str,
     days: int = 7,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    """Get unique visitor count for a post."""
-    return StatsService.get_unique_visitors_service(db, post_id, days)
+    return await StatsService.get_unique_visitors_service(db, post_id, days)
 
 
 @router.get("/trends")
-def get_trends(
+async def get_trends(
     days: int = 30,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    """Get access trends for the last N days."""
-    return StatsService.get_trends_service(db, days)
+    return await StatsService.get_trends_service(db, days)
 
 
 @router.get("/popular-posts")
-def get_popular_posts(
+async def get_popular_posts(
     days: int = 30,
     limit: int = 10,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    """Get most popular posts by unique visitors."""
-    return StatsService.get_popular_posts_service(db, days, limit)
+    return await StatsService.get_popular_posts_service(db, days, limit)
 
 
 @router.get("/summary")
-def get_summary(
-    db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user)
+async def get_summary(
+    db: AsyncSession = Depends(get_db),
+    current_user: Optional[Admin] = Depends(get_current_user)
 ):
-    """Get overall statistics summary. Requires authentication."""
-    return StatsService.get_summary_service(db, current_user)
+    return await StatsService.get_summary_service(db, current_user)

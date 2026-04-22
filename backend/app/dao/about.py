@@ -1,50 +1,49 @@
 """DAO layer for About - database CRUD operations."""
 import json
-from sqlalchemy.orm import Session
-from ..models import AuthorSettings, SiteSettings
-from ..schemas import AboutUpdate
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models import AuthorProfile, SiteSettings
+from app.schemas import AboutUpdate
 
 
 class AboutDao:
     @staticmethod
-    def get_author_settings(db: Session) -> AuthorSettings:
-        """Get author settings or return None if not exists."""
-        return db.query(AuthorSettings).first()
+    async def get_author_settings(db: AsyncSession) -> AuthorProfile | None:
+        return (await db.execute(select(AuthorProfile))).scalar_one_or_none()
 
     @staticmethod
-    def create_author_settings(db: Session) -> AuthorSettings:
-        """Create default author settings."""
-        settings = AuthorSettings(username="颜如玉")
+    async def create_author_settings(db: AsyncSession, admin_id: str | None = None) -> AuthorProfile:
+        settings = AuthorProfile(username="颜如玉", created_by=admin_id, updated_by=admin_id)
         db.add(settings)
-        db.commit()
-        db.refresh(settings)
+        await db.commit()
+        await db.refresh(settings)
         return settings
 
     @staticmethod
-    def get_site_settings(db: Session) -> SiteSettings:
-        """Get site settings or return None if not exists."""
-        return db.query(SiteSettings).first()
+    async def get_site_settings(db: AsyncSession) -> SiteSettings | None:
+        return (await db.execute(select(SiteSettings))).scalar_one_or_none()
 
     @staticmethod
-    def create_site_settings(db: Session) -> SiteSettings:
-        """Create default site settings."""
+    async def create_site_settings(db: AsyncSession, admin_id: str | None = None) -> SiteSettings:
         settings = SiteSettings(
             wechat_guide_text="扫码关注公众号，获取更多精彩内容",
             wechat_show_on_article=True,
             wechat_show_in_sidebar=True,
+            created_by=admin_id,
+            updated_by=admin_id,
         )
         db.add(settings)
-        db.commit()
-        db.refresh(settings)
+        await db.commit()
+        await db.refresh(settings)
         return settings
 
     @staticmethod
-    def update_author_settings(
-        db: Session,
-        author: AuthorSettings,
-        update_data: AboutUpdate
-    ) -> AuthorSettings:
-        """Update author settings fields."""
+    async def update_author_settings(
+        db: AsyncSession,
+        author: AuthorProfile,
+        update_data: AboutUpdate,
+        admin_id: str | None = None,
+    ) -> AuthorProfile:
         if update_data.username is not None:
             author.username = update_data.username
         if update_data.avatar_url is not None:
@@ -52,7 +51,7 @@ class AboutDao:
         if update_data.bio is not None:
             author.bio = update_data.bio
         if update_data.tech_stack is not None:
-            author.tech_stack = json.dumps(update_data.tech_stack, ensure_ascii=False)
+            author.tech_stack_json = json.dumps(update_data.tech_stack, ensure_ascii=False)
         if update_data.github_url is not None:
             author.github_url = update_data.github_url
         if update_data.zhihu_url is not None:
@@ -61,17 +60,19 @@ class AboutDao:
             author.twitter_url = update_data.twitter_url
         if update_data.wechat_id is not None:
             author.wechat_id = update_data.wechat_id
-        
-        db.commit()
-        db.refresh(author)
+        if admin_id is not None:
+            author.updated_by = admin_id
+
+        await db.commit()
+        await db.refresh(author)
         return author
 
     @staticmethod
-    def parse_tech_stack(author: AuthorSettings) -> list:
-        """Parse tech_stack JSON field."""
-        if author.tech_stack:
+    def parse_tech_stack(author: AuthorProfile) -> list:
+        """Parse tech_stack_json field."""
+        if author.tech_stack_json:
             try:
-                return json.loads(author.tech_stack)
+                return json.loads(author.tech_stack_json)
             except json.JSONDecodeError:
                 pass
         return []

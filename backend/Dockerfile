@@ -9,7 +9,6 @@ RUN pip install uv --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 ENV PATH="/app/.venv/bin:/root/.local/bin:$PATH"
 # 依赖
 COPY pyproject.toml uv.lock ./
-# ✅ 安装到项目虚拟环境，不装系统
 RUN uv sync --frozen --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 # 代码
 COPY . .

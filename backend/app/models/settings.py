@@ -1,43 +1,45 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from ..database import Base
+from datetime import datetime
+from uuid import uuid4
+
+from sqlalchemy import Boolean, DateTime, String, Text, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.database import Base
 
 
 class SiteSettings(Base):
     """Site-wide settings for public configuration."""
     __tablename__ = "site_settings"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    # WeChat QR code image URL
-    wechat_qr_url = Column(Text, nullable=True)
-    # Guidance text shown below the QR code
-    wechat_guide_text = Column(String(200), default="扫码关注公众号，获取更多精彩内容")
-    # Whether to show WeChat QR on article pages
-    wechat_show_on_article = Column(Boolean, default=True)
-    # Whether to show WeChat QR in sidebar
-    wechat_show_in_sidebar = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    wechat_qr_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    wechat_guide_text: Mapped[str] = mapped_column(String(200), default="扫码关注公众号，获取更多精彩内容")
+    wechat_show_on_article: Mapped[bool] = mapped_column(Boolean, default=True)
+    wechat_show_in_sidebar: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
-class AuthorSettings(Base):
-    """Single-row table storing the author profile for the About page.
+class AuthorProfile(Base):
+    """Single-row table storing author profile for About page."""
+    __tablename__ = "author_profile"
 
-    Previously these fields lived in the `users` table but are moved here
-    since regular visitors never need user account data — only the author
-    profile shown on the About page.
-    """
-    __tablename__ = "author_settings"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    username = Column(String(50), nullable=False)
-    avatar_url = Column(Text, nullable=True)
-    bio = Column(Text, nullable=True)
-    tech_stack = Column(Text, nullable=True)  # JSON string of tags list
-    github_url = Column(String(500), nullable=True)
-    zhihu_url = Column(String(500), nullable=True)
-    twitter_url = Column(String(500), nullable=True)
-    wechat_id = Column(String(100), nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    username: Mapped[str] = mapped_column(String(50), nullable=False)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    bio: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tech_stack_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    github_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    zhihu_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    twitter_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    wechat_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

@@ -1,4 +1,4 @@
-from .base import BaseSettingsConfig
+from configs.base import BaseSettingsConfig
 
 
 class TestSettings(BaseSettingsConfig):
@@ -7,7 +7,3 @@ class TestSettings(BaseSettingsConfig):
     class Config:
         env_file = ".env.test"
         case_sensitive = True
-
-
-# Create test settings instance
-test_settings = TestSettings()

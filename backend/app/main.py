@@ -8,9 +8,6 @@ from app.database import engine, Base
 from app.api import auth_router, posts_router, projects_router, tags_router, settings_router, stats_router, about_router, comments_router
 from app.api.seo import router as seo_router
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -40,11 +37,17 @@ app.include_router(comments_router, prefix=settings.API_V1_STR)
 app.include_router(seo_router)
 
 
+@app.on_event("startup")
+async def on_startup() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
 @app.get("/")
-def root():
+async def root():
     return {"message": "Meblog API", "version": settings.VERSION}
 
 
 @app.get("/health")
-def health():
+async def health():
     return {"status": "ok"}

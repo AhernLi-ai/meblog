@@ -4,8 +4,8 @@ from datetime import datetime
 
 
 class CommentCreate(BaseModel):
-    post_id: int
-    parent_id: Optional[int] = None
+    post_id: str
+    parent_id: Optional[str] = None
     nickname: str = Field(..., max_length=50)
     email: str = Field(..., max_length=100)
     website: Optional[str] = Field(None, max_length=200)
@@ -13,9 +13,9 @@ class CommentCreate(BaseModel):
 
 
 class CommentResponse(BaseModel):
-    id: int
-    post_id: int
-    parent_id: Optional[int] = None
+    id: str
+    post_id: str
+    parent_id: Optional[str] = None
     nickname: str
     email: Optional[str] = None  # 仅管理员可见，非管理员为 None
     website: Optional[str] = None  # 个人网站

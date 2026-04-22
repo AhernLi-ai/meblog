@@ -6,7 +6,7 @@
      6|from app.models.post import Post
      7|from app.models.project import Project
      8|from app.models.tag import Tag
-     9|from app.models.user import User
+     9|from app.models import Admin
     10|from app.models.tag import post_tags
     11|from datetime import datetime
     12|import random

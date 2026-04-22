@@ -1,7 +1,8 @@
 import re
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from slugify import slugify as python_slugify
-from ..models import Post
+from app.models import Post
 
 
 def generate_slug(text: str) -> str:
@@ -10,26 +11,24 @@ def generate_slug(text: str) -> str:
     return slug
 
 
-def generate_unique_slug(db: Session, title: str, exclude_id: int = None) -> str:
+async def generate_unique_slug(db: AsyncSession, title: str, exclude_id: str | None = None) -> str:
     """
     Generate a unique slug for a post.
     If the slug already exists, appends a counter suffix.
     """
-    from sqlalchemy import or_
-    
     slug = generate_slug(title)
     original_slug = slug
     counter = 1
-    
+
     while True:
-        query = db.query(Post.slug).filter(Post.slug == slug)
+        query = select(Post.slug).where(Post.slug == slug)
         if exclude_id is not None:
-            query = query.filter(Post.id != exclude_id)
-        
-        existing = query.first()
+            query = query.where(Post.id != exclude_id)
+
+        existing = (await db.execute(query)).first()
         if not existing:
             break
         slug = f"{original_slug}-{counter}"
         counter += 1
-    
+
     return slug

@@ -9,8 +9,8 @@ class UserSettingsUpdate(BaseModel):
 
 
 class UserSettingsResponse(BaseModel):
-    id: int
-    user_id: int
+    id: str
+    user_id: str
     theme: str
     language: str
     created_at: datetime
@@ -22,7 +22,7 @@ class UserSettingsResponse(BaseModel):
 
 class SiteSettingsResponse(BaseModel):
     """Public site settings response (no auth required)."""
-    id: int
+    id: str
     wechat_qr_url: Optional[str] = None
     wechat_guide_text: str
     wechat_show_on_article: bool
@@ -30,3 +30,11 @@ class SiteSettingsResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SiteSettingsUpdate(BaseModel):
+    """Admin update payload for site settings."""
+    wechat_qr_url: Optional[str] = None
+    wechat_guide_text: Optional[str] = None
+    wechat_show_on_article: Optional[bool] = None
+    wechat_show_in_sidebar: Optional[bool] = None

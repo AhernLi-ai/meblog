@@ -1,15 +1,25 @@
 """API layer for Settings - HTTP handling."""
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from app.schemas import SiteSettingsResponse
+from app.schemas import SiteSettingsResponse, SiteSettingsUpdate
 from app.services import SettingsService
+from app.utils.security import get_current_admin_user
+from app.models import Admin
 
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
 
 
 @router.get("/site", response_model=SiteSettingsResponse)
-def get_site_settings(db: Session = Depends(get_db)):
-    """Get public site settings (no auth required)."""
-    return SettingsService.get_site_settings_service(db)
+async def get_site_settings(db: AsyncSession = Depends(get_db)):
+    return await SettingsService.get_or_create_site_settings(db)
+
+
+@router.put("/site", response_model=SiteSettingsResponse)
+async def update_site_settings(
+    payload: SiteSettingsUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin_user),
+):
+    return await SettingsService.update_site_settings_service(db, payload, current_admin)

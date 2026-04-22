@@ -1,32 +1,35 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
-class ProjectBase(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200)
-    slug: str = Field(..., min_length=1, max_length=200)
-    description: Optional[str] = None
-    content: str
-    is_published: bool = False
-    cover_image: Optional[str] = None
-    meta_description: Optional[str] = None
+class ProjectCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    cover: Optional[str] = None
+    is_pinned: bool = False
+    sort_order: int = 0
+    created_by: Optional[str] = None
 
 
-class ProjectCreate(ProjectBase):
-    pass
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=50)
+    cover: Optional[str] = None
+    is_pinned: Optional[bool] = None
+    sort_order: Optional[int] = None
+    updated_by: Optional[str] = None
 
 
-class ProjectUpdate(ProjectBase):
-    title: Optional[str] = None
-    slug: Optional[str] = None
-    content: Optional[str] = None
-
-
-class ProjectResponse(ProjectBase):
-    id: int
+class ProjectResponse(BaseModel):
+    id: str
+    name: str
+    slug: str
+    cover: Optional[str] = None
+    is_pinned: bool = False
+    sort_order: int = 0
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
     created_at: datetime
-    updated_at: datetime
 
     class Config:
         from_attributes = True

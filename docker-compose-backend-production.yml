@@ -15,13 +15,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - PATH=/app/.venv/bin:/root/.local/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/sbin:/bin
-      - DATABASE_URL=postgresql://admin:admin@common-postgres:5432/meblog
-      - REDIS_URL=redis://common-redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,meblog.bugooai.cn
-      - DEBUG=false
-      - ENV=production
+      - APP_ENV=production
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

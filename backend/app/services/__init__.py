@@ -1,14 +1,15 @@
 """
 Service layer exports - all Service classes.
 """
-from .project import ProjectService
-from .post import PostService
-from .tag import TagService
-from .auth import AuthService
-from .comment import CommentService
-from .settings import SettingsService
-from .stats import StatsService
-from .about import AboutService
+from app.services.project import ProjectService
+from app.services.post import PostService
+from app.services.tag import TagService
+from app.services.auth import AuthService
+from app.services.comment import CommentService
+from app.services.settings import SettingsService
+from app.services.stats import StatsService
+from app.services.about import AboutService
+from app.services.visitor import VisitorService
 
 __all__ = [
     "ProjectService",
@@ -18,5 +19,6 @@ __all__ = [
     "CommentService",
     "SettingsService",
     "StatsService",
-    "AboutService"
+    "AboutService",
+    "VisitorService",
 ]

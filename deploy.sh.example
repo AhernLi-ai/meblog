@@ -13,11 +13,11 @@ if [[ "$ENVIRONMENT" != "test" && "$ENVIRONMENT" != "production" ]]; then
   exit 1
 fi
 
-# 服务器配置 - 请在 deploy.sh 中填写实际值
-SERVER_IP="your-server-ip"
-SERVER_USER="your-username"
-SERVER_PASS="your-password"
-PROJECT_ROOT="/path/to/your/project"
+# 服务器配置 - 从外部环境变量读取，不在脚本中硬编码
+: "${SERVER_IP:?Please export SERVER_IP}"
+: "${SERVER_USER:?Please export SERVER_USER}"
+: "${SERVER_PASS:?Please export SERVER_PASS}"
+: "${PROJECT_ROOT:=/root/code/projects/meblog}"
 
 echo "=== 部署 meblog 到 $ENVIRONMENT 环境 ==="
 
@@ -56,40 +56,59 @@ cd ~/code/skills/proxy-switcher && python enable_proxy.py disable
 # 4. 在服务器上部署
 echo "4. 在服务器上部署 $ENVIRONMENT 服务..."
 sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
-  cd /root/code && 
+  PROJECT_ROOT=\"$PROJECT_ROOT\"
+  BASE_DIR=\$(dirname \"\$PROJECT_ROOT\")
+  PROJECT_NAME=\$(basename \"\$PROJECT_ROOT\")
+  mkdir -p \"\$BASE_DIR\"
+  cd \"\$BASE_DIR\" && 
   
   # 克隆或更新项目
-  if [ ! -d projects ]; then
-    mkdir -p projects
-  fi
-  
-  cd projects
-  
-  if [ ! -d meblog ]; then
-    git clone https://gitee.com/AhernLi-ai/meblog.git
+  if [ ! -d \"\$PROJECT_NAME\" ]; then
+    git clone https://gitee.com/AhernLi-ai/meblog.git \"\$PROJECT_NAME\"
   else
-    cd meblog && git reset --hard HEAD && git pull origin dev
+    cd \"\$PROJECT_NAME\" && git reset --hard HEAD && git pull origin dev
   fi
   
-  cd meblog
+  cd \"\$PROJECT_NAME\"
   
-  # 选择正确的 compose 文件
+  # 选择后端/前端 compose 文件，并按环境注入变量
   if [ \"$ENVIRONMENT\" = \"test\" ]; then
-    COMPOSE_FILE=\"docker-compose-test.yml\"
+    BACKEND_COMPOSE_FILE=\"docker-compose-backend-test.yml\"
+    FRONTEND_COMPOSE_FILE=\"docker-compose-frontend-test.yml\"
+    APP_ENV_VALUE=\"test\"
+    NEXT_PUBLIC_ENV_VALUE=\"test\"
   else
-    COMPOSE_FILE=\"docker-compose-production.yml\"
+    BACKEND_COMPOSE_FILE=\"docker-compose-backend-production.yml\"
+    FRONTEND_COMPOSE_FILE=\"docker-compose-frontend-production.yml\"
+    APP_ENV_VALUE=\"production\"
+    NEXT_PUBLIC_ENV_VALUE=\"production\"
   fi
-  
-  # 构建并启动新服务（Docker Compose 会自动处理容器重启）
-  echo '构建并启动新服务...'
-  timeout 600 docker compose -f \$COMPOSE_FILE up -d --build
-  
-  echo '等待服务启动...'
-  sleep 10
-  
-  # 检查服务状态
+
+  # 先部署后端
+  echo '部署后端服务...'
+  timeout 600 env APP_ENV=\$APP_ENV_VALUE docker compose -f \$BACKEND_COMPOSE_FILE up -d --build
+
+  # 后端健康检查，成功后再部署前端
+  echo '等待后端健康检查通过...'
+  for i in \$(seq 1 20); do
+    if curl -fsS http://localhost:8000/health >/dev/null; then
+      echo '后端健康检查通过'
+      break
+    fi
+    if [ \$i -eq 20 ]; then
+      echo '后端健康检查失败，部署终止'
+      exit 1
+    fi
+    sleep 3
+  done
+
+  # 再部署前端
+  echo '部署前端服务...'
+  timeout 600 env NEXT_PUBLIC_ENV=\$NEXT_PUBLIC_ENV_VALUE docker compose -f \$FRONTEND_COMPOSE_FILE up -d --build
+
   echo '服务状态:'
-  docker compose -f \$COMPOSE_FILE ps
+  docker compose -f \$BACKEND_COMPOSE_FILE ps
+  docker compose -f \$FRONTEND_COMPOSE_FILE ps
 "
 
 echo "=== 部署完成！ ==="

@@ -1,6 +1,3 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
 import type { Project, PostListResponse } from '@/types';
@@ -14,52 +11,15 @@ interface ProjectClientProps {
 
 export default function ProjectClient({ initialProjectSlug, initialCategory, initialData, initialPage }: ProjectClientProps) {
   const slug = initialProjectSlug;
-  const [page, setPage] = useState(initialPage);
-  const [project, setProject] = useState(initialCategory);
-  const [postsData, setPostsData] = useState(initialData);
-  const [loading, setLoading] = useState(!initialCategory || !initialData.items.length);
-
-  useEffect(() => {
-    if (!project) {
-      fetch(`/api/v1/projects/${slug}`)
-        .then(res => res.json())
-        .then(data => {
-          setProject(data);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    }
-  }, [slug, project]);
-
-  useEffect(() => {
-    fetch(`/api/v1/posts?project=${slug}&page=${page}&size=5`)
-      .then(res => res.json())
-      .then(data => {
-        setPostsData(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [slug, page]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
-            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--color-foreground-secondary)]">加载中...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const page = initialPage;
+  const project = initialCategory;
+  const postsData = initialData;
 
   if (!project) {
     return (
       <div className="text-center py-12">
         <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
-          <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-          <span className="text-[var(--color-foreground-secondary)]">加载中...</span>
+          <span className="text-[var(--color-foreground-secondary)]">项目不存在或暂不可用</span>
         </div>
       </div>
     );
@@ -94,7 +54,7 @@ export default function ProjectClient({ initialProjectSlug, initialCategory, ini
         <Pagination
           currentPage={page}
           totalPages={postsData.pages}
-          onPageChange={setPage}
+          getPageHref={(nextPage) => `/project/${slug}?page=${nextPage}`}
         />
       )}
     </div>

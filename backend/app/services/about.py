@@ -1,32 +1,29 @@
 """Service layer for About - business logic."""
-import json
-from sqlalchemy.orm import Session
-from ..schemas import AboutResponse, AboutUpdate
-from ..dao import AboutDao
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models import Admin
+from app.schemas import AboutResponse, AboutUpdate
+from app.dao import AboutDao
 
 
 class AboutService:
     @staticmethod
-    def get_or_create_author_settings(db: Session):
-        """Get author settings or create default if not exists."""
-        settings = AboutDao.get_author_settings(db)
+    async def get_or_create_author_settings(db: AsyncSession, admin_id: str | None = None):
+        settings = await AboutDao.get_author_settings(db)
         if not settings:
-            settings = AboutDao.create_author_settings(db)
+            settings = await AboutDao.create_author_settings(db, admin_id=admin_id)
         return settings
 
     @staticmethod
-    def get_or_create_site_settings(db: Session):
-        """Get site settings or create default if not exists."""
-        settings = AboutDao.get_site_settings(db)
+    async def get_or_create_site_settings(db: AsyncSession, admin_id: str | None = None):
+        settings = await AboutDao.get_site_settings(db)
         if not settings:
-            settings = AboutDao.create_site_settings(db)
+            settings = await AboutDao.create_site_settings(db, admin_id=admin_id)
         return settings
 
     @staticmethod
-    def build_about_response(db: Session) -> AboutResponse:
-        """Build AboutResponse from author and site settings."""
-        author = AboutService.get_or_create_author_settings(db)
-        site_settings = AboutService.get_or_create_site_settings(db)
+    async def build_about_response(db: AsyncSession) -> AboutResponse:
+        author = await AboutService.get_or_create_author_settings(db)
+        site_settings = await AboutService.get_or_create_site_settings(db)
         tech_stack = AboutDao.parse_tech_stack(author)
 
         return AboutResponse(
@@ -43,17 +40,15 @@ class AboutService:
         )
 
     @staticmethod
-    def get_about_service(db: Session) -> AboutResponse:
-        """Get public about page data (博主信息 + 站点设置). No auth required."""
-        return AboutService.build_about_response(db)
+    async def get_about_service(db: AsyncSession) -> AboutResponse:
+        return await AboutService.build_about_response(db)
 
     @staticmethod
-    def update_about_service(
-        db: Session,
+    async def update_about_service(
+        db: AsyncSession,
         update_data: AboutUpdate,
+        current_admin: Admin,
     ) -> AboutResponse:
-        """Update about page data (admin only)."""
-        author = AboutService.get_or_create_author_settings(db)
-        AboutDao.update_author_settings(db, author, update_data)
-        # Return updated about data
-        return AboutService.build_about_response(db)
+        author = await AboutService.get_or_create_author_settings(db, admin_id=current_admin.id)
+        await AboutDao.update_author_settings(db, author, update_data, admin_id=current_admin.id)
+        return await AboutService.build_about_response(db)

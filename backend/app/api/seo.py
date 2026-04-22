@@ -1,12 +1,12 @@
 """API layer for SEO - HTTP handling."""
 from fastapi import APIRouter, Depends
 from starlette.responses import Response
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from typing import List
-from ..database import get_db
-from ..models import Post, Project, Tag
+from app.database import get_db
+from app.models import AuthorProfile, Post, Project, Tag
 from configs import settings
 
 router = APIRouter(tags=["SEO"])
@@ -31,8 +31,7 @@ def format_iso_date(dt: datetime) -> str:
 
 
 @router.get("/sitemap.xml")
-def get_sitemap(db: Session = Depends(get_db)):
-    """Generate sitemap.xml following sitemap.org specification."""
+async def get_sitemap(db: AsyncSession = Depends(get_db)):
     site_url = settings.SITE_URL.rstrip("/")
 
     urls: List[str] = []
@@ -53,11 +52,12 @@ def get_sitemap(db: Session = Depends(get_db)):
 
     # Published posts
     posts = (
-        db.query(Post)
-        .filter(Post.status == "published", Post.is_deleted == False)
-        .order_by(Post.updated_at.desc())
-        .all()
-    )
+        await db.execute(
+            select(Post)
+            .where(Post.status == "published", Post.is_deleted.is_(False))
+            .order_by(Post.updated_at.desc())
+        )
+    ).scalars().all()
     for post in posts:
         lastmod = format_iso_date(post.updated_at) if post.updated_at else ""
         urls.append(
@@ -70,7 +70,7 @@ def get_sitemap(db: Session = Depends(get_db)):
         )
 
     # Projects (categories)
-    projects = db.query(Project).all()
+    projects = (await db.execute(select(Project))).scalars().all()
     for project in projects:
         urls.append(
             f"  <url>\n"
@@ -81,7 +81,7 @@ def get_sitemap(db: Session = Depends(get_db)):
         )
 
     # Tags
-    tags = db.query(Tag).all()
+    tags = (await db.execute(select(Tag))).scalars().all()
     for tag in tags:
         urls.append(
             f"  <url>\n"
@@ -101,18 +101,20 @@ def get_sitemap(db: Session = Depends(get_db)):
 
 
 @router.get("/feed.xml")
-def get_feed(db: Session = Depends(get_db)):
-    """Generate RSS 2.0 full-text feed."""
+async def get_feed(db: AsyncSession = Depends(get_db)):
     site_url = settings.SITE_URL.rstrip("/")
+    author_profile = (await db.execute(select(AuthorProfile))).scalar_one_or_none()
+    author_name = author_profile.username if author_profile else settings.PROJECT_NAME
 
     # Get latest 20 published posts
     posts = (
-        db.query(Post)
-        .filter(Post.status == "published", Post.is_deleted == False)
-        .order_by(Post.created_at.desc())
-        .limit(20)
-        .all()
-    )
+        await db.execute(
+            select(Post)
+            .where(Post.status == "published", Post.is_deleted.is_(False))
+            .order_by(Post.created_at.desc())
+            .limit(20)
+        )
+    ).scalars().all()
 
     items: List[str] = []
     for post in posts:
@@ -128,7 +130,7 @@ def get_feed(db: Session = Depends(get_db)):
             if post.created_at
             else ""
         )
-        author = escape_xml(post.author.username) if post.author else ""
+        author = escape_xml(author_name)
 
         items.append(
             f"    <item>\n"

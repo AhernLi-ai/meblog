@@ -1,195 +1,163 @@
-"""
-DAO layer for Post - database CRUD operations.
-"""
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_
-from typing import Optional, List, Tuple
-from app.models import Post, Project, Tag, User
+"""DAO layer for Post - database CRUD operations."""
+from typing import Optional
+
+from sqlalchemy import func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from app.models import Post, Project, Tag
+from app.models.tag import post_tags
 from app.schemas import PostCreate, PostUpdate
-from app.utils.slug import generate_unique_slug
 from app.utils.logger import logger
+from app.utils.slug import generate_unique_slug
 
 
 class PostDao:
-    """Data Access Object for Post operations."""
-    
     @staticmethod
-    def get_posts(
-        db: Session,
+    async def _get_post_with_relations(db: AsyncSession, post_id: str) -> Post | None:
+        stmt = (
+            select(Post)
+            .options(selectinload(Post.project), selectinload(Post.tags))
+            .where(Post.id == post_id, Post.is_deleted.is_(False))
+        )
+        return (await db.execute(stmt)).scalar_one_or_none()
+
+    @staticmethod
+    async def get_posts(
+        db: AsyncSession,
         page: int = 1,
         size: int = 10,
         project_slug: Optional[str] = None,
         tag_slug: Optional[str] = None,
         q: Optional[str] = None,
-        include_unpublished: bool = False
-    ) -> Tuple[List[Post], int]:
-        """Get paginated posts with filters."""
-        try:
-            query = db.query(Post).filter(Post.is_deleted == False)
+        include_unpublished: bool = False,
+    ) -> tuple[list[Post], int]:
+        filters = [Post.is_deleted.is_(False)]
+        if not include_unpublished:
+            filters.append(Post.status == "published")
+        if q:
+            search = f"%{q}%"
+            filters.append(or_(Post.title.ilike(search), Post.content.ilike(search)))
 
-            if not include_unpublished:
-                query = query.filter(Post.status == "published")
-
-            if project_slug:
-                # Filter posts by project slug without relationship
-                query = query.join(Project, Project.id == Post.project_id).filter(Project.slug == project_slug)
-
-            if tag_slug:
-                # Filter posts by tag slug without relationship
-                from .tag import post_tags
-                query = query.join(post_tags, Post.id == post_tags.c.post_id).join(Tag, Tag.id == post_tags.c.tag_id).filter(Tag.slug == tag_slug)
-
-            if q:
-                search = f"%{q}%"
-                query = query.filter(
-                    or_(
-                        Post.title.ilike(search),
-                        Post.content.ilike(search)
-                    )
-                )
-
-            total = query.count()
-            query = query.order_by(Post.created_at.desc())
-            query = query.offset((page - 1) * size).limit(size)
-            posts = query.all()
-            return posts, total
-        except Exception as e:
-            logger.error(f"Error getting posts: {e}")
-            raise
-
-    @staticmethod
-    def get_post_by_id(db: Session, post_id: int, include_unpublished: bool = False) -> Optional[Post]:
-        """Get post by ID."""
-        try:
-            query = db.query(Post).filter(Post.id == post_id, Post.is_deleted == False)
-            if not include_unpublished:
-                query = query.filter(Post.status == "published")
-            return query.first()
-        except Exception as e:
-            logger.error(f"Error getting post by ID {post_id}: {e}")
-            raise
-
-    @staticmethod
-    def get_post_by_slug(db: Session, slug: str, include_unpublished: bool = False) -> Optional[Post]:
-        """Get post by slug and increment view count."""
-        try:
-            query = db.query(Post).filter(Post.slug == slug, Post.is_deleted == False)
-            if not include_unpublished:
-                query = query.filter(Post.status == "published")
-            post = query.first()
-            if post:
-                post.view_count += 1
-                db.commit()
-                db.refresh(post)
-            return post
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Error getting post by slug {slug}: {e}")
-            raise
-
-    @staticmethod
-    def create_post(db: Session, post: PostCreate, user_id: int) -> Post:
-        """Create a new post."""
-        try:
-            slug = generate_unique_slug(db, post.title)
-            
-            db_post = Post(
-                title=post.title,
-                slug=slug,
-                content=post.content,
-                summary=post.summary or (post.content[:200] + "..." if len(post.content) > 200 else post.content),
-                project_id=post.project_id,
-                status=post.status,
-                user_id=user_id,
+        count_stmt = select(func.count(Post.id)).where(*filters)
+        stmt = (
+            select(Post)
+            .options(
+                selectinload(Post.project),
+                selectinload(Post.tags),
             )
-            db.add(db_post)
-            db.commit()
-            db.refresh(db_post)
+            .where(*filters)
+            .order_by(Post.created_at.desc())
+            .offset((page - 1) * size)
+            .limit(size)
+        )
 
-            if post.tag_ids:
-                tags = db.query(Tag).filter(Tag.id.in_(post.tag_ids)).all()
-                # Cannot assign to tags without relationship, skip this for now
+        if project_slug:
+            count_stmt = count_stmt.join(Project, Project.id == Post.project_id).where(Project.slug == project_slug)
+            stmt = stmt.join(Project, Project.id == Post.project_id).where(Project.slug == project_slug)
+        if tag_slug:
+            count_stmt = (
+                count_stmt.join(post_tags, Post.id == post_tags.c.post_id)
+                .join(Tag, Tag.id == post_tags.c.tag_id)
+                .where(Tag.slug == tag_slug)
+            )
+            stmt = (
+                stmt.join(post_tags, Post.id == post_tags.c.post_id)
+                .join(Tag, Tag.id == post_tags.c.tag_id)
+                .where(Tag.slug == tag_slug)
+            )
 
-            logger.info(f"Created post: {db_post.title} (ID: {db_post.id})")
-            return db_post
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Error creating post: {e}")
-            raise
-
-    @staticmethod
-    def update_post(db: Session, post_id: int, post: PostUpdate, include_unpublished: bool = False) -> Optional[Post]:
-        """Update an existing post."""
-        try:
-            db_post = PostDao.get_post_by_id(db, post_id, include_unpublished=include_unpublished)
-            if not db_post:
-                return None
-
-            if post.title is not None:
-                db_post.title = post.title
-                db_post.slug = generate_unique_slug(db, post.title, exclude_id=post_id)
-
-            if post.content is not None:
-                db_post.content = post.content
-            if post.summary is not None:
-                db_post.summary = post.summary
-            if 'project_id' in post.model_fields_set:
-                db_post.project_id = post.project_id
-            if post.status is not None:
-                db_post.status = post.status
-
-            if post.tag_ids is not None:
-                tags = db.query(Tag).filter(Tag.id.in_(post.tag_ids)).all()
-                # Cannot assign to tags without relationship, skip this for now
-
-            db.commit()
-            db.refresh(db_post)
-            logger.info(f"Updated post: {db_post.title} (ID: {db_post.id})")
-            return db_post
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Error updating post {post_id}: {e}")
-            raise
+        total = (await db.execute(count_stmt)).scalar_one()
+        posts = (await db.execute(stmt)).scalars().all()
+        return posts, total
 
     @staticmethod
-    def delete_post(db: Session, post_id: int) -> bool:
-        """Soft delete a post."""
-        try:
-            db_post = db.query(Post).filter(Post.id == post_id).first()
-            if not db_post:
-                return False
-            db_post.is_deleted = True
-            db.commit()
-            logger.info(f"Soft deleted post: {db_post.title} (ID: {db_post.id})")
-            return True
-        except Exception as e:
-            db.rollback()
-            logger.error(f"Error deleting post {post_id}: {e}")
-            raise
+    async def get_post_by_id(db: AsyncSession, post_id: str, include_unpublished: bool = False) -> Post | None:
+        stmt = (
+            select(Post)
+            .options(selectinload(Post.project), selectinload(Post.tags))
+            .where(Post.id == post_id, Post.is_deleted.is_(False))
+        )
+        if not include_unpublished:
+            stmt = stmt.where(Post.status == "published")
+        return (await db.execute(stmt)).scalar_one_or_none()
 
     @staticmethod
-    def get_post_count_by_project(db: Session, project_id: int) -> int:
-        """Get published post count for a project."""
-        try:
-            return db.query(Post).filter(
-                Post.project_id == project_id,
-                Post.is_deleted == False,
-                Post.status == "published"
-            ).count()
-        except Exception as e:
-            logger.error(f"Error getting post count for project {project_id}: {e}")
-            raise
+    async def get_post_by_slug(db: AsyncSession, slug: str, include_unpublished: bool = False) -> Post | None:
+        stmt = (
+            select(Post)
+            .options(selectinload(Post.project), selectinload(Post.tags))
+            .where(Post.slug == slug, Post.is_deleted.is_(False))
+        )
+        if not include_unpublished:
+            stmt = stmt.where(Post.status == "published")
+        post = (await db.execute(stmt)).scalar_one_or_none()
+        if post and not include_unpublished:
+            post.view_count += 1
+            await db.commit()
+            await db.refresh(post)
+        return post
 
     @staticmethod
-    def get_post_count_by_tag(db: Session, tag_id: int) -> int:
-        """Get published post count for a tag."""
-        try:
-            from .tag import post_tags
-            return db.query(Post).join(post_tags, Post.id == post_tags.c.post_id).filter(
-                post_tags.c.tag_id == tag_id,
-                Post.is_deleted == False,
-                Post.status == "published"
-            ).count()
-        except Exception as e:
-            logger.error(f"Error getting post count for tag {tag_id}: {e}")
-            raise
+    async def create_post(db: AsyncSession, post: PostCreate, creator_id: str) -> Post:
+        slug = await generate_unique_slug(db, post.title)
+        db_post = Post(
+            title=post.title,
+            slug=slug,
+            content=post.content,
+            summary=post.summary or (post.content[:200] + "..." if len(post.content) > 200 else post.content),
+            project_id=post.project_id,
+            status=post.status,
+            user_id=creator_id,
+            created_by=creator_id,
+            updated_by=creator_id,
+        )
+        if post.tag_ids:
+            tags = (await db.execute(select(Tag).where(Tag.id.in_(post.tag_ids)))).scalars().all()
+            db_post.tags = tags
+        db.add(db_post)
+        await db.commit()
+        logger.info(f"Created post: {db_post.title} (ID: {db_post.id})")
+        return await PostDao._get_post_with_relations(db, db_post.id)
+
+    @staticmethod
+    async def update_post(
+        db: AsyncSession,
+        post_id: str,
+        post: PostUpdate,
+        updater_id: str,
+        include_unpublished: bool = False,
+    ) -> Post | None:
+        db_post = await PostDao.get_post_by_id(db, post_id, include_unpublished=include_unpublished)
+        if not db_post:
+            return None
+
+        if post.title is not None:
+            db_post.title = post.title
+            db_post.slug = await generate_unique_slug(db, post.title, exclude_id=post_id)
+        if post.content is not None:
+            db_post.content = post.content
+        if post.summary is not None:
+            db_post.summary = post.summary
+        if "project_id" in post.model_fields_set:
+            db_post.project_id = post.project_id
+        if post.status is not None:
+            db_post.status = post.status
+        if post.tag_ids is not None:
+            tags = (await db.execute(select(Tag).where(Tag.id.in_(post.tag_ids)))).scalars().all()
+            db_post.tags = tags
+        db_post.updated_by = updater_id
+
+        await db.commit()
+        logger.info(f"Updated post: {db_post.title} (ID: {db_post.id})")
+        return await PostDao._get_post_with_relations(db, db_post.id)
+
+    @staticmethod
+    async def delete_post(db: AsyncSession, post_id: str) -> bool:
+        db_post = (await db.execute(select(Post).where(Post.id == post_id))).scalar_one_or_none()
+        if not db_post:
+            return False
+        db_post.is_deleted = True
+        await db.commit()
+        logger.info(f"Soft deleted post: {db_post.title} (ID: {db_post.id})")
+        return True

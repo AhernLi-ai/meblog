@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings
-from typing import Optional, List
 
 
 class BaseSettingsConfig(BaseSettings):
@@ -11,10 +10,11 @@ class BaseSettingsConfig(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Site URL (used for sitemap, RSS feed, SEO)
-    SITE_URL: str = "http://localhost:6000"
+    SITE_URL: str = "http://localhost:3000"
     
-    # Database
-    DATABASE_URL: str = "postgresql://test:test@116.62.176.216:6001/meblog_test"
+    # Database default (override via backend/.env in real environments)
+    DATABASE_URL: str = "sqlite:///./meblog.db"
+    TEST_DATABASE_URL: str = "sqlite:///:memory:"
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"
@@ -28,14 +28,10 @@ class BaseSettingsConfig(BaseSettings):
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
     
     # Application
-    APP_ENV: str = "development"
+    APP_ENV: str = "local"
 
     class Config:
         case_sensitive = True
         env_file_encoding = "utf-8"
-        env_file = ".env"
+        env_file = None
         extra = "ignore"
-
-
-# Create settings instance
-settings = BaseSettingsConfig()

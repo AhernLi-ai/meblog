@@ -1,16 +1,18 @@
 import os
-# from typing import Union
-
-from .base import settings as base_settings
-# from .test import test_settings
-# from .production import production_settings
+from configs.local import LocalSettings
+from configs.production import ProductionSettings
+from configs.test import TestSettings
 
 
-def get_settings():
-    """Get appropriate settings based on environment"""
-    # Always use base_settings for local development
-    return base_settings
+def get_setting_class():
+    """Get settings based on APP_ENV."""
+    app_env = os.getenv("APP_ENV", "local").strip().lower()
+    if app_env in {"test", "testing"}:
+        return TestSettings
+    if app_env in {"prod", "production"}:
+        return ProductionSettings
+    return LocalSettings
 
 
 # Default settings instance
-settings = get_settings()
+settings = get_setting_class()()

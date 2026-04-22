@@ -4,11 +4,11 @@ import bcrypt
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from configs import settings
-from ..database import get_db
-from ..models import User
-from ..schemas import TokenData
+from app.database import get_db
+from app.models import Admin
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login", auto_error=False)
 
@@ -38,11 +38,11 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 
-def get_current_user(
+async def get_current_user(
     request: Request,
-    db: Session = Depends(get_db)
-) -> Optional[User]:
-    """Get current user from JWT token. Returns None if not authenticated."""
+    db: AsyncSession = Depends(get_db),
+) -> Optional[Admin]:
+    """Get current admin from JWT token. Returns None if not authenticated."""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
@@ -51,22 +51,17 @@ def get_current_user(
     
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        user_id_str: str = payload.get("sub")
-        if user_id_str is None:
-            return None
-        try:
-            user_id = int(user_id_str)
-        except (ValueError, TypeError):
+        admin_id: str | None = payload.get("sub")
+        if admin_id is None:
             return None
     except JWTError:
         return None
 
-    user = db.query(User).filter(User.id == user_id).first()
-    return user
+    return (await db.execute(select(Admin).where(Admin.id == admin_id))).scalar_one_or_none()
 
 
-def get_current_user_from_request(request: Request, db: Session) -> Optional[User]:
-    """Get current user from JWT token without Depends. Returns None if not authenticated."""
+async def get_current_user_from_request(request: Request, db: AsyncSession) -> Optional[Admin]:
+    """Get current admin from JWT token without Depends. Returns None if not authenticated."""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
@@ -75,24 +70,19 @@ def get_current_user_from_request(request: Request, db: Session) -> Optional[Use
     
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        user_id_str: str = payload.get("sub")
-        if user_id_str is None:
-            return None
-        try:
-            user_id = int(user_id_str)
-        except (ValueError, TypeError):
+        admin_id: str | None = payload.get("sub")
+        if admin_id is None:
             return None
     except JWTError:
         return None
 
-    user = db.query(User).filter(User.id == user_id).first()
-    return user
+    return (await db.execute(select(Admin).where(Admin.id == admin_id))).scalar_one_or_none()
 
 
-def get_current_admin_user(
-    current_user: Optional[User] = Depends(get_current_user),
-) -> User:
-    """Get current user and verify they are an admin. Raises 401/403 if not."""
+async def get_current_admin_user(
+    current_user: Optional[Admin] = Depends(get_current_user),
+) -> Admin:
+    """Get current admin and verify admin permissions."""
     if current_user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

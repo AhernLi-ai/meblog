@@ -66,7 +66,7 @@ export default async function Home({ searchParams }: HomeProps) {
         <Pagination
           currentPage={page}
           totalPages={data.pages}
-          onPageChange={() => {}}
+          getPageHref={(nextPage) => `/?page=${nextPage}`}
         />
       )}
     </div>
