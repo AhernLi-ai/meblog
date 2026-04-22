@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+const API_BASE_URL =
+  typeof window === 'undefined'
+    ? rawBaseUrl.replace('://localhost', '://127.0.0.1')
+    : rawBaseUrl;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

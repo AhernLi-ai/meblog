@@ -1,3 +1,5 @@
+'use client';
+
 import RouteError from '@/components/RouteError';
 
 interface PostErrorProps {

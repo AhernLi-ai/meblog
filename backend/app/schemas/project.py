@@ -25,6 +25,7 @@ class ProjectResponse(BaseModel):
     name: str
     slug: str
     cover: Optional[str] = None
+    post_count: int = 0
     is_pinned: bool = False
     sort_order: int = 0
     created_by: Optional[str] = None

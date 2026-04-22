@@ -217,6 +217,7 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
         {slug && (
           <div className="mt-8 flex justify-center">
             <LikeButton
+              key={slug}
               slug={slug}
               queryKey={['postLike', slug]}
               initialLiked={likeStatus?.liked ?? false}

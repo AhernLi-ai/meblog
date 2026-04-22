@@ -11,11 +11,22 @@ from app.schemas.post import AuthorInfo
 from app.dao import PostDao
 from app.dao.about import AboutDao
 from app.utils.logger import logger
+from app.utils.revalidate import notify_frontend_revalidate
 from app.services.visitor import VisitorService
 
 
 class PostService:
     """Service class for Post business logic."""
+
+    @staticmethod
+    async def _notify_frontend_for_post(post: Post | None) -> None:
+        if post is None:
+            return
+        await notify_frontend_revalidate(
+            post_slug=post.slug,
+            project_slug=post.project.slug if post.project else None,
+            tag_slugs=[tag.slug for tag in (post.tags or [])],
+        )
 
     @staticmethod
     async def _build_author_info(db: AsyncSession) -> AuthorInfo | None:
@@ -121,6 +132,7 @@ class PostService:
             if current_user is None:
                 raise HTTPException(status_code=401, detail="Not authenticated")
             result = await PostDao.create_post(db, post, creator_id=current_user.id)
+            await PostService._notify_frontend_for_post(result)
             logger.info(f"Admin {current_user.id} created post {result.id}")
             return await PostService._to_post_response(db, result)
         except HTTPException:
@@ -153,6 +165,7 @@ class PostService:
                 updater_id=current_user.id,
                 include_unpublished=True,
             )
+            await PostService._notify_frontend_for_post(result)
             logger.info(f"Admin {current_user.id} updated post {post_id}")
             return await PostService._to_post_response(db, result)
         except HTTPException:
@@ -177,6 +190,7 @@ class PostService:
             creator_id = existing.created_by or existing.user_id
             if creator_id != current_user.id:
                 raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+            await PostService._notify_frontend_for_post(existing)
             await PostDao.delete_post(db, post_id)
             logger.info(f"Admin {current_user.id} deleted post {post_id}")
         except HTTPException:

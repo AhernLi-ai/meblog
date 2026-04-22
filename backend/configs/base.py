@@ -29,6 +29,8 @@ class BaseSettingsConfig(BaseSettings):
     
     # Application
     APP_ENV: str = "local"
+    FRONTEND_REVALIDATE_URL: str = ""
+    FRONTEND_REVALIDATE_TOKEN: str = ""
 
     class Config:
         case_sensitive = True

@@ -29,10 +29,38 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL, **engine_kwargs)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+class AsyncSessionAdapter:
+    """Adapt sync SQLAlchemy Session to async-like API used by app code."""
+
+    def __init__(self, session):
+        self._session = session
+
+    def __getattr__(self, item):
+        return getattr(self._session, item)
+
+    async def execute(self, *args, **kwargs):
+        return self._session.execute(*args, **kwargs)
+
+    async def commit(self):
+        self._session.commit()
+
+    async def rollback(self):
+        self._session.rollback()
+
+    async def refresh(self, *args, **kwargs):
+        self._session.refresh(*args, **kwargs)
+
+    async def delete(self, *args, **kwargs):
+        self._session.delete(*args, **kwargs)
+
+    async def flush(self):
+        self._session.flush()
+
+
 def override_get_db():
     db = TestingSessionLocal()
     try:
-        yield db
+        yield AsyncSessionAdapter(db)
     finally:
         db.close()
 

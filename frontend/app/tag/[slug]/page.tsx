@@ -1,16 +1,15 @@
 import TagClient from './TagClient';
 import type { Metadata } from 'next';
+import { use } from 'react';
 import { notFound } from 'next/navigation';
 import type { PostListResponse } from '@/types';
 import { fetchFromServerApi } from '@/app/lib/server-api';
-import tagSlugs from '@/tag-slugs.json';
 
 export const revalidate = 1800;
-export const dynamicParams = false;
-const tagSlugSet = new Set(tagSlugs as string[]);
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return (tagSlugs as string[]).map((slug) => ({ slug }));
+  return [];
 }
 
 interface TagPageProps {
@@ -32,12 +31,6 @@ async function getTagPosts(slug: string, page: number): Promise<PostListResponse
   );
 }
 
-function assertKnownTagSlug(slug: string): void {
-  if (!tagSlugSet.has(slug)) {
-    notFound();
-  }
-}
-
 function assertValidPage(page: number): void {
   if (!Number.isInteger(page) || page < 1) {
     notFound();
@@ -46,7 +39,6 @@ function assertValidPage(page: number): void {
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
   const { slug } = await params;
-  assertKnownTagSlug(slug);
   const tagName = formatTagName(slug);
 
   return {
@@ -56,13 +48,12 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   };
 }
 
-export default async function TagPage({ params, searchParams }: TagPageProps) {
-  const { slug } = await params;
-  assertKnownTagSlug(slug);
-  const { page: pageStr } = await searchParams;
+export default function TagPage({ params, searchParams }: TagPageProps) {
+  const { slug } = use(params);
+  const { page: pageStr } = use(searchParams);
   const page = parseInt(pageStr || '1', 10);
   assertValidPage(page);
-  const initialData: PostListResponse = await getTagPosts(slug, page);
+  const initialData: PostListResponse = use(getTagPosts(slug, page));
 
   return <TagClient initialTagSlug={slug} initialData={initialData} initialPage={page} />;
 }

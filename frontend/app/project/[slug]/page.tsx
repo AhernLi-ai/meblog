@@ -1,17 +1,15 @@
 import ProjectClient from './ProjectClient';
 import type { Metadata } from 'next';
-import { cache } from 'react';
+import { cache, use } from 'react';
 import { notFound } from 'next/navigation';
-import projectSlugs from '@/project-slugs.json';
 import type { Project, PostListResponse } from '@/types';
 import { fetchFromServerApi, ServerApiError } from '@/app/lib/server-api';
 
 export const revalidate = 1800;
-export const dynamicParams = false;
-const projectSlugSet = new Set(projectSlugs as string[]);
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return (projectSlugs as string[]).map((slug) => ({ slug }));
+  return [];
 }
 
 interface ProjectPageProps {
@@ -30,12 +28,6 @@ const getProject = cache(async (slug: string): Promise<Project | null> => {
     throw error;
   }
 });
-
-function assertKnownProjectSlug(slug: string): void {
-  if (!projectSlugSet.has(slug)) {
-    notFound();
-  }
-}
 
 function assertValidPage(page: number): void {
   if (!Number.isInteger(page) || page < 1) {
@@ -60,7 +52,6 @@ async function getProjectPosts(slug: string, page: number): Promise<PostListResp
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  assertKnownProjectSlug(slug);
   const project = await getProject(slug);
   if (!project) {
     return {
@@ -84,16 +75,15 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   };
 }
 
-export default async function ProjectPage({ params, searchParams }: ProjectPageProps) {
-  const { slug } = await params;
-  assertKnownProjectSlug(slug);
-  const { page: pageStr } = await searchParams;
+export default function ProjectPage({ params, searchParams }: ProjectPageProps) {
+  const { slug } = use(params);
+  const { page: pageStr } = use(searchParams);
   const page = parseInt(pageStr || '1', 10);
   assertValidPage(page);
-  const project = ensureProjectExists(await getProject(slug));
+  const project = ensureProjectExists(use(getProject(slug)));
   let initialData: PostListResponse = { items: [], total: 0, page, size: 5, pages: 1 };
 
-  initialData = await getProjectPosts(slug, page);
+  initialData = use(getProjectPosts(slug, page));
 
   return (
     <ProjectClient

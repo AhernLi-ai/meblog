@@ -1,17 +1,15 @@
 import PostDetailClient from './PostDetailClient';
 import type { Metadata } from 'next';
-import { cache } from 'react';
+import { cache, use } from 'react';
 import { notFound } from 'next/navigation';
 import type { PostDetail } from '@/types';
 import { fetchFromServerApi, ServerApiError } from '@/app/lib/server-api';
-import postSlugs from '../../../post-slugs.json';
 
 export const revalidate = 3600;
-export const dynamicParams = false;
-const postSlugSet = new Set(postSlugs as string[]);
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return (postSlugs as string[]).map((slug) => ({ slug }));
+  return [];
 }
 
 interface PostPageProps {
@@ -36,12 +34,6 @@ const getPostBySlug = cache(async (slug: string): Promise<PostDetail | null> => 
   }
 });
 
-function assertKnownSlug(slug: string): void {
-  if (!postSlugSet.has(slug)) {
-    notFound();
-  }
-}
-
 function assertValidSlug(slug: string): void {
   if (!slug || !slug.trim()) {
     notFound();
@@ -59,7 +51,6 @@ function ensurePostExists(post: PostDetail | null): PostDetail {
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
   assertValidSlug(slug);
-  assertKnownSlug(slug);
   const post = await getPostBySlug(slug);
 
   if (!post) {
@@ -93,10 +84,9 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   };
 }
 
-export default async function PostPage({ params }: PostPageProps) {
-  const { slug } = await params;
+export default function PostPage({ params }: PostPageProps) {
+  const { slug } = use(params);
   assertValidSlug(slug);
-  assertKnownSlug(slug);
-  const post = await getPostBySlug(slug);
+  const post = use(getPostBySlug(slug));
   return <PostDetailClient initialPost={ensurePostExists(post)} initialSlug={slug} />;
 }

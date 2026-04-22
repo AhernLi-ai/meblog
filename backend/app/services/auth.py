@@ -49,7 +49,7 @@ class AuthService:
             if not admin:
                 admin = await AdminDao.get_admin_by_email(db, form_data.username)
             
-            ip = request.client.host if request else "unknown"
+            ip = request.client.host if request and request.client else "unknown"
             if not admin or not verify_password(form_data.password, admin.password_hash):
                 logger.warning(f"Failed login attempt for {form_data.username} from {ip}")
                 raise HTTPException(
@@ -78,6 +78,8 @@ class AuthService:
             if current_user is None:
                 raise HTTPException(status_code=401, detail="Not authenticated")
             return current_user
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(f"Error getting current admin: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")

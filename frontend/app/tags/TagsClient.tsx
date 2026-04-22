@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Tag } from '@/types';
 
@@ -8,32 +7,12 @@ interface TagWithCount extends Tag {
   post_count?: number;
 }
 
-export default function TagsClient() {
-  const [tags, setTags] = useState<TagWithCount[]>([]);
-  const [loading, setLoading] = useState(true);
+interface TagsClientProps {
+  initialTags: TagWithCount[];
+}
 
-  useEffect(() => {
-    fetch('/api/v1/tags')
-      .then(res => res.json())
-      .then(data => {
-        setTags(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)]">
-            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--color-foreground-secondary)]">加载中...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+export default function TagsClient({ initialTags }: TagsClientProps) {
+  const tags = initialTags || [];
 
   return (
     <div>

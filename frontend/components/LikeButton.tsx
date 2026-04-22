@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,17 +25,13 @@ export default function LikeButton({ slug, queryKey = ['postLike', slug], initia
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  // Use ref to track if this is the initial render
-  const isFirstRender = useRef(true);
-
-  // Only sync with server state on initial render to prevent overwrites after user interaction
+  // Re-sync state whenever we enter a different post slug.
+  // This prevents carrying over previous post's like state.
   useEffect(() => {
-    if (isFirstRender.current) {
-      setLiked(initialLiked);
-      setCount(initialCount);
-      isFirstRender.current = false;
-    }
-  }, [initialLiked, initialCount]);
+    setLiked(initialLiked);
+    setCount(initialCount);
+    setLoading(false);
+  }, [slug, initialLiked, initialCount]);
 
   const handleLike = async () => {
     if (loading) return;

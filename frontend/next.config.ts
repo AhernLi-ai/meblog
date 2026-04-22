@@ -51,9 +51,38 @@ function loadEnvFromSelectedFile(): void {
 
 loadEnvFromSelectedFile();
 
+function stripApiPath(value: string): string {
+  return value.replace(/\/api\/v\d+\/?$/i, "").replace(/\/+$/, "");
+}
+
+function resolveApiOrigin(isDev: boolean, isTest: boolean): string {
+  if (isDev) {
+    // Use IPv4 loopback to avoid localhost resolving to ::1 on Windows.
+    return "http://127.0.0.1:8000";
+  }
+
+  if (isTest) {
+    return "http://meblog-backend:8000";
+  }
+
+  const explicitOrigin = process.env.API_ORIGIN || process.env.NEXT_PUBLIC_API_ORIGIN;
+  if (explicitOrigin) {
+    return explicitOrigin.replace(/\/+$/, "");
+  }
+
+  const legacyBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (legacyBaseUrl) {
+    return stripApiPath(legacyBaseUrl);
+  }
+
+  return "https://api.yourdomain.com";
+}
+
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker
   output: 'standalone',
+  // Only required for local development with 127.0.0.1 origin.
+  allowedDevOrigins: process.env.NODE_ENV === 'development' ? ['127.0.0.1'] : undefined,
 
   // Enable strict mode for better React practices
   reactStrictMode: true,
@@ -71,21 +100,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const isDev = process.env.NODE_ENV === 'development';
     const isTest = process.env.NEXT_PUBLIC_ENV === 'test';
-    
-    let apiBaseUrl;
-    if (isDev) {
-      apiBaseUrl = 'http://localhost:8000';
-    } else if (isTest) {
-      apiBaseUrl = 'http://meblog-backend:8000';
-    } else {
-      // Production - use the actual domain
-      apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.yourdomain.com';
-    }
-    
+    const apiOrigin = resolveApiOrigin(isDev, isTest);
+
     return [
       {
         source: '/api/:path*',
-        destination: `${apiBaseUrl}/api/:path*`,
+        destination: `${apiOrigin}/api/:path*`,
       },
     ];
   },

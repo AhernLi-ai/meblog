@@ -3,6 +3,7 @@ import type { PostListResponse } from '@/types';
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
 import { SparklesIcon } from '@heroicons/react/24/outline';
+import { cache, use } from 'react';
 
 export const revalidate = 3600;
 
@@ -10,9 +11,7 @@ interface HomeProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-export default async function Home({ searchParams }: HomeProps) {
-  const { page: pageStr } = await searchParams;
-  const page = parseInt(pageStr || '1', 10);
+const getHomeData = cache(async (page: number): Promise<{ data: PostListResponse; error: boolean }> => {
   let data: PostListResponse = { items: [], total: 0, page, size: 5, pages: 1 };
   let error = false;
 
@@ -23,6 +22,14 @@ export default async function Home({ searchParams }: HomeProps) {
     // 构建时后端不可用，返回空数据，让客户端处理
     error = true;
   }
+
+  return { data, error };
+});
+
+export default function Home({ searchParams }: HomeProps) {
+  const { page: pageStr } = use(searchParams);
+  const page = parseInt(pageStr || '1', 10);
+  const { data, error } = use(getHomeData(page));
 
   return (
     <div>

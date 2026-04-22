@@ -1,16 +1,28 @@
-import { projectsApi } from '@/api/project';
 import Link from 'next/link';
+import type { Project } from '@/types';
+import { fetchFromServerApi } from '@/app/lib/server-api';
 
-export const dynamic = 'force-static';
-
-interface Project { id: number; name: string; slug: string; cover?: string; post_count?: number; }
+export const revalidate = 1800;
 
 export default async function ProjectsPage() {
   let projects: Project[] = [];
+  let loadFailed = false;
+
   try {
-    projects = await projectsApi.getAll() || [];
+    projects = (await fetchFromServerApi<Project[]>('/projects', { revalidate })) || [];
   } catch {
-    // 构建时后端不可用
+    loadFailed = true;
+    // Keep page render resilient when API is temporarily unavailable.
+  }
+
+  if (loadFailed) {
+    return (
+      <div className="text-center py-16">
+        <div className="text-6xl mb-4">⚠️</div>
+        <h2 className="text-2xl font-semibold text-[var(--color-foreground)] mb-2">项目列表加载失败</h2>
+        <p className="text-[var(--color-foreground-secondary)]">请稍后刷新页面重试。</p>
+      </div>
+    );
   }
 
   return (
