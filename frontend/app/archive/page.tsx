@@ -1,18 +1,31 @@
-import { postsApi } from '@/api/posts';
+import { fetchFromServerApi } from '@/app/lib/server-api';
 import type { PostListItem } from '@/types';
 import Link from 'next/link';
 
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 export const revalidate = 86400;
 
 interface GroupedPosts {
   [key: string]: PostListItem[];
 }
 
+function formatArchiveKey(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${date.getFullYear()}-${month}`;
+}
+
+function formatArchiveItemDate(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${month}-${day}`;
+}
+
 export default async function Archive() {
   let posts: PostListItem[] = [];
   try {
-    const response = await postsApi.getAll({ size: 100 });
+    const response = await fetchFromServerApi<{ items: PostListItem[] }>(`/posts?page=1&size=100`, {
+      revalidate,
+    });
     posts = response?.items ?? [];
   } catch {
     // 构建时后端不可用
@@ -22,15 +35,15 @@ export default async function Archive() {
   const groupedPosts: GroupedPosts = {};
   for (const post of posts) {
     const date = new Date(post.created_at);
-    const key = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+    const key = formatArchiveKey(date);
     if (!groupedPosts[key]) groupedPosts[key] = [];
     groupedPosts[key].push(post);
   }
 
   // 按月份降序排序
   const sortedKeys = Object.keys(groupedPosts).sort((a, b) => {
-    const [yearA, monthA] = a.match(/(\d+)年(\d+)月/)!.slice(1).map(Number);
-    const [yearB, monthB] = b.match(/(\d+)年(\d+)月/)!.slice(1).map(Number);
+    const [yearA, monthA] = a.split('-').map(Number);
+    const [yearB, monthB] = b.split('-').map(Number);
     return yearB - yearA || monthB - monthA;
   });
 
@@ -72,7 +85,7 @@ export default async function Archive() {
                       {post.title}
                     </span>
                     <span className="text-xs text-[var(--color-foreground-secondary)]">
-                      {new Date(post.created_at).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                      {formatArchiveItemDate(new Date(post.created_at))}
                     </span>
                   </Link>
                 ))}

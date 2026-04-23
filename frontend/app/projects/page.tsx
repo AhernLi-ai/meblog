@@ -3,6 +3,18 @@ import type { Project } from '@/types';
 import { fetchFromServerApi } from '@/app/lib/server-api';
 
 export const revalidate = 1800;
+export const dynamic = 'force-dynamic';
+
+function isImageUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  const lower = value.toLowerCase();
+  return (
+    lower.startsWith('http://') ||
+    lower.startsWith('https://') ||
+    lower.startsWith('/') ||
+    lower.startsWith('data:image/')
+  );
+}
 
 export default async function ProjectsPage() {
   let projects: Project[] = [];
@@ -52,9 +64,9 @@ export default async function ProjectsPage() {
             >
               {/* Cover Image */}
               <div className="aspect-video bg-[var(--color-background-secondary)] overflow-hidden">
-                {proj.cover ? (
+                {isImageUrl(proj.cover) ? (
                   <img
-                    src={proj.cover}
+                    src={proj.cover!}
                     alt={proj.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

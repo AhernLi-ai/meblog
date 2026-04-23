@@ -1,12 +1,12 @@
 import TagClient from './TagClient';
 import type { Metadata } from 'next';
-import { use } from 'react';
 import { notFound } from 'next/navigation';
 import type { PostListResponse } from '@/types';
 import { fetchFromServerApi } from '@/app/lib/server-api';
 
 export const revalidate = 1800;
 export const dynamicParams = true;
+export const dynamic = 'force-dynamic';
 
 export async function generateStaticParams() {
   return [];
@@ -48,12 +48,18 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   };
 }
 
-export default function TagPage({ params, searchParams }: TagPageProps) {
-  const { slug } = use(params);
-  const { page: pageStr } = use(searchParams);
+export default async function TagPage({ params, searchParams }: TagPageProps) {
+  const { slug } = await params;
+  const { page: pageStr } = await searchParams;
   const page = parseInt(pageStr || '1', 10);
   assertValidPage(page);
-  const initialData: PostListResponse = use(getTagPosts(slug, page));
+  let initialData: PostListResponse = { items: [], total: 0, page, size: 5, pages: 1 };
+
+  try {
+    initialData = await getTagPosts(slug, page);
+  } catch {
+    // Keep tag page render resilient when posts query is temporarily unavailable.
+  }
 
   return <TagClient initialTagSlug={slug} initialData={initialData} initialPage={page} />;
 }

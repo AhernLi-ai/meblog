@@ -3,6 +3,7 @@ import type { Tag } from '@/types';
 import { fetchFromServerApi } from '@/app/lib/server-api';
 
 export const revalidate = 1800;
+export const dynamic = 'force-dynamic';
 
 export default async function TagsPage() {
   let tags: Tag[] = [];

@@ -1,4 +1,4 @@
-import { postsApi } from '@/api/posts';
+import { fetchFromServerApi } from '@/app/lib/server-api';
 import type { PostListResponse } from '@/types';
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
@@ -16,7 +16,9 @@ const getHomeData = cache(async (page: number): Promise<{ data: PostListResponse
   let error = false;
 
   try {
-    const result = await postsApi.getAll({ page, size: 5 });
+    const result = await fetchFromServerApi<PostListResponse>(`/posts?page=${page}&size=5`, {
+      revalidate,
+    });
     if (result) data = result;
   } catch {
     // 构建时后端不可用，返回空数据，让客户端处理

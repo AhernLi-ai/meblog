@@ -17,25 +17,22 @@ RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com
 COPY . .
 RUN pnpm run build
 # ==========================
-# 运行阶段
+# 运行阶段（Next standalone）
 # ==========================
 FROM docker.m.daocloud.io/library/node:20-alpine AS runner
-RUN npm config set registry https://registry.npmmirror.com
 ARG NEXT_PUBLIC_ENV=local
 ENV NEXT_PUBLIC_ENV=${NEXT_PUBLIC_ENV}
-RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
+
 # 非root用户
 RUN addgroup -g 1001 -S nodejs && \
-adduser -S nextjs -u 1001
-# 复制产物
-COPY --from=builder /app/.next ./.next
+    adduser -S nextjs -u 1001
+
+# 复制 standalone 运行所需产物
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/server.js ./
-# 生产依赖
-RUN pnpm install --production --frozen-lockfile --registry https://registry.npmmirror.com
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next/standalone ./
+
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 EXPOSE 3000

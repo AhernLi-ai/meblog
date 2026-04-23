@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { useQueryClient } from '@tanstack/react-query';
 import api from '@/api/client';
 import clsx from 'clsx';
 
@@ -14,24 +13,41 @@ interface LikeStatus {
 
 interface LikeButtonProps {
   slug: string;
-  queryKey?: string[];
   initialLiked?: boolean;
   initialCount?: number;
 }
 
-export default function LikeButton({ slug, queryKey = ['postLike', slug], initialLiked = false, initialCount = 0 }: LikeButtonProps) {
+export default function LikeButton({ slug, initialLiked = false, initialCount = 0 }: LikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
-  const queryClient = useQueryClient();
 
-  // Re-sync state whenever we enter a different post slug.
-  // This prevents carrying over previous post's like state.
+  // Initialize status when switching to another post.
   useEffect(() => {
     setLiked(initialLiked);
     setCount(initialCount);
     setLoading(false);
-  }, [slug, initialLiked, initialCount]);
+
+    let cancelled = false;
+    const loadLikeStatus = async () => {
+      try {
+        const res = await api.get<LikeStatus>(`/posts/${slug}/like`);
+        if (cancelled) return;
+        setLiked(res.data.liked);
+        setCount(res.data.like_count);
+      } catch {
+        // Keep fallback values when status query fails.
+      }
+    };
+
+    if (slug) {
+      loadLikeStatus();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   const handleLike = async () => {
     if (loading) return;
@@ -48,8 +64,6 @@ export default function LikeButton({ slug, queryKey = ['postLike', slug], initia
       // Sync with server response
       setLiked(res.data.liked);
       setCount(res.data.like_count);
-      // Invalidate the query to ensure consistency
-      queryClient.invalidateQueries({ queryKey });
     } catch {
       // Revert on error
       setLiked(prevLiked);

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
 import { postsApi } from '@/api/posts';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import TableOfContents from '@/components/TableOfContents';
@@ -71,15 +70,6 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
 
   const [showToc, setShowToc] = useState(false);
   const [headings, setHeadings] = useState<{ id: string; text: string; level: number }[]>([]);
-
-  // Only fetch like status initially, then rely on LikeButton component to handle state
-  const { data: likeStatus } = useQuery({
-    queryKey: ['postLike', slug],
-    queryFn: () => postsApi.getLikeStatus(slug),
-    enabled: !!slug,
-    staleTime: Infinity, // Prevent refetching
-    gcTime: 1000 * 60 * 60, // Keep data for 1 hour
-  });
 
   // Extract headings when post changes
   useEffect(() => {
@@ -219,9 +209,7 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
             <LikeButton
               key={slug}
               slug={slug}
-              queryKey={['postLike', slug]}
-              initialLiked={likeStatus?.liked ?? false}
-              initialCount={likeStatus?.like_count ?? post?.like_count ?? 0}
+              initialCount={post?.like_count ?? 0}
             />
           </div>
         )}

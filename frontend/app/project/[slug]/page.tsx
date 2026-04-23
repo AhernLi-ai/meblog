@@ -1,12 +1,13 @@
 import ProjectClient from './ProjectClient';
 import type { Metadata } from 'next';
-import { cache, use } from 'react';
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import type { Project, PostListResponse } from '@/types';
 import { fetchFromServerApi, ServerApiError } from '@/app/lib/server-api';
 
 export const revalidate = 1800;
 export const dynamicParams = true;
+export const dynamic = 'force-dynamic';
 
 export async function generateStaticParams() {
   return [];
@@ -75,15 +76,19 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   };
 }
 
-export default function ProjectPage({ params, searchParams }: ProjectPageProps) {
-  const { slug } = use(params);
-  const { page: pageStr } = use(searchParams);
+export default async function ProjectPage({ params, searchParams }: ProjectPageProps) {
+  const { slug } = await params;
+  const { page: pageStr } = await searchParams;
   const page = parseInt(pageStr || '1', 10);
   assertValidPage(page);
-  const project = ensureProjectExists(use(getProject(slug)));
+  const project = ensureProjectExists(await getProject(slug));
   let initialData: PostListResponse = { items: [], total: 0, page, size: 5, pages: 1 };
 
-  initialData = use(getProjectPosts(slug, page));
+  try {
+    initialData = await getProjectPosts(slug, page);
+  } catch {
+    // Keep project page render resilient when posts query is temporarily unavailable.
+  }
 
   return (
     <ProjectClient
