@@ -22,41 +22,38 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-[var(--color-background)] border-b border-[var(--color-border)] sticky top-0 z-50 h-16 flex items-center shadow-[var(--shadow-navbar)]">
+    <nav className="bg-[var(--color-background)] border-b border-[var(--color-border)] sticky top-0 z-50 h-16 md:h-[72px] flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex justify-between items-center h-full">
-          {/* Logo - Fixed width to prevent layout shift when switching tabs */}
+        <div className="relative flex justify-between items-center h-full">
+          {/* Brand */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-xl font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity w-[100px]"
+            className="flex items-center gap-2 text-xl font-bold text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors"
             style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
           >
-            <span className="text-2xl inline-block min-w-[24px] text-center">📝</span>
-            <span className="inline-block min-w-[52px] text-left">Meblog</span>
+            <img
+              src="/bugoo-logo.png"
+              alt="Bugoo logo"
+              className="w-7 h-7 rounded-full object-cover border border-[var(--color-border)]"
+            />
+            <span className="inline-block">AhernLi&apos;s Blog</span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
-            <NavLink href="/" icon={<HomeIcon className="w-4 h-4" strokeWidth={1.5} />} label="首页" pathname={pathname} />
-            <NavLink href="/projects" icon={<FolderIcon className="w-4 h-4" strokeWidth={1.5} />} label="项目" pathname={pathname} />
-            <NavLink href="/tags" icon={<TagIcon className="w-4 h-4" strokeWidth={1.5} />} label="标签" pathname={pathname} />
-            <NavLink href="/archive" icon={<ClockIcon className="w-4 h-4" strokeWidth={1.5} />} label="归档" pathname={pathname} />
-            <NavLink href="/about" icon={<UserCircleIcon className="w-4 h-4" strokeWidth={1.5} />} label="关于" pathname={pathname} />
-
-            <div className="w-px h-6 bg-[var(--color-border)] mx-2" />
-
-            <ThemeToggle />
+          {/* Desktop Nav (centered) */}
+          <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            <NavLink href="/" icon={<HomeIcon className="w-4 h-4" strokeWidth={1.5} />} label="Home" pathname={pathname} />
+            <NavLink href="/projects" icon={<FolderIcon className="w-4 h-4" strokeWidth={1.5} />} label="Projects" pathname={pathname} />
+            <NavLink href="/tags" icon={<TagIcon className="w-4 h-4" strokeWidth={1.5} />} label="Tags" pathname={pathname} />
+            <NavLink href="/archive" icon={<ClockIcon className="w-4 h-4" strokeWidth={1.5} />} label="Archives" pathname={pathname} />
+            <NavLink href="/about" icon={<UserCircleIcon className="w-4 h-4" strokeWidth={1.5} />} label="About" pathname={pathname} />
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle />
-            <MobileMenu isAuthenticated={isAuthenticated} />
-          </div>
-
-          {/* Desktop User Menu */}
-          {isAuthenticated && (
-            <div className="hidden md:flex items-center gap-3">
+          {/* Right controls */}
+          <div className="flex items-center gap-2">
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
+            {isAuthenticated && (
               <Menu as="div" className="relative">
                 <Menu.Button className="flex items-center gap-2 text-sm text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors rounded-lg px-2 py-1">
                   <UserCircleIcon className="w-6 h-6" strokeWidth={1.5} />
@@ -110,8 +107,12 @@ export default function Navbar() {
                   </Menu.Items>
                 </Transition>
               </Menu>
+            )}
+            <div className="md:hidden flex items-center gap-2">
+              <ThemeToggle />
+              <MobileMenu isAuthenticated={isAuthenticated} />
             </div>
-          )}
+          </div>
         </div>
       </div>
     </nav>
@@ -126,14 +127,19 @@ function NavLink({ href, icon, label, pathname }: { href: string; icon: React.Re
   return (
     <Link
       href={href}
-      className={`flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-[8px] transition-all no-underline min-w-[80px] h-9 ${
+      className={`relative flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold transition-colors no-underline min-w-[78px] h-9 ${
         isActive
-          ? '!text-[var(--color-primary)] bg-[var(--color-primary)]/10'
-          : '!text-[var(--color-foreground)] hover:!text-[var(--color-primary)] hover:bg-[var(--color-background-secondary)]'
+          ? '!text-[var(--color-primary)]'
+          : '!text-[var(--color-foreground-secondary)] hover:!text-[var(--color-foreground)]'
       }`}
     >
       {icon}
       {label}
+      <span
+        className={`absolute left-2 right-2 -bottom-[6px] h-0.5 rounded-full transition-all ${
+          isActive ? 'bg-[var(--color-primary)] opacity-100' : 'bg-transparent opacity-0'
+        }`}
+      />
     </Link>
   );
 }
@@ -160,7 +166,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
               {({ active }) => (
                 <Link href="/" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <HomeIcon className="w-5 h-5" />
-                  首页
+                  Home
                 </Link>
               )}
             </Menu.Item>
@@ -168,7 +174,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
               {({ active }) => (
                 <Link href="/projects" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <FolderIcon className="w-5 h-5" />
-                  项目
+                  Projects
                 </Link>
               )}
             </Menu.Item>
@@ -176,7 +182,15 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
               {({ active }) => (
                 <Link href="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <TagIcon className="w-5 h-5" />
-                  标签
+                  Tags
+                </Link>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <Link href="/archive" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                  <ClockIcon className="w-5 h-5" />
+                  Archives
                 </Link>
               )}
             </Menu.Item>
@@ -184,7 +198,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
               {({ active }) => (
                 <Link href="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <UserCircleIcon className="w-5 h-5" />
-                  关于
+                  About
                 </Link>
               )}
             </Menu.Item>

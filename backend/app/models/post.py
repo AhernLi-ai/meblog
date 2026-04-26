@@ -14,11 +14,13 @@ class Post(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), unique=True, nullable=False, index=True)
+    cover: Mapped[str | None] = mapped_column(Text, nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     view_count: Mapped[int] = mapped_column(Integer, default=0)
     like_count: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(20), default="draft")
+    is_hidden: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
     # Legacy creator column kept for compatibility; creation ownership should use created_by.
     user_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)

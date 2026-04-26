@@ -14,18 +14,34 @@ class ProjectService:
     """Service class for Project business logic."""
     
     @staticmethod
-    async def list_projects(db: AsyncSession) -> List[ProjectResponse]:
+    async def list_projects(
+        db: AsyncSession,
+        current_user: Admin | None = None,
+        include_hidden: bool = False,
+    ) -> List[ProjectResponse]:
         try:
-            projects = await ProjectDao.get_projects(db)
+            can_view_hidden = current_user is not None and current_user.is_admin and include_hidden
+            projects = await ProjectDao.get_projects(
+                db,
+                include_hidden=can_view_hidden,
+                include_hidden_posts=can_view_hidden,
+                include_unpublished_posts=can_view_hidden,
+            )
             return projects
         except Exception as e:
             logger.error(f"Error listing projects: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
     @staticmethod
-    async def get_project_by_slug(db: AsyncSession, slug: str) -> ProjectResponse:
+    async def get_project_by_slug(
+        db: AsyncSession,
+        slug: str,
+        current_user: Admin | None = None,
+        include_hidden: bool = False,
+    ) -> ProjectResponse:
         try:
-            project = await ProjectDao.get_project_by_slug(db, slug)
+            can_view_hidden = current_user is not None and current_user.is_admin and include_hidden
+            project = await ProjectDao.get_project_by_slug(db, slug, include_hidden=can_view_hidden)
             if not project:
                 raise HTTPException(status_code=404, detail="Project not found")
             return project

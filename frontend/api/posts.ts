@@ -12,6 +12,8 @@ export interface GetPostsParams {
   project?: string;
   tag?: string;
   q?: string;
+  include_unpublished?: boolean;
+  include_hidden?: boolean;
 }
 
 export interface LikeStatus {
@@ -25,8 +27,11 @@ export const postsApi = {
     return response.data;
   },
 
-  getById: async (idOrSlug: string): Promise<PostDetail> => {
-    const response = await api.get<PostDetail>(`/posts/${idOrSlug}`);
+  getById: async (
+    idOrSlug: string,
+    params?: { include_unpublished?: boolean; include_hidden?: boolean }
+  ): Promise<PostDetail> => {
+    const response = await api.get<PostDetail>(`/posts/${idOrSlug}`, { params });
     return response.data;
   },
 
@@ -35,12 +40,12 @@ export const postsApi = {
     return response.data;
   },
 
-  update: async (id: number, data: UpdatePostData): Promise<PostDetail> => {
+  update: async (id: string, data: UpdatePostData): Promise<PostDetail> => {
     const response = await api.put<PostDetail>(`/posts/${id}`, data);
     return response.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/posts/${id}`);
   },
 

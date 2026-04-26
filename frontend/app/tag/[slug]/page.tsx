@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import type { PostListResponse } from '@/types';
 import { fetchFromServerApi } from '@/app/lib/server-api';
 
-export const revalidate = 1800;
+export const revalidate = 180;
 export const dynamicParams = true;
 export const dynamic = 'force-dynamic';
 

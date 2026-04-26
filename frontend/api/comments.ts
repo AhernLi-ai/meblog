@@ -1,9 +1,9 @@
 import api from './client';
 
 export interface Comment {
-  id: number;
-  post_id: number;
-  parent_id: number | null;
+  id: string;
+  post_id: string;
+  parent_id: string | null;
   nickname: string;
   email?: string;
   website?: string;
@@ -18,8 +18,8 @@ export interface CommentListResponse {
 }
 
 export interface CreateCommentData {
-  post_id: number;
-  parent_id?: number | null;
+  post_id: string;
+  parent_id?: string | null;
   nickname: string;
   email: string;
   website?: string;
@@ -47,7 +47,7 @@ export const commentsApi = {
   /**
    * Delete a comment (admin only).
    */
-  delete: async (commentId: number): Promise<void> => {
+  delete: async (commentId: string): Promise<void> => {
     await api.delete(`/comments/${commentId}`);
   },
 };

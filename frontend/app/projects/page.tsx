@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import type { Project } from '@/types';
 import { fetchFromServerApi } from '@/app/lib/server-api';
+import CoverImage from '@/components/CoverImage';
 
-export const revalidate = 1800;
+export const revalidate = 180;
 export const dynamic = 'force-dynamic';
 
-function isImageUrl(value: string | undefined): boolean {
+function isImageUrl(value: string | null | undefined): boolean {
   if (!value) return false;
   const lower = value.toLowerCase();
   return (
@@ -29,7 +30,7 @@ export default async function ProjectsPage() {
 
   if (loadFailed) {
     return (
-      <div className="text-center py-16">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-10 text-center">
         <div className="text-6xl mb-4">⚠️</div>
         <h2 className="text-2xl font-semibold text-[var(--color-foreground)] mb-2">项目列表加载失败</h2>
         <p className="text-[var(--color-foreground-secondary)]">请稍后刷新页面重试。</p>
@@ -38,13 +39,16 @@ export default async function ProjectsPage() {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+    <div className="max-w-5xl mx-auto px-4 md:px-6 py-10">
+      <div className="mb-12">
+        <p className="text-xs tracking-[0.35em] text-[var(--color-foreground-secondary)] mb-3 uppercase">
+          Project Index
+        </p>
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-foreground)] mb-4" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
           所有项目
         </h1>
-        <p className="text-[var(--color-foreground-secondary)]">
-          共 {projects?.length || 0} 个项目
+        <p className="text-[var(--color-foreground-secondary)] leading-7 max-w-3xl">
+          项目用于聚合相关主题文章与实践记录，当前累计收录 {projects?.length || 0} 个项目。
         </p>
       </div>
 
@@ -65,7 +69,7 @@ export default async function ProjectsPage() {
               {/* Cover Image */}
               <div className="aspect-video bg-[var(--color-background-secondary)] overflow-hidden">
                 {isImageUrl(proj.cover) ? (
-                  <img
+                  <CoverImage
                     src={proj.cover!}
                     alt={proj.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

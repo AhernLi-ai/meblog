@@ -2,9 +2,9 @@
 DAO layer for Tag - database CRUD operations.
 """
 import re
-from sqlalchemy import delete, func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Tag, Post
+from app.models import Tag, Post, Project
 from app.models.tag import post_tags
 from app.schemas import TagCreate, TagUpdate
 from app.utils.logger import logger
@@ -23,7 +23,12 @@ class TagDao:
         return text
 
     @staticmethod
-    async def get_tags(db: AsyncSession):
+    async def get_tags(
+        db: AsyncSession,
+        include_hidden_posts: bool = False,
+        include_unpublished_posts: bool = False,
+        include_hidden_projects: bool = False,
+    ):
         """Get all tags with their post counts in a single query."""
         try:
             tags = (await db.execute(select(Tag))).scalars().all()
@@ -33,14 +38,21 @@ class TagDao:
 
             tag_ids = [t.id for t in tags]
 
+            post_filters = [Post.is_deleted.is_(False), post_tags.c.tag_id.in_(tag_ids)]
+            if not include_unpublished_posts:
+                post_filters.append(Post.status == "published")
+            if not include_hidden_posts:
+                post_filters.append(Post.is_hidden.is_(False))
+            if not include_hidden_projects:
+                post_filters.append(or_(Post.project_id.is_(None), Project.is_hidden.is_(False)))
+
             counts = (
                 await db.execute(
                     select(post_tags.c.tag_id, func.count(post_tags.c.post_id).label("count"))
                     .join(Post, Post.id == post_tags.c.post_id)
+                    .outerjoin(Project, Project.id == Post.project_id)
                     .where(
-                        Post.is_deleted.is_(False),
-                        Post.status == "published",
-                        post_tags.c.tag_id.in_(tag_ids),
+                        *post_filters,
                     )
                     .group_by(post_tags.c.tag_id)
                 )

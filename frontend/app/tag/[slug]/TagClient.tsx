@@ -13,17 +13,19 @@ export default function TagClient({ initialTagSlug, initialData, initialPage }: 
   const page = initialPage;
   const postsData = initialData;
 
-  // Convert slug to a more readable format, e.g. 'python' -> 'Python'
-  const tagName = slug
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  // Prefer tag display name from payload (keeps Chinese names like "数据库"),
+  // fallback to a readable slug when the tag metadata is not present.
+  const matchedTagName = postsData?.items
+    .flatMap((post) => post.tags || [])
+    .find((tag) => tag.slug === slug)?.name;
+  const fallbackTagName = decodeURIComponent(slug).replace(/-/g, ' ');
+  const tagName = matchedTagName || fallbackTagName;
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          🏷️ {tagName}
+          {tagName}
         </h1>
         <p className="text-[var(--color-foreground-secondary)]">
           共 {postsData?.total || 0} 篇文章

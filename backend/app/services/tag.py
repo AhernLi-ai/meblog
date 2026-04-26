@@ -9,8 +9,18 @@ from app.dao import TagDao
 
 class TagService:
     @staticmethod
-    async def list_tags_service(db: AsyncSession) -> List[TagResponse]:
-        return await TagDao.get_tags(db)
+    async def list_tags_service(
+        db: AsyncSession,
+        current_user: Admin | None = None,
+        include_hidden: bool = False,
+    ) -> List[TagResponse]:
+        can_view_hidden = current_user is not None and current_user.is_admin and include_hidden
+        return await TagDao.get_tags(
+            db,
+            include_hidden_posts=can_view_hidden,
+            include_unpublished_posts=can_view_hidden,
+            include_hidden_projects=can_view_hidden,
+        )
 
     @staticmethod
     async def create_tag_service(

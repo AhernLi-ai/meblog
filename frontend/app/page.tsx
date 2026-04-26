@@ -5,7 +5,7 @@ import Pagination from '@/components/Pagination';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import { cache, use } from 'react';
 
-export const revalidate = 3600;
+export const revalidate = 180;
 
 interface HomeProps {
   searchParams: Promise<{ page?: string }>;

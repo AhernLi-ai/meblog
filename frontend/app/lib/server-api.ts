@@ -4,6 +4,7 @@ const DEFAULT_PRODUCTION_API_BASE_URL = 'https://api.yourdomain.com/api/v1';
 
 interface ServerApiFetchOptions extends RequestInit {
   revalidate?: number;
+  suppressErrorStatuses?: number[];
 }
 
 export class ServerApiError extends Error {
@@ -48,16 +49,21 @@ export function getServerApiBaseUrl(): string {
 
 export async function fetchFromServerApi<T>(
   path: string,
-  { revalidate = 300, ...init }: ServerApiFetchOptions = {}
+  { revalidate = 300, suppressErrorStatuses = [], ...init }: ServerApiFetchOptions = {}
 ): Promise<T> {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${getServerApiBaseUrl()}${normalizedPath}`;
+  const shouldUseNextRevalidate = init.cache !== 'no-store';
   const response = await fetch(url, {
     ...init,
-    next: {
-      revalidate,
-      ...(init as RequestInit & { next?: Record<string, unknown> }).next,
-    },
+    ...(shouldUseNextRevalidate
+      ? {
+          next: {
+            revalidate,
+            ...(init as RequestInit & { next?: Record<string, unknown> }).next,
+          },
+        }
+      : {}),
   });
 
   if (!response.ok) {
@@ -68,12 +74,14 @@ export async function fetchFromServerApi<T>(
       // Ignore body parse failures for error logging.
     }
 
-    console.error('[server-api] request failed', {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      body: responseText,
-    });
+    if (!suppressErrorStatuses.includes(response.status)) {
+      console.error('[server-api] request failed', {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+        body: responseText,
+      });
+    }
 
     throw new ServerApiError(
       response.status,

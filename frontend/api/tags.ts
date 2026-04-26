@@ -2,8 +2,8 @@ import api from './client';
 import type { Tag } from '../types';
 
 export const tagsApi = {
-  getAll: async (): Promise<Tag[]> => {
-    const response = await api.get<Tag[]>('/tags');
+  getAll: async (params?: { include_hidden?: boolean }): Promise<Tag[]> => {
+    const response = await api.get<Tag[]>('/tags', { params });
     return response.data;
   },
 

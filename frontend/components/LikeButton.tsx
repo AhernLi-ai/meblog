@@ -17,15 +17,19 @@ interface LikeButtonProps {
   initialCount?: number;
 }
 
-export default function LikeButton({ slug, initialLiked = false, initialCount = 0 }: LikeButtonProps) {
-  const [liked, setLiked] = useState(initialLiked);
+export default function LikeButton({ slug, initialLiked, initialCount = 0 }: LikeButtonProps) {
+  const hasInitialLike = typeof initialLiked === 'boolean';
+  const [liked, setLiked] = useState<boolean | null>(hasInitialLike ? initialLiked : null);
   const [count, setCount] = useState(initialCount);
+  const [initializing, setInitializing] = useState(!hasInitialLike);
   const [loading, setLoading] = useState(false);
 
   // Initialize status when switching to another post.
   useEffect(() => {
-    setLiked(initialLiked);
+    const hasInitial = typeof initialLiked === 'boolean';
+    setLiked(hasInitial ? initialLiked : null);
     setCount(initialCount);
+    setInitializing(!hasInitial);
     setLoading(false);
 
     let cancelled = false;
@@ -37,20 +41,27 @@ export default function LikeButton({ slug, initialLiked = false, initialCount = 
         setCount(res.data.like_count);
       } catch {
         // Keep fallback values when status query fails.
+        if (!cancelled) {
+          setLiked(initialLiked ?? false);
+        }
+      } finally {
+        if (!cancelled) {
+          setInitializing(false);
+        }
       }
     };
 
-    if (slug) {
+    if (slug && !hasInitial) {
       loadLikeStatus();
     }
 
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, initialLiked, initialCount]);
 
   const handleLike = async () => {
-    if (loading) return;
+    if (loading || initializing || liked === null) return;
     setLoading(true);
 
     // Optimistic update: immediately toggle
@@ -76,14 +87,16 @@ export default function LikeButton({ slug, initialLiked = false, initialCount = 
   return (
     <button
       onClick={handleLike}
-      disabled={loading}
+      disabled={loading || initializing || liked === null}
       className={clsx(
         'flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200',
         'border focus:outline-none focus:ring-2 focus:ring-offset-2',
-        liked
+        liked === null
+          ? 'border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground-secondary)]'
+          : liked
           ? 'border-red-300 bg-red-50 text-red-600 dark:bg-red-900/20 dark:border-red-700 dark:text-red-400 focus:ring-red-400'
           : 'border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground-secondary)] hover:border-red-300 hover:text-red-500 dark:hover:border-red-600 dark:hover:text-red-400 focus:ring-gray-400',
-        loading && 'opacity-60 cursor-not-allowed'
+        (loading || initializing || liked === null) && 'opacity-60 cursor-not-allowed'
       )}
       aria-label={liked ? '取消点赞' : '点赞'}
     >

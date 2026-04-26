@@ -19,20 +19,41 @@ async def list_posts(
     project: Optional[str] = None,
     tag: Optional[str] = None,
     q: Optional[str] = None,
+    include_unpublished: bool = Query(False),
+    include_hidden: bool = Query(False),
     db: AsyncSession = Depends(get_db),
     current_user: Optional[Admin] = Depends(get_current_user)
 ):
-    return await PostService.list_posts(db, page=page, size=size, project=project, tag=tag, q=q, current_user=current_user)
+    return await PostService.list_posts(
+        db,
+        page=page,
+        size=size,
+        project=project,
+        tag=tag,
+        q=q,
+        include_unpublished=include_unpublished,
+        include_hidden=include_hidden,
+        current_user=current_user,
+    )
 
 
 @router.get("/{id_or_slug}", response_model=PostResponse)
 async def get_post(
     id_or_slug: str,
     request: Request,
+    include_unpublished: bool = Query(False),
+    include_hidden: bool = Query(False),
     db: AsyncSession = Depends(get_db),
     current_user: Optional[Admin] = Depends(get_current_user)
 ):
-    return await PostService.get_post(db, id_or_slug, request, current_user)
+    return await PostService.get_post(
+        db,
+        id_or_slug,
+        request,
+        include_unpublished=include_unpublished,
+        include_hidden=include_hidden,
+        current_user=current_user,
+    )
 
 
 @router.post("", response_model=PostResponse, status_code=201)

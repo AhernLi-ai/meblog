@@ -31,7 +31,7 @@ export default function Layout({ children }: LayoutProps) {
 
   if (isAdminPage) {
     return (
-      <div className="min-h-screen bg-[var(--color-background)]">
+      <div className="min-h-screen bg-[var(--color-background)] admin-surface">
         <Navbar />
         <main className="max-w-7xl mx-auto px-4 py-8">
           {children}

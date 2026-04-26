@@ -8,6 +8,7 @@ class ProjectInfo(BaseModel):
     name: str
     slug: str
     cover: Optional[str] = None
+    is_hidden: bool = False
 
     class Config:
         from_attributes = True
@@ -38,10 +39,12 @@ class PostListItem(BaseModel):
     id: str
     title: str
     slug: str
+    cover: Optional[str] = None
     summary: Optional[str]
     view_count: int
     like_count: int
     status: str
+    is_hidden: bool = False
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
     created_at: datetime
@@ -56,11 +59,13 @@ class PostResponse(BaseModel):
     id: str
     title: str
     slug: str
+    cover: Optional[str] = None
     content: str
     summary: Optional[str]
     view_count: int
     like_count: int
     status: str
+    is_hidden: bool = False
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
     created_at: datetime
@@ -83,20 +88,24 @@ class PostListResponse(BaseModel):
 
 class PostCreate(BaseModel):
     title: str = Field(..., max_length=200)
+    cover: Optional[str] = None
     content: str
     summary: Optional[str] = Field(None, max_length=500)
     project_id: Optional[str] = None
     tag_ids: List[str] = []
     status: str = "draft"
+    is_hidden: bool = False
 
 
 class PostUpdate(BaseModel):
     title: Optional[str] = Field(None, max_length=200)
+    cover: Optional[str] = None
     content: Optional[str] = None
     summary: Optional[str] = Field(None, max_length=500)
     project_id: Optional[str] = None
     tag_ids: Optional[List[str]] = None
     status: Optional[str] = None
+    is_hidden: Optional[bool] = None
 
 
 class LikeStatusResponse(BaseModel):

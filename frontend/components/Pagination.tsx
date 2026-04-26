@@ -21,12 +21,15 @@ export default function Pagination({
 
   const renderPageControl = (page: number, label: string, disabled = false, isActive = false) => {
     const className = clsx(
-      label === '上一页' || label === '下一页' ? 'px-3 py-2 rounded-[8px] text-sm' : 'w-10 h-10 rounded-[8px] text-sm',
+      'inline-flex items-center justify-center select-none transition-colors',
+      label === '上一页' || label === '下一页'
+        ? 'px-4 h-10 rounded-[10px] text-sm border'
+        : 'w-10 h-10 rounded-[10px] text-sm border font-medium',
       disabled
-        ? 'text-[var(--color-foreground-secondary)] cursor-not-allowed opacity-50'
+        ? 'text-[var(--color-foreground-secondary)] border-[var(--color-border)] cursor-not-allowed opacity-50'
         : isActive
-          ? 'bg-[var(--color-primary)] text-white'
-          : 'text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)]'
+          ? 'bg-[var(--color-primary)] !text-white border-[var(--color-primary)] font-semibold shadow-sm'
+          : 'text-[var(--color-foreground)] border-[var(--color-border)] hover:bg-[var(--color-background-secondary)]'
     );
 
     if (hasHref) {
@@ -35,6 +38,7 @@ export default function Pagination({
         <Link
           href={disabled ? '#' : href}
           aria-disabled={disabled}
+          aria-current={isActive ? 'page' : undefined}
           className={clsx(className, disabled && 'pointer-events-none')}
         >
           {label}
@@ -46,6 +50,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange?.(page)}
         disabled={disabled}
+        aria-current={isActive ? 'page' : undefined}
         className={className}
       >
         {label}

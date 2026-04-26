@@ -39,6 +39,11 @@ uv sync
 APP_ENV=local uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
+隐藏可见性回归脚本（后端）：
+- 写入型（会创建测试数据）：`backend/tests/hidden_visibility_regression.sh`
+- 只读型（不改数据）：`backend/tests/hidden_visibility_readonly_check.sh`
+- 使用说明：`backend/tests/README_hidden_visibility_tests.md`
+
 本地开发统一使用 `local`：
 - 后端：`APP_ENV=local`，读取 `backend/.env.local`
 - 前端：`NEXT_PUBLIC_ENV` 不设置或为 `local`，默认读取 `frontend/.env.local`

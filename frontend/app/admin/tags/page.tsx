@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tagsApi } from '@/api/tags';
 import AdminGuard from '@/components/AdminGuard';
@@ -66,36 +67,48 @@ export default function AdminTagsPage() {
 
   return (
     <AdminGuard>
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">标签管理</h1>
-          <button onClick={() => openModal()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            新建标签
-          </button>
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--color-foreground)]" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+              标签管理
+            </h1>
+            <p className="mt-2 text-sm text-[var(--color-foreground-secondary)]">
+              管理标签名称与文章聚合，保持内容分类清晰。
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="px-4 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-background-secondary)] text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors">
+              返回管理后台
+            </Link>
+            <button onClick={() => openModal()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              新建标签
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-12 text-gray-500">加载中...</div>
+          <div className="text-center py-12 text-[var(--color-foreground-secondary)]">加载中...</div>
         ) : (
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-[var(--color-background)] rounded-xl shadow-[var(--shadow-card)] border border-[var(--color-border)] overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-[var(--color-background-secondary)]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">名称</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">别名</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">文章数</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">操作</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-foreground-secondary)] uppercase tracking-wider">名称</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-foreground-secondary)] uppercase tracking-wider">别名</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-foreground-secondary)] uppercase tracking-wider">文章数</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-[var(--color-foreground-secondary)] uppercase tracking-wider">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-[var(--color-border)]">
                 {tags.map((tag) => (
-                  <tr key={tag.id}>
-                    <td className="px-6 py-4 text-gray-900 dark:text-white">{tag.name}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{tag.slug}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{tag.post_count || 0}</td>
+                  <tr key={tag.id} className="hover:bg-[var(--color-background-secondary)]/60 transition-colors">
+                    <td className="px-6 py-4 text-[var(--color-foreground)]">{tag.name}</td>
+                    <td className="px-6 py-4 text-[var(--color-foreground-secondary)]">{tag.slug}</td>
+                    <td className="px-6 py-4 text-[var(--color-foreground-secondary)]">{tag.post_count || 0}</td>
                     <td className="px-6 py-4 text-right space-x-2">
-                      <button onClick={() => openModal(tag)} className="text-blue-600 dark:text-blue-400 hover:underline">编辑</button>
-                      <button onClick={() => confirm('确定要删除这个标签吗？') && deleteMutation.mutate(tag.id)} className="text-red-600 dark:text-red-400 hover:underline">删除</button>
+                      <button onClick={() => openModal(tag)} className="text-[var(--color-primary)] hover:underline">编辑</button>
+                      <button onClick={() => confirm('确定要删除这个标签吗？') && deleteMutation.mutate(tag.id)} className="text-red-500 hover:underline">删除</button>
                     </td>
                   </tr>
                 ))}
@@ -106,16 +119,16 @@ export default function AdminTagsPage() {
 
         {showModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-md">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{editingId ? '编辑标签' : '新建标签'}</h2>
-              {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm">{error}</div>}
+            <div className="bg-[var(--color-background)] rounded-xl shadow-[var(--shadow-card-hover)] border border-[var(--color-border)] p-6 w-full max-w-md">
+              <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-4">{editingId ? '编辑标签' : '新建标签'}</h2>
+              {error && <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">{error}</div>}
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">名称</label>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500" autoFocus />
+                  <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">名称</label>
+                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-foreground)] focus:ring-2 focus:ring-[var(--color-primary)]" autoFocus />
                 </div>
                 <div className="flex gap-4 justify-end">
-                  <button type="button" onClick={closeModal} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">取消</button>
+                  <button type="button" onClick={closeModal} className="px-4 py-2 bg-[var(--color-background-secondary)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-border)]">取消</button>
                   <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
                     {createMutation.isPending || updateMutation.isPending ? '保存中...' : '保存'}
                   </button>

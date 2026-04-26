@@ -1,7 +1,7 @@
 """
 DAO layer for Project - database CRUD operations.
 """
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Project, Post
 from app.schemas import ProjectCreate, ProjectUpdate
@@ -13,21 +13,32 @@ class ProjectDao:
     """Data Access Object for Project operations."""
 
     @staticmethod
-    async def get_projects(db: AsyncSession):
+    async def get_projects(
+        db: AsyncSession,
+        include_hidden: bool = False,
+        include_hidden_posts: bool = False,
+        include_unpublished_posts: bool = False,
+    ):
         try:
-            projects = (
-                await db.execute(
-                    select(Project, func.count(Post.id).label("post_count"))
-                    .outerjoin(
-                        Post,
-                        (Post.project_id == Project.id)
-                        & (Post.is_deleted.is_(False))
-                        & (Post.status == "published"),
-                    )
-                    .group_by(Project.id)
-                    .order_by(Project.is_pinned.desc(), Project.sort_order.desc(), Project.created_at.desc())
+            post_filters = [Post.project_id == Project.id, Post.is_deleted.is_(False)]
+            if not include_unpublished_posts:
+                post_filters.append(Post.status == "published")
+            if not include_hidden_posts:
+                post_filters.append(Post.is_hidden.is_(False))
+
+            stmt = (
+                select(Project, func.count(Post.id).label("post_count"))
+                .outerjoin(
+                    Post,
+                    and_(*post_filters),
                 )
-            ).all()
+                .group_by(Project.id)
+                .order_by(Project.is_pinned.desc(), Project.sort_order.desc(), Project.created_at.desc())
+            )
+            if not include_hidden:
+                stmt = stmt.where(Project.is_hidden.is_(False))
+
+            projects = (await db.execute(stmt)).all()
 
             result = []
             for proj, count in projects:
@@ -47,9 +58,12 @@ class ProjectDao:
             raise
 
     @staticmethod
-    async def get_project_by_slug(db: AsyncSession, slug: str):
+    async def get_project_by_slug(db: AsyncSession, slug: str, include_hidden: bool = False):
         try:
-            return (await db.execute(select(Project).where(Project.slug == slug))).scalar_one_or_none()
+            stmt = select(Project).where(Project.slug == slug)
+            if not include_hidden:
+                stmt = stmt.where(Project.is_hidden.is_(False))
+            return (await db.execute(stmt)).scalar_one_or_none()
         except Exception as e:
             logger.error(f"Error getting project by slug {slug}: {e}")
             raise
@@ -65,6 +79,7 @@ class ProjectDao:
                 name=project.name,
                 slug=slug,
                 cover=project.cover,
+                is_hidden=project.is_hidden,
                 is_pinned=project.is_pinned,
                 sort_order=project.sort_order,
                 created_by=project.created_by,
@@ -94,8 +109,10 @@ class ProjectDao:
                     raise ValueError("Project with this name already exists")
                 db_project.name = project.name
                 db_project.slug = generate_slug(project.name)
-            if project.cover is not None:
+            if "cover" in project.model_fields_set:
                 db_project.cover = project.cover
+            if project.is_hidden is not None:
+                db_project.is_hidden = project.is_hidden
             if project.is_pinned is not None:
                 db_project.is_pinned = project.is_pinned
             if project.sort_order is not None:

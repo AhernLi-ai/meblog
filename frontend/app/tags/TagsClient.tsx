@@ -15,13 +15,16 @@ export default function TagsClient({ initialTags }: TagsClientProps) {
   const tags = initialTags || [];
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+    <div className="max-w-5xl mx-auto px-4 md:px-6 py-10">
+      <div className="mb-12">
+        <p className="text-xs tracking-[0.35em] text-[var(--color-foreground-secondary)] mb-3 uppercase">
+          Tag Index
+        </p>
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-foreground)] mb-4" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
           所有标签
         </h1>
-        <p className="text-[var(--color-foreground-secondary)]">
-          共 {tags?.length || 0} 个标签
+        <p className="text-[var(--color-foreground-secondary)] leading-7 max-w-3xl">
+          标签用于按技术主题和内容类型快速检索文章，当前累计收录 {tags?.length || 0} 个标签。
         </p>
       </div>
 

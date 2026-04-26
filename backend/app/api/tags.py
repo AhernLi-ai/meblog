@@ -12,8 +12,12 @@ router = APIRouter(prefix="/tags", tags=["Tags"])
 
 
 @router.get("", response_model=List[TagResponse])
-async def list_tags(db: AsyncSession = Depends(get_db)):
-    return await TagService.list_tags_service(db)
+async def list_tags(
+    include_hidden: bool = False,
+    db: AsyncSession = Depends(get_db),
+    current_user: Optional[Admin] = Depends(get_current_user),
+):
+    return await TagService.list_tags_service(db, current_user=current_user, include_hidden=include_hidden)
 
 
 @router.post("", response_model=TagResponse, status_code=status.HTTP_201_CREATED)

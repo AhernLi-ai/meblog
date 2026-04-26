@@ -7,8 +7,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'htt
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Meblog - 技术博客',
+  title: 'AhernLi - 技术博客',
   description: '分享技术与生活的个人博客',
+  icons: {
+    icon: '/icon.svg?v=ahernli-round',
+    shortcut: '/icon.svg?v=ahernli-round',
+    apple: '/bugoo-logo.png?v=ahernli-round',
+  },
 };
 
 export default function RootLayout({

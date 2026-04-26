@@ -10,11 +10,26 @@ from configs import settings
 
 class VisitorService:
     @staticmethod
+    def _normalize_ip(ip: str) -> str:
+        value = (ip or "").strip().lower()
+        if not value:
+            return "unknown"
+        if value == "::1":
+            return "127.0.0.1"
+        if value.startswith("::ffff:"):
+            mapped = value.split("::ffff:", 1)[1]
+            if mapped:
+                return mapped
+        return value
+
+    @staticmethod
     def _get_client_ip(request: Request) -> str:
         forwarded_for = request.headers.get("x-forwarded-for")
         if forwarded_for:
-            return forwarded_for.split(",")[0].strip()
-        return request.client.host if request.client else "unknown"
+            first_ip = forwarded_for.split(",")[0].strip()
+            return VisitorService._normalize_ip(first_ip)
+        raw_ip = request.client.host if request.client else "unknown"
+        return VisitorService._normalize_ip(raw_ip)
 
     @staticmethod
     def _normalize_ua(request: Request) -> str:

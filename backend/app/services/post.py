@@ -44,6 +44,7 @@ class PostService:
             id=post.id,
             title=post.title,
             slug=post.slug,
+            cover=post.cover,
             content=post.content,
             summary=post.summary,
             view_count=post.view_count,
@@ -66,14 +67,17 @@ class PostService:
         project: Optional[str] = None,
         tag: Optional[str] = None,
         q: Optional[str] = None,
-        current_user: Optional[Admin] = None
+        include_unpublished: bool = False,
+        include_hidden: bool = False,
+        current_user: Optional[Admin] = None,
     ) -> PostListResponse:
         try:
-            include_unpublished = current_user is not None
+            can_view_all = current_user is not None and current_user.is_admin
             posts, total = await PostDao.get_posts(
                 db, page=page, size=size,
                 project_slug=project, tag_slug=tag, q=q,
-                include_unpublished=include_unpublished
+                include_unpublished=can_view_all and include_unpublished,
+                include_hidden=can_view_all and include_hidden,
             )
             pages = (total + size - 1) // size if total > 0 else 1
             return PostListResponse(
@@ -92,18 +96,32 @@ class PostService:
         db: AsyncSession,
         id_or_slug: str,
         request,
+        include_unpublished: bool = False,
+        include_hidden: bool = False,
         current_user: Optional[Admin] = None
     ) -> PostResponse:
         try:
-            include_unpublished = current_user is not None
-            post = await PostDao.get_post_by_id(db, id_or_slug, include_unpublished)
+            can_view_all = current_user is not None and current_user.is_admin
+            effective_include_unpublished = can_view_all and include_unpublished
+            effective_include_hidden = can_view_all and include_hidden
+            post = await PostDao.get_post_by_id(
+                db,
+                id_or_slug,
+                include_unpublished=effective_include_unpublished,
+                include_hidden=effective_include_hidden,
+            )
             if not post:
-                post = await PostDao.get_post_by_slug(db, id_or_slug, include_unpublished)
+                post = await PostDao.get_post_by_slug(
+                    db,
+                    id_or_slug,
+                    include_unpublished=effective_include_unpublished,
+                    include_hidden=effective_include_hidden,
+                )
 
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
 
-            if not include_unpublished:
+            if not effective_include_unpublished and not effective_include_hidden:
                 visitor_id = await VisitorService.resolve_visitor_id(db, request)
                 log = PostViewEvent(
                     post_id=post.id,
@@ -152,7 +170,12 @@ class PostService:
         try:
             if current_user is None:
                 raise HTTPException(status_code=401, detail="Not authenticated")
-            existing = await PostDao.get_post_by_id(db, post_id, include_unpublished=True)
+            existing = await PostDao.get_post_by_id(
+                db,
+                post_id,
+                include_unpublished=True,
+                include_hidden=True,
+            )
             if not existing:
                 raise HTTPException(status_code=404, detail="Post not found")
             creator_id = existing.created_by or existing.user_id
@@ -164,6 +187,7 @@ class PostService:
                 post,
                 updater_id=current_user.id,
                 include_unpublished=True,
+                include_hidden=True,
             )
             await PostService._notify_frontend_for_post(result)
             logger.info(f"Admin {current_user.id} updated post {post_id}")
@@ -184,7 +208,12 @@ class PostService:
         try:
             if current_user is None:
                 raise HTTPException(status_code=401, detail="Not authenticated")
-            existing = await PostDao.get_post_by_id(db, post_id, include_unpublished=True)
+            existing = await PostDao.get_post_by_id(
+                db,
+                post_id,
+                include_unpublished=True,
+                include_hidden=True,
+            )
             if not existing:
                 raise HTTPException(status_code=404, detail="Post not found")
             creator_id = existing.created_by or existing.user_id

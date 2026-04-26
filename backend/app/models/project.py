@@ -14,6 +14,7 @@ class Project(Base):
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     slug: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
     cover: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_hidden: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     is_pinned: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False, index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)

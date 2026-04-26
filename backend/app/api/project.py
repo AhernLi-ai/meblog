@@ -12,13 +12,27 @@ router = APIRouter(prefix="/projects", tags=["Projects"])
 
 
 @router.get("", response_model=List[ProjectResponse])
-async def list_projects(db: AsyncSession = Depends(get_db)):
-    return await ProjectService.list_projects(db)
+async def list_projects(
+    include_hidden: bool = False,
+    db: AsyncSession = Depends(get_db),
+    current_user: Optional[Admin] = Depends(get_current_user),
+):
+    return await ProjectService.list_projects(db, current_user=current_user, include_hidden=include_hidden)
 
 
 @router.get("/{slug}", response_model=ProjectResponse)
-async def get_project_by_slug_endpoint(slug: str, db: AsyncSession = Depends(get_db)):
-    return await ProjectService.get_project_by_slug(db, slug)
+async def get_project_by_slug_endpoint(
+    slug: str,
+    include_hidden: bool = False,
+    db: AsyncSession = Depends(get_db),
+    current_user: Optional[Admin] = Depends(get_current_user),
+):
+    return await ProjectService.get_project_by_slug(
+        db,
+        slug,
+        current_user=current_user,
+        include_hidden=include_hidden,
+    )
 
 
 @router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)

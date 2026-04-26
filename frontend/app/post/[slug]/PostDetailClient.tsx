@@ -39,9 +39,17 @@ function extractHeadings(content: string): { id: string; text: string; level: nu
 interface PostDetailClientProps {
   initialPost: any;
   initialSlug: string;
+  initialLikeStatus?: {
+    liked: boolean;
+    like_count: number;
+  } | null;
 }
 
-export default function PostDetailClient({ initialPost, initialSlug }: PostDetailClientProps) {
+export default function PostDetailClient({
+  initialPost,
+  initialSlug,
+  initialLikeStatus = null,
+}: PostDetailClientProps) {
   const pathname = usePathname();
   const slugFromUrl = pathname ? pathname.split('/').pop() : null;
   const slug = initialSlug || slugFromUrl || '';
@@ -209,7 +217,8 @@ export default function PostDetailClient({ initialPost, initialSlug }: PostDetai
             <LikeButton
               key={slug}
               slug={slug}
-              initialCount={post?.like_count ?? 0}
+              initialLiked={initialLikeStatus?.liked}
+              initialCount={initialLikeStatus?.like_count ?? post?.like_count ?? 0}
             />
           </div>
         )}
