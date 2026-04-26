@@ -51,9 +51,9 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+      className="absolute top-2 right-2 px-2 py-1 text-xs rounded border border-[var(--color-border)] bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] hover:text-[var(--color-foreground)] hover:border-[var(--color-primary)] opacity-0 group-hover:opacity-100 transition-all"
     >
-      {copied ? 'Copied!' : 'Copy'}
+      {copied ? '已复制' : '复制'}
     </button>
   );
 }
@@ -240,7 +240,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             // Bug fix: completed [x] = green fill + white checkmark, uncompleted [ ] = border only
             if (checked) {
               return (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-green-500 border border-green-500">
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-[var(--color-success)] border border-[var(--color-success)]">
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
@@ -248,7 +248,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
               );
             }
             return (
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded border-2 border-gray-400 bg-transparent">
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded border-2 border-[var(--color-border)] bg-transparent">
                 <span className="w-2 h-2 rounded-full bg-transparent" />
               </span>
             );

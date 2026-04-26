@@ -94,8 +94,8 @@ export default function LikeButton({ slug, initialLiked, initialCount = 0 }: Lik
         liked === null
           ? 'border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground-secondary)]'
           : liked
-          ? 'border-red-300 bg-red-50 text-red-600 dark:bg-red-900/20 dark:border-red-700 dark:text-red-400 focus:ring-red-400'
-          : 'border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground-secondary)] hover:border-red-300 hover:text-red-500 dark:hover:border-red-600 dark:hover:text-red-400 focus:ring-gray-400',
+          ? 'border-[var(--color-danger)]/50 bg-[var(--color-danger-soft)] text-[var(--color-danger)] focus:ring-[var(--color-danger)]'
+          : 'border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground-secondary)] hover:border-[var(--color-danger)]/50 hover:text-[var(--color-danger)] focus:ring-[var(--color-border)]',
         (loading || initializing || liked === null) && 'opacity-60 cursor-not-allowed'
       )}
       aria-label={liked ? '取消点赞' : '点赞'}

@@ -9,6 +9,7 @@ import { projectsApi } from '@/api/project';
 import { tagsApi } from '@/api/tags';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import AdminGuard from '@/components/AdminGuard';
+import OssUploadInput from '@/components/OssUploadInput';
 
 export default function AdminPostEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -123,12 +124,11 @@ export default function AdminPostEditPage() {
               <label className={labelClass}>标题</label>
               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} required />
 
-              <label className={labelClass}>封面图片 URL（可选）</label>
-              <input
-                type="url"
+              <OssUploadInput
+                label="封面图片 URL（可选）"
                 value={cover}
-                onChange={(e) => setCover(e.target.value)}
-                className={inputClass}
+                onChange={setCover}
+                folder="posts/covers"
                 placeholder="https://example.com/cover.jpg"
               />
 

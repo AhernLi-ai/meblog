@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { siteSettingsApi } from '@/api/settings';
 import AdminGuard from '@/components/AdminGuard';
+import OssUploadInput from '@/components/OssUploadInput';
 
 export default function AdminSiteSettingsPage() {
   const queryClient = useQueryClient();
@@ -13,6 +14,8 @@ export default function AdminSiteSettingsPage() {
   const [wechatGuideText, setWechatGuideText] = useState('');
   const [showOnArticle, setShowOnArticle] = useState(true);
   const [showInSidebar, setShowInSidebar] = useState(true);
+  const [footerGithubUrl, setFooterGithubUrl] = useState('');
+  const [beianIcp, setBeianIcp] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -27,6 +30,8 @@ export default function AdminSiteSettingsPage() {
     setWechatGuideText(data.wechat_guide_text || '');
     setShowOnArticle(Boolean(data.wechat_show_on_article));
     setShowInSidebar(Boolean(data.wechat_show_in_sidebar));
+    setFooterGithubUrl(data.footer_github_url || '');
+    setBeianIcp(data.beian_icp || '');
   }, [data]);
 
   const updateMutation = useMutation({
@@ -52,6 +57,8 @@ export default function AdminSiteSettingsPage() {
       wechat_guide_text: wechatGuideText,
       wechat_show_on_article: showOnArticle,
       wechat_show_in_sidebar: showInSidebar,
+      footer_github_url: footerGithubUrl || null,
+      beian_icp: beianIcp || null,
     });
   };
 
@@ -95,16 +102,13 @@ export default function AdminSiteSettingsPage() {
             {message && <div className="p-3 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm">{message}</div>}
             {error && <div className="p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">{error}</div>}
 
-            <div className="space-y-1">
-              <label className={labelClass}>公众号二维码 URL</label>
-              <input
-                type="url"
-                value={wechatQrUrl}
-                onChange={(e) => setWechatQrUrl(e.target.value)}
-                className={inputClass}
-                placeholder="https://example.com/wechat-qr.png"
-              />
-            </div>
+            <OssUploadInput
+              label="公众号二维码 URL"
+              value={wechatQrUrl}
+              onChange={setWechatQrUrl}
+              folder="site/wechat"
+              placeholder="https://example.com/wechat-qr.png"
+            />
 
             <div className="space-y-1">
               <label className={labelClass}>公众号引导文案</label>
@@ -113,6 +117,28 @@ export default function AdminSiteSettingsPage() {
                 onChange={(e) => setWechatGuideText(e.target.value)}
                 className={`${inputClass} h-24`}
                 placeholder="扫码关注公众号，获取更多精彩内容"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className={labelClass}>页脚 GitHub 链接</label>
+              <input
+                type="url"
+                value={footerGithubUrl}
+                onChange={(e) => setFooterGithubUrl(e.target.value)}
+                className={inputClass}
+                placeholder="https://github.com/yourname"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className={labelClass}>备案号</label>
+              <input
+                type="text"
+                value={beianIcp}
+                onChange={(e) => setBeianIcp(e.target.value)}
+                className={inputClass}
+                placeholder="粤ICP备xxxxxxxx号"
               />
             </div>
 

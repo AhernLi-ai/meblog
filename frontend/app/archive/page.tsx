@@ -55,7 +55,7 @@ function toYearBuckets(posts: PostListItem[]): YearBucket[] {
 export default async function Archive() {
   let posts: PostListItem[] = [];
   try {
-    const response = await fetchFromServerApi<{ items: PostListItem[] }>(`/posts?page=1&size=100`, {
+    const response = await fetchFromServerApi<{ items: PostListItem[] }>(`/posts?page=1&size=100&include_hidden=true`, {
       revalidate,
     });
     posts = response?.items ?? [];

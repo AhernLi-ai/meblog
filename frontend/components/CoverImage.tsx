@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { buildCoverFallbackCandidates } from '@/app/lib/cover-fallback';
+import { filesApi } from '@/api/files';
 
 interface CoverImageProps {
   src: string;
@@ -16,18 +17,40 @@ export default function CoverImage({
   className,
   placeholderSrc = '/cover-placeholder.svg',
 }: CoverImageProps) {
+  const [resolvedSrc, setResolvedSrc] = useState(src);
+
+  useEffect(() => {
+    let cancelled = false;
+    const resolveSrc = async () => {
+      if (!src?.startsWith('oss://')) {
+        setResolvedSrc(src);
+        return;
+      }
+      try {
+        const signed = await filesApi.getSignedUrl(src);
+        if (!cancelled) setResolvedSrc(signed.signed_url);
+      } catch {
+        if (!cancelled) setResolvedSrc(src);
+      }
+    };
+    resolveSrc();
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
   const candidates = useMemo(() => {
-    const fallbackCandidates = buildCoverFallbackCandidates(src, {
+    const fallbackCandidates = buildCoverFallbackCandidates(resolvedSrc, {
       giteeAssetsBase: process.env.NEXT_PUBLIC_GITEE_ASSETS_BASE || null,
     });
     return Array.from(new Set([...fallbackCandidates, placeholderSrc]));
-  }, [src, placeholderSrc]);
+  }, [resolvedSrc, placeholderSrc]);
 
   const [candidateIndex, setCandidateIndex] = useState(0);
 
   useEffect(() => {
     setCandidateIndex(0);
-  }, [src, placeholderSrc]);
+  }, [resolvedSrc, placeholderSrc]);
 
   const currentSrc = candidates[candidateIndex] || placeholderSrc;
 

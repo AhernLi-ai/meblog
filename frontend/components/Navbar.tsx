@@ -21,6 +21,11 @@ export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const pathname = usePathname();
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
+  };
+
   return (
     <nav className="bg-[var(--color-background)] border-b border-[var(--color-border)] sticky top-0 z-50 h-16 md:h-[72px] flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -68,7 +73,7 @@ export default function Navbar() {
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-black ring-opacity-5 focus:outline-none border border-[var(--color-border)] overflow-hidden">
+                  <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--color-border)]/40 focus:outline-none border border-[var(--color-border)] overflow-hidden">
                     <div className="px-4 py-3 border-b border-[var(--color-border)]">
                       <p className="text-sm font-medium text-[var(--color-foreground)]">{user?.username}</p>
                     </div>
@@ -91,10 +96,10 @@ export default function Navbar() {
                       <Menu.Item>
                         {({ active }) => (
                           <button
-                            onClick={logout}
+                            onClick={handleLogout}
                             className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-left ${
                               active
-                                ? 'bg-red-500 text-white'
+                                ? 'bg-[var(--color-danger)] text-white'
                                 : 'text-[var(--color-foreground)]'
                             }`}
                           >
@@ -160,7 +165,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-black ring-opacity-5 focus:outline-none border border-[var(--color-border)] overflow-hidden">
+        <Menu.Items className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-1rem)] origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--color-border)]/40 focus:outline-none border border-[var(--color-border)] overflow-hidden">
           <div className="py-2">
             <Menu.Item>
               {({ active }) => (

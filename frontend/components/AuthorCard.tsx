@@ -16,7 +16,7 @@ export default function AuthorCard({ username, avatar_url, bio }: AuthorCardProp
             className="w-28 h-28 rounded-full object-cover ring-4 ring-[var(--color-primary)]/20 shadow-lg"
           />
         ) : (
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] dark:from-[#60A5FA] dark:to-[#A78BFA] flex items-center justify-center text-white text-4xl font-bold shadow-lg ring-4 ring-[var(--color-primary)]/20">
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-hover)] flex items-center justify-center text-white text-4xl font-bold shadow-lg ring-4 ring-[var(--color-primary)]/20">
             {username.charAt(0).toUpperCase()}
           </div>
         )}

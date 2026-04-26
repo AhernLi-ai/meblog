@@ -26,7 +26,7 @@ function formatTagName(slug: string): string {
 
 async function getTagPosts(slug: string, page: number): Promise<PostListResponse> {
   return fetchFromServerApi<PostListResponse>(
-    `/posts?tag=${encodeURIComponent(slug)}&page=${page}&size=5`,
+    `/posts?tag=${encodeURIComponent(slug)}&page=${page}&size=5&include_hidden=true`,
     { revalidate }
   );
 }

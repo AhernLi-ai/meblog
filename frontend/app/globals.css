@@ -14,6 +14,8 @@
   --color-border: #E2E8F0;
   --color-success: #10B981;
   --color-warning: #F59E0B;
+  --color-danger: #ef4444;
+  --color-danger-soft: #fef2f2;
   
   /* Shadows */
   --shadow-card: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
@@ -29,21 +31,83 @@
 
 .dark {
   /* Dark Mode Colors */
-  --color-primary: #60A5FA;
-  --color-primary-hover: #93C5FD;
-  --color-primary-light: #1E3A8A;
-  --color-background: #0F172A;
-  --color-background-secondary: #1E293B;
-  --color-foreground: #F8FAFB;
-  --color-foreground-secondary: #94A3B8;
-  --color-border: #334155;
+  --color-primary: #8fb4ff;
+  --color-primary-hover: #b0caff;
+  --color-primary-light: #334a7a;
+  --color-background: #1b1f27;
+  --color-background-secondary: #252b36;
+  --color-foreground: #e8edf5;
+  --color-foreground-secondary: #bcc7d8;
+  --color-border: #434d5e;
   --color-success: #34D399;
   --color-warning: #FBBF24;
+  --color-danger: #f87171;
+  --color-danger-soft: rgba(248, 113, 113, 0.16);
   
   /* Shadows */
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-  --shadow-card-hover: 0 10px 15px -3px rgba(0,0,0,0.4);
-  --shadow-navbar: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-card: 0 1px 2px rgba(3, 6, 14, 0.35), 0 6px 18px rgba(3, 6, 14, 0.18);
+  --shadow-card-hover: 0 4px 10px rgba(3, 6, 14, 0.35), 0 14px 28px rgba(3, 6, 14, 0.22);
+  --shadow-navbar: 0 1px 0 rgba(67, 77, 94, 0.9);
+}
+
+/* Improve dark mode readability for primary data surfaces */
+.dark input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.dark textarea,
+.dark select {
+  background-color: #2c3442;
+  border-color: var(--color-border);
+  color: var(--color-foreground);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--color-foreground-secondary);
+  opacity: 0.9;
+}
+
+.dark .prose,
+.dark .prose p,
+.dark .prose li {
+  color: var(--color-foreground);
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4 {
+  color: #f0f6fc;
+}
+
+.dark .prose blockquote {
+  border-left-color: var(--color-primary);
+  background-color: rgba(122, 162, 247, 0.12);
+}
+
+.dark .prose code {
+  background-color: #293244;
+  color: #f0f6fc;
+}
+
+.dark .prose a {
+  color: var(--color-primary-hover);
+}
+
+.dark .prose table {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border);
+}
+
+.dark .prose thead {
+  background-color: rgba(88, 166, 255, 0.08);
+}
+
+.dark .prose td,
+.dark .prose th {
+  color: var(--color-foreground);
+}
+
+.dark .prose hr {
+  border-color: var(--color-border);
 }
 
 * {
@@ -66,6 +130,29 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
   overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+/* Keep autofill fields visually consistent with theme */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-foreground);
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-background) inset;
+  box-shadow: 0 0 0px 1000px var(--color-background) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Mobile: avoid layout shift when opening dropdown menus */
+@media (max-width: 767px) {
+  html {
+    scrollbar-gutter: auto;
+  }
+  body {
+    overflow-y: auto;
+  }
 }
 
 /* Typography */
@@ -254,7 +341,7 @@ a:hover {
 }
 
 .prose pre {
-  background-color: #1e293b;
+  background-color: var(--color-background-secondary);
   border-radius: var(--radius-btn);
   padding: 1rem;
   overflow-x: auto;
@@ -274,7 +361,7 @@ a:hover {
 }
 
 .dark .prose pre {
-  background-color: #0f172a;
+  background-color: #2a3140;
 }
 
 /* Animation utilities */

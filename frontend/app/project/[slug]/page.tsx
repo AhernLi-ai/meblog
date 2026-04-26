@@ -1,6 +1,5 @@
 import ProjectClient from './ProjectClient';
 import type { Metadata } from 'next';
-import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import type { Project, PostListResponse } from '@/types';
 import { fetchFromServerApi, ServerApiError } from '@/app/lib/server-api';
@@ -18,9 +17,9 @@ interface ProjectPageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-const getProject = cache(async (slug: string): Promise<Project | null> => {
+const getProject = async (slug: string): Promise<Project | null> => {
   try {
-    return await fetchFromServerApi<Project>(`/projects/${encodeURIComponent(slug)}`, { revalidate });
+    return await fetchFromServerApi<Project>(`/projects/${encodeURIComponent(slug)}?include_hidden=true`, { revalidate });
   } catch (error) {
     if (error instanceof ServerApiError && error.status === 404) {
       return null;
@@ -28,7 +27,7 @@ const getProject = cache(async (slug: string): Promise<Project | null> => {
 
     throw error;
   }
-});
+};
 
 function assertValidPage(page: number): void {
   if (!Number.isInteger(page) || page < 1) {
@@ -46,7 +45,7 @@ function ensureProjectExists(project: Project | null): Project {
 
 async function getProjectPosts(slug: string, page: number): Promise<PostListResponse> {
   return fetchFromServerApi<PostListResponse>(
-    `/posts?project=${encodeURIComponent(slug)}&page=${page}&size=5`,
+    `/posts?project=${encodeURIComponent(slug)}&page=${page}&size=5&include_hidden=true`,
     { revalidate }
   );
 }

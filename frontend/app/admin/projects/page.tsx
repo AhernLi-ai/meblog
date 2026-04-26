@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectsApi } from '@/api/project';
 import AdminGuard from '@/components/AdminGuard';
 import CoverImage from '@/components/CoverImage';
+import OssUploadInput from '@/components/OssUploadInput';
 
 export default function AdminProjectsPage() {
   const queryClient = useQueryClient();
@@ -157,12 +158,11 @@ export default function AdminProjectsPage() {
                   <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-foreground)] focus:ring-2 focus:ring-[var(--color-primary)]" autoFocus />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">封面图片 URL（可选）</label>
-                  <input
-                    type="url"
+                  <OssUploadInput
+                    label="封面图片 URL（可选）"
                     value={cover}
-                    onChange={(e) => setCover(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-foreground)] focus:ring-2 focus:ring-[var(--color-primary)]"
+                    onChange={setCover}
+                    folder="projects/covers"
                     placeholder="https://example.com/project-cover.jpg"
                   />
                 </div>

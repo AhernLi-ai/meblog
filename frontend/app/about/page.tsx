@@ -29,7 +29,7 @@ export default function About() {
   if (error || !data) {
     return (
       <div className="text-center py-12">
-        <div className="inline-flex items-center gap-2 px-6 py-3 bg-red-500/10 text-red-500 rounded-[12px]">
+        <div className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-danger-soft)] text-[var(--color-danger)] rounded-[12px] border border-[var(--color-danger)]/25">
           加载失败，请稍后重试
         </div>
       </div>

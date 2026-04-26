@@ -2,6 +2,17 @@ const DEFAULT_LOCAL_API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 const TEST_API_BASE_URL = 'http://meblog-backend:8000/api/v1';
 const DEFAULT_PRODUCTION_API_BASE_URL = 'https://api.yourdomain.com/api/v1';
 
+async function getServerTokenFromCookie(): Promise<string | null> {
+  try {
+    const { cookies } = await import('next/headers');
+    const store = await cookies();
+    const token = store.get('token')?.value;
+    return token ? decodeURIComponent(token) : null;
+  } catch {
+    return null;
+  }
+}
+
 interface ServerApiFetchOptions extends RequestInit {
   revalidate?: number;
   suppressErrorStatuses?: number[];
@@ -53,9 +64,19 @@ export async function fetchFromServerApi<T>(
 ): Promise<T> {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${getServerApiBaseUrl()}${normalizedPath}`;
-  const shouldUseNextRevalidate = init.cache !== 'no-store';
+  const token = await getServerTokenFromCookie();
+  const headers = new Headers(init.headers || {});
+  const hasAuthorization = headers.has('Authorization') || headers.has('authorization');
+  if (token && !hasAuthorization) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const forceNoStoreForAuthed = Boolean(token && !init.cache);
+  const shouldUseNextRevalidate = init.cache !== 'no-store' && !forceNoStoreForAuthed;
   const response = await fetch(url, {
     ...init,
+    headers,
+    ...(forceNoStoreForAuthed ? { cache: 'no-store' } : {}),
     ...(shouldUseNextRevalidate
       ? {
           next: {

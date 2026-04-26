@@ -15,6 +15,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function setTokenCookie(token: string | null) {
+  if (typeof document === 'undefined') return;
+  if (!token) {
+    document.cookie = 'token=; Max-Age=0; Path=/; SameSite=Lax';
+    return;
+  }
+  const maxAge = 60 * 60 * 24 * 3;
+  document.cookie = `token=${encodeURIComponent(token)}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -26,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem('user');
 
     if (storedToken && storedUser) {
+      setTokenCookie(storedToken);
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
       
@@ -39,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Token invalid, clear auth
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          setTokenCookie(null);
           setToken(null);
           setUser(null);
         })
@@ -51,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
+    setTokenCookie(newToken);
     setToken(newToken);
     setUser(newUser);
   };
@@ -58,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    setTokenCookie(null);
     setToken(null);
     setUser(null);
   };

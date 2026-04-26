@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { aboutApi } from '@/api/about';
 import AdminGuard from '@/components/AdminGuard';
+import OssUploadInput from '@/components/OssUploadInput';
 
 export default function AdminAuthorSettingsPage() {
   const queryClient = useQueryClient();
@@ -115,10 +116,13 @@ export default function AdminAuthorSettingsPage() {
               <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={inputClass} required />
             </div>
 
-            <div>
-              <label className={labelClass}>头像 URL</label>
-              <input type="url" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className={inputClass} />
-            </div>
+            <OssUploadInput
+              label="头像 URL"
+              value={avatarUrl}
+              onChange={setAvatarUrl}
+              folder="author/avatar"
+              placeholder="https://example.com/avatar.png"
+            />
 
             <div>
               <label className={labelClass}>个人简介</label>

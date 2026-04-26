@@ -3,7 +3,7 @@ import type { PostListResponse } from '@/types';
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
 import { SparklesIcon } from '@heroicons/react/24/outline';
-import { cache, use } from 'react';
+import { use } from 'react';
 
 export const revalidate = 180;
 
@@ -11,12 +11,12 @@ interface HomeProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-const getHomeData = cache(async (page: number): Promise<{ data: PostListResponse; error: boolean }> => {
+const getHomeData = async (page: number): Promise<{ data: PostListResponse; error: boolean }> => {
   let data: PostListResponse = { items: [], total: 0, page, size: 5, pages: 1 };
   let error = false;
 
   try {
-    const result = await fetchFromServerApi<PostListResponse>(`/posts?page=${page}&size=5`, {
+    const result = await fetchFromServerApi<PostListResponse>(`/posts?page=${page}&size=5&include_hidden=true`, {
       revalidate,
     });
     if (result) data = result;
@@ -26,7 +26,7 @@ const getHomeData = cache(async (page: number): Promise<{ data: PostListResponse
   }
 
   return { data, error };
-});
+};
 
 export default function Home({ searchParams }: HomeProps) {
   const { page: pageStr } = use(searchParams);

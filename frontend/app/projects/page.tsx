@@ -22,7 +22,7 @@ export default async function ProjectsPage() {
   let loadFailed = false;
 
   try {
-    projects = (await fetchFromServerApi<Project[]>('/projects', { revalidate })) || [];
+    projects = (await fetchFromServerApi<Project[]>('/projects?include_hidden=true', { revalidate })) || [];
   } catch {
     loadFailed = true;
     // Keep page render resilient when API is temporarily unavailable.

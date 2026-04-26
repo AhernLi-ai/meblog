@@ -4,6 +4,7 @@ export interface Comment {
   id: string;
   post_id: string;
   parent_id: string | null;
+  avatar_seed?: string;
   nickname: string;
   email?: string;
   website?: string;

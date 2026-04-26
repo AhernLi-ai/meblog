@@ -28,9 +28,13 @@ function fallbackDescription(content: string): string {
 
 async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   try {
-    return await fetchFromServerApi<PostDetail>(`/posts/${encodeURIComponent(slug)}`, {
-      revalidate,
-    });
+    const encodedSlug = encodeURIComponent(slug);
+    return await fetchFromServerApi<PostDetail>(
+      `/posts/${encodedSlug}?include_hidden=true`,
+      {
+        revalidate,
+      }
+    );
   } catch (error) {
     if (error instanceof ServerApiError && error.status === 404) {
       return null;

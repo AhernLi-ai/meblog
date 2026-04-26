@@ -15,6 +15,8 @@ export interface SiteSettings {
   wechat_guide_text: string;
   wechat_show_on_article: boolean;
   wechat_show_in_sidebar: boolean;
+  footer_github_url: string | null;
+  beian_icp: string | null;
 }
 
 export const settingsApi = {

@@ -10,7 +10,7 @@ export default async function TagsPage() {
   let loadFailed = false;
 
   try {
-    tags = await fetchFromServerApi<Tag[]>('/tags', { revalidate });
+    tags = await fetchFromServerApi<Tag[]>('/tags?include_hidden=true', { revalidate });
   } catch {
     loadFailed = true;
     // Keep page render resilient when API is temporarily unavailable.

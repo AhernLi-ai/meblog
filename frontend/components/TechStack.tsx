@@ -4,14 +4,10 @@ interface TechStackProps {
 
 // Color palette for tags
 const TAG_COLORS = [
-  'bg-[var(--color-primary)]/10 text-[var(--color-primary)] dark:bg-[var(--color-primary)]/20',
-  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-  'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-  'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300',
-  'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
-  'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
+  'bg-[var(--color-primary)]/12 text-[var(--color-primary)] border border-[var(--color-primary)]/25',
+  'bg-[var(--color-primary)]/16 text-[var(--color-primary-hover)] border border-[var(--color-primary)]/30',
+  'bg-[var(--color-background-secondary)] text-[var(--color-foreground-secondary)] border border-[var(--color-border)]',
+  'bg-[var(--color-primary-light)]/28 text-[var(--color-foreground)] border border-[var(--color-border)]',
 ];
 
 function getTagColor(index: number) {

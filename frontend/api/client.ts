@@ -32,6 +32,7 @@ if (typeof window !== 'undefined') {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        document.cookie = 'token=; Max-Age=0; Path=/; SameSite=Lax';
         // Only redirect if not already on login page
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';

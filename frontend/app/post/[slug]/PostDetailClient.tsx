@@ -93,7 +93,7 @@ export default function PostDetailClient({
 
   if (!post || loading) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-[var(--color-foreground-secondary)]">
         文章加载中...
       </div>
     );
