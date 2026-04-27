@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { siteSettingsApi } from '@/api/settings';
 
@@ -12,7 +13,57 @@ export default function WechatQR({ variant = 'article-end' }: WechatQRProps) {
   const { data: siteSettings } = useQuery({
     queryKey: ['site-settings'],
     queryFn: siteSettingsApi.getSiteSettings,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
+  const [displayQrUrl, setDisplayQrUrl] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    let localBlobUrl = '';
+    const sourceUrl = siteSettings?.wechat_qr_url;
+    if (!sourceUrl) {
+      setDisplayQrUrl('');
+      return () => {};
+    }
+
+    const loadToLocalBlob = async () => {
+      try {
+        const resp = await fetch(sourceUrl);
+        if (!resp.ok) throw new Error('Failed to fetch QR image');
+        const blob = await resp.blob();
+        localBlobUrl = URL.createObjectURL(blob);
+        if (!cancelled) {
+          setDisplayQrUrl(localBlobUrl);
+        }
+      } catch {
+        if (!cancelled) {
+          setDisplayQrUrl(sourceUrl);
+        }
+      }
+    };
+
+    loadToLocalBlob();
+
+    return () => {
+      cancelled = true;
+      if (localBlobUrl) {
+        URL.revokeObjectURL(localBlobUrl);
+      }
+    };
+  }, [siteSettings?.wechat_qr_url]);
+
+  const resolvedQrUrl = displayQrUrl || siteSettings?.wechat_qr_url || '';
+
+  const handleQrLoadError = () => {
+    // Keep current source and avoid extra network retries.
+    try {
+      console.warn('Failed to load WeChat QR image');
+    } catch {
+      // no-op
+    }
+  };
 
   // Don't render if disabled
   if (variant === 'article-end' && !siteSettings?.wechat_show_on_article) {
@@ -40,9 +91,10 @@ export default function WechatQR({ variant = 'article-end' }: WechatQRProps) {
         </div>
         <div className="p-4 flex flex-col items-center">
           <img
-            src={siteSettings.wechat_qr_url}
+            src={resolvedQrUrl}
             alt="微信公众号二维码"
             className="w-36 h-36 object-contain rounded-[8px] border border-[var(--color-border)]"
+            onError={handleQrLoadError}
           />
           <p className="mt-3 text-xs text-[var(--color-foreground-secondary)] text-center leading-relaxed">
             {siteSettings.wechat_guide_text}
@@ -57,9 +109,10 @@ export default function WechatQR({ variant = 'article-end' }: WechatQRProps) {
     <div className="mt-12 py-8 border-t border-b border-[var(--color-border)] flex flex-col items-center">
       <div className="flex flex-col items-center">
         <img
-          src={siteSettings.wechat_qr_url}
+          src={resolvedQrUrl}
           alt="微信公众号二维码"
           className="w-48 h-48 object-contain rounded-[12px] border border-[var(--color-border)] shadow-[var(--shadow-card)]"
+          onError={handleQrLoadError}
         />
         <p className="mt-4 text-base text-[var(--color-foreground-secondary)] text-center">
           {siteSettings.wechat_guide_text}

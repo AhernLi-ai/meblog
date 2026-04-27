@@ -42,6 +42,7 @@ export interface Summary {
 export interface PublicSummary {
   total_posts: number;
   total_comments: number;
+  total_visits: number;
 }
 
 export interface TopVisitorInfo {

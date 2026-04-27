@@ -27,7 +27,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-[var(--color-background)] border-b border-[var(--color-border)] sticky top-0 z-50 h-16 md:h-[72px] flex items-center">
+    <nav className="sticky top-0 z-50 h-16 md:h-[72px] flex items-center border-b border-[var(--color-border)] bg-[var(--color-background)] dark:border-[var(--color-border)]/85 dark:bg-[var(--color-background)]/86 dark:backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="relative flex justify-between items-center h-full">
           {/* Brand */}
@@ -39,18 +39,18 @@ export default function Navbar() {
             <img
               src="/bugoo-logo.png"
               alt="Bugoo logo"
-              className="w-7 h-7 rounded-full object-cover border border-[var(--color-border)]"
+              className="w-10 h-10 rounded-full object-cover border border-[var(--color-border)]"
             />
-            <span className="inline-block">AhernLi&apos;s Blog</span>
+            <span className="inline-block">AhernLi</span>
           </Link>
 
           {/* Desktop Nav (centered) */}
           <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-            <NavLink href="/" icon={<HomeIcon className="w-4 h-4" strokeWidth={1.5} />} label="Home" pathname={pathname} />
-            <NavLink href="/projects" icon={<FolderIcon className="w-4 h-4" strokeWidth={1.5} />} label="Projects" pathname={pathname} />
-            <NavLink href="/tags" icon={<TagIcon className="w-4 h-4" strokeWidth={1.5} />} label="Tags" pathname={pathname} />
-            <NavLink href="/archive" icon={<ClockIcon className="w-4 h-4" strokeWidth={1.5} />} label="Archives" pathname={pathname} />
-            <NavLink href="/about" icon={<UserCircleIcon className="w-4 h-4" strokeWidth={1.5} />} label="About" pathname={pathname} />
+            <NavLink href="/" icon={<HomeIcon className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Home" pathname={pathname} />
+            <NavLink href="/projects" icon={<FolderIcon className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Projects" pathname={pathname} />
+            <NavLink href="/tags" icon={<TagIcon className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Tags" pathname={pathname} />
+            <NavLink href="/archive" icon={<ClockIcon className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Archives" pathname={pathname} />
+            <NavLink href="/about" icon={<UserCircleIcon className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="About" pathname={pathname} />
           </div>
 
           {/* Right controls */}
@@ -169,7 +169,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
           <div className="py-2">
             <Menu.Item>
               {({ active }) => (
-                <Link href="/" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link prefetch={false} href="/" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <HomeIcon className="w-5 h-5" />
                   Home
                 </Link>
@@ -177,7 +177,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href="/projects" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link prefetch={false} href="/projects" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <FolderIcon className="w-5 h-5" />
                   Projects
                 </Link>
@@ -185,7 +185,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link prefetch={false} href="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <TagIcon className="w-5 h-5" />
                   Tags
                 </Link>
@@ -193,7 +193,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href="/archive" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link prefetch={false} href="/archive" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <ClockIcon className="w-5 h-5" />
                   Archives
                 </Link>
@@ -201,7 +201,7 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <Link href="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <Link prefetch={false} href="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
                   <UserCircleIcon className="w-5 h-5" />
                   About
                 </Link>

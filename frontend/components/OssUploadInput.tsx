@@ -27,23 +27,35 @@ export default function OssUploadInput({
   const [uploadError, setUploadError] = useState('');
   const [previewFailed, setPreviewFailed] = useState(false);
   const [previewSrc, setPreviewSrc] = useState('');
+  const localBlobUrlRef = useRef<string>('');
 
   useEffect(() => {
     setPreviewFailed(false);
     let cancelled = false;
+    let effectBlobUrl = '';
     const resolvePreview = async () => {
       if (!value) {
+        if (localBlobUrlRef.current) {
+          URL.revokeObjectURL(localBlobUrlRef.current);
+          localBlobUrlRef.current = '';
+        }
         setPreviewSrc('');
         return;
       }
-      if (!value.startsWith('oss://')) {
-        setPreviewSrc(value);
-        return;
-      }
       try {
-        const signed = await filesApi.getSignedUrl(value);
+        const sourceUrl = value.startsWith('oss://')
+          ? (await filesApi.getSignedUrl(value)).signed_url
+          : value;
+        const imageResp = await fetch(sourceUrl);
+        if (!imageResp.ok) throw new Error('Failed to fetch preview image');
+        const blob = await imageResp.blob();
+        effectBlobUrl = URL.createObjectURL(blob);
         if (!cancelled) {
-          setPreviewSrc(signed.signed_url);
+          if (localBlobUrlRef.current) {
+            URL.revokeObjectURL(localBlobUrlRef.current);
+          }
+          localBlobUrlRef.current = effectBlobUrl;
+          setPreviewSrc(effectBlobUrl);
         }
       } catch {
         if (!cancelled) {
@@ -55,8 +67,19 @@ export default function OssUploadInput({
     resolvePreview();
     return () => {
       cancelled = true;
+      if (effectBlobUrl && effectBlobUrl !== localBlobUrlRef.current) {
+        URL.revokeObjectURL(effectBlobUrl);
+      }
     };
   }, [value]);
+
+  useEffect(() => {
+    return () => {
+      if (localBlobUrlRef.current) {
+        URL.revokeObjectURL(localBlobUrlRef.current);
+      }
+    };
+  }, []);
 
   const handlePickFile = () => {
     fileInputRef.current?.click();
@@ -69,9 +92,8 @@ export default function OssUploadInput({
     setUploading(true);
     try {
       const uploaded = await filesApi.upload(file, folder);
-        onChange(uploaded.storage_key || uploaded.url);
-        setPreviewSrc(uploaded.signed_url || uploaded.url);
-        setPreviewFailed(false);
+      onChange(uploaded.storage_key || uploaded.url);
+      setPreviewFailed(false);
     } catch (err: any) {
       setUploadError(err?.response?.data?.detail || '上传失败，请稍后重试');
     } finally {

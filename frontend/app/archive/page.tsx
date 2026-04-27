@@ -66,8 +66,8 @@ export default async function Archive() {
   const timeline = toYearBuckets(posts);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-6 py-10">
-      <div className="mb-12">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
+      <div className="mb-8 md:mb-10 min-h-[150px] md:min-h-[170px]">
         <p className="text-xs tracking-[0.35em] text-[var(--color-foreground-secondary)] mb-3 uppercase">
           Memory Bank
         </p>
@@ -77,7 +77,7 @@ export default async function Archive() {
         >
           档案回顾
         </h1>
-        <p className="text-[var(--color-foreground-secondary)] leading-7 max-w-3xl">
+        <p className="text-[var(--color-foreground-secondary)] leading-8 max-w-3xl">
           该档案系统用于结构化沉淀项目实践、技术研究与方法论复盘。
           所有内容按时间轴索引，当前累计收录 {posts.length} 篇可检索文章。
         </p>

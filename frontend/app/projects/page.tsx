@@ -39,59 +39,65 @@ export default async function ProjectsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-6 py-10">
-      <div className="mb-12">
-        <p className="text-xs tracking-[0.35em] text-[var(--color-foreground-secondary)] mb-3 uppercase">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
+      <div className="mb-6 md:mb-8 min-h-[150px] md:min-h-[170px]">
+        <p className="text-xs tracking-[0.3em] text-[var(--color-foreground-secondary)] mb-3 uppercase">
           Project Index
         </p>
-        <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-foreground)] mb-4" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          所有项目
+        <h1
+          className="text-4xl md:text-5xl font-bold text-[var(--color-foreground)] mb-4"
+          style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
+        >
+          项目体系
         </h1>
-        <p className="text-[var(--color-foreground-secondary)] leading-7 max-w-3xl">
-          项目用于聚合相关主题文章与实践记录，当前累计收录 {projects?.length || 0} 个项目。
+        <p className="text-[var(--color-foreground-secondary)] max-w-3xl leading-8">
+          按项目组织的技术与实践集合，沉淀从探索到落地的完整过程，当前共 {projects.length} 个项目。
         </p>
       </div>
 
       {!projects || projects.length === 0 ? (
-        <div className="text-center py-16">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] text-center py-16">
           <div className="text-6xl mb-4">📭</div>
           <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">暂无项目</h3>
           <p className="text-[var(--color-foreground-secondary)]">稍后再来看看吧</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((proj) => (
-            <Link
-              key={proj.id}
-              href={`/project/${proj.slug}`}
-              className="group bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]"
-            >
-              {/* Cover Image */}
-              <div className="aspect-video bg-[var(--color-background-secondary)] overflow-hidden">
-                {isImageUrl(proj.cover) ? (
-                  <CoverImage
-                    src={proj.cover!}
-                    alt={proj.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[var(--color-foreground-secondary)] text-4xl">
-                    📁
-                  </div>
-                )}
-              </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.map((proj) => {
+            const count = proj.post_count || 0;
+            return (
+              <Link
+                key={proj.id}
+                href={`/project/${proj.slug}`}
+                className="group rounded-2xl overflow-hidden bg-[var(--color-background)]/80 backdrop-blur border border-[var(--color-border)] hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 transition"
+              >
+                <div className="h-40 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800">
+                  {isImageUrl(proj.cover) ? (
+                    <CoverImage
+                      src={proj.cover!}
+                      alt={proj.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : null}
+                </div>
 
-              {/* Content */}
-              <div className="p-4">
-                <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-1 group-hover:text-[var(--color-primary)] transition-colors" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-                  {proj.name}
-                </h2>
-                <p className="text-sm text-[var(--color-foreground-secondary)]">
-                  {proj.post_count || 0} 篇文章
-                </p>
-              </div>
-            </Link>
-          ))}
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <h2
+                      className="text-xl font-semibold text-[var(--color-foreground)]"
+                      style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
+                    >
+                      {proj.name}
+                    </h2>
+                    <span className="opacity-0 group-hover:opacity-100 transition text-[var(--color-foreground-secondary)]">→</span>
+                  </div>
+                  <p className="mt-4 text-sm text-[var(--color-foreground-secondary)]">
+                    {count} {count === 1 ? 'Article' : 'Articles'}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

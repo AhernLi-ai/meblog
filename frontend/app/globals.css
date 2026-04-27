@@ -27,34 +27,47 @@
   --radius-btn: 8px;
   --radius-container: 16px;
   --radius-small: 6px;
+
+  /* Global scene tokens (light) - keep these 4 layers unchanged */
+  --scene-layer-grid-x: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  --scene-layer-grid-y: linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  --scene-layer-glow: radial-gradient(circle at 50% -20%, rgba(191, 219, 254, 0.3) 0%, rgba(191, 219, 254, 0.3) 38%, transparent 72%);
+  --scene-layer-gradient: linear-gradient(to bottom, #ffffff, #f8fafc, #f1f5f9);
+  --scene-grid-size: 40px 40px;
 }
 
 .dark {
   /* Dark Mode Colors */
-  --color-primary: #8fb4ff;
-  --color-primary-hover: #b0caff;
-  --color-primary-light: #334a7a;
-  --color-background: #1b1f27;
-  --color-background-secondary: #252b36;
-  --color-foreground: #e8edf5;
-  --color-foreground-secondary: #bcc7d8;
-  --color-border: #434d5e;
+  --color-primary: #a7c2f5;
+  --color-primary-hover: #c6d7f7;
+  --color-primary-light: #465a7d;
+  --color-background: #212a38;
+  --color-background-secondary: #2b3646;
+  --color-foreground: #dce6f3;
+  --color-foreground-secondary: #afbdd2;
+  --color-border: #536178;
   --color-success: #34D399;
   --color-warning: #FBBF24;
   --color-danger: #f87171;
   --color-danger-soft: rgba(248, 113, 113, 0.16);
   
   /* Shadows */
-  --shadow-card: 0 1px 2px rgba(3, 6, 14, 0.35), 0 6px 18px rgba(3, 6, 14, 0.18);
-  --shadow-card-hover: 0 4px 10px rgba(3, 6, 14, 0.35), 0 14px 28px rgba(3, 6, 14, 0.22);
-  --shadow-navbar: 0 1px 0 rgba(67, 77, 94, 0.9);
+  --shadow-card: 0 1px 2px rgba(3, 6, 14, 0.24), 0 8px 20px rgba(3, 6, 14, 0.12);
+  --shadow-card-hover: 0 6px 14px rgba(3, 6, 14, 0.22), 0 16px 28px rgba(3, 6, 14, 0.16);
+  --shadow-navbar: 0 1px 0 rgba(116, 130, 156, 0.5);
+
+  /* Global scene tokens (dark) */
+  --scene-layer-grid-x: linear-gradient(to right, rgba(148, 163, 184, 0.022) 1px, transparent 1px);
+  --scene-layer-grid-y: linear-gradient(to bottom, rgba(148, 163, 184, 0.022) 1px, transparent 1px);
+  --scene-layer-glow: radial-gradient(circle at 50% -20%, rgba(96, 165, 250, 0.1) 0%, rgba(96, 165, 250, 0.065) 38%, transparent 74%);
+  --scene-layer-gradient: linear-gradient(to bottom, #172133, #1c273a, #172234);
 }
 
 /* Improve dark mode readability for primary data surfaces */
 .dark input:not([type='checkbox']):not([type='radio']):not([type='range']),
 .dark textarea,
 .dark select {
-  background-color: #2c3442;
+  background-color: #333f50;
   border-color: var(--color-border);
   color: var(--color-foreground);
 }
@@ -62,7 +75,7 @@
 .dark input::placeholder,
 .dark textarea::placeholder {
   color: var(--color-foreground-secondary);
-  opacity: 0.9;
+  opacity: 0.78;
 }
 
 .dark .prose,
@@ -75,17 +88,17 @@
 .dark .prose h2,
 .dark .prose h3,
 .dark .prose h4 {
-  color: #f0f6fc;
+  color: #e6eef9;
 }
 
 .dark .prose blockquote {
   border-left-color: var(--color-primary);
-  background-color: rgba(122, 162, 247, 0.12);
+  background-color: rgba(122, 162, 247, 0.08);
 }
 
 .dark .prose code {
-  background-color: #293244;
-  color: #f0f6fc;
+  background-color: #334052;
+  color: #ebf2fb;
 }
 
 .dark .prose a {
@@ -98,7 +111,7 @@
 }
 
 .dark .prose thead {
-  background-color: rgba(88, 166, 255, 0.08);
+  background-color: rgba(88, 166, 255, 0.05);
 }
 
 .dark .prose td,
@@ -131,6 +144,17 @@ body {
   transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+.global-engineering-bg {
+  background-image:
+    var(--scene-layer-grid-x),
+    var(--scene-layer-grid-y),
+    var(--scene-layer-glow),
+    var(--scene-layer-gradient);
+  background-size: var(--scene-grid-size), var(--scene-grid-size), auto, auto;
+  background-attachment: fixed, fixed, fixed, fixed;
+  background-color: var(--color-background);
 }
 
 /* Keep autofill fields visually consistent with theme */

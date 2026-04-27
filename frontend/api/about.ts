@@ -1,10 +1,27 @@
 import api from './client';
 
+export interface TechStackItem {
+  name: string;
+  summary: string | null;
+  sort_order: number | null;
+  background_image_url: string | null;
+}
+
+export interface CareerTimelineItem {
+  period: string;
+  title: string;
+  description: string;
+  tag: string | null;
+  short_tag: string | null;
+}
+
 export interface AboutData {
   username: string;
   avatar_url: string | null;
   bio: string | null;
   tech_stack: string[];
+  tech_stack_items: TechStackItem[];
+  career_timeline: CareerTimelineItem[];
   github_url: string | null;
   zhihu_url: string | null;
   twitter_url: string | null;

@@ -2,7 +2,6 @@ import { fetchFromServerApi } from '@/app/lib/server-api';
 import type { PostListResponse } from '@/types';
 import PostCard from '@/components/PostCard';
 import Pagination from '@/components/Pagination';
-import { SparklesIcon } from '@heroicons/react/24/outline';
 import { use } from 'react';
 
 export const revalidate = 180;
@@ -36,18 +35,35 @@ export default function Home({ searchParams }: HomeProps) {
   return (
     <div>
       {/* Hero Header */}
-      <div className="mb-10 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 bg-[var(--color-primary)]/10 rounded-full text-sm text-[var(--color-primary)]">
-          <SparklesIcon className="w-4 h-4" />
-          <span>欢迎来到我的博客</span>
+      <section className="mb-10 md:mb-12 px-2 py-16 md:px-4 md:py-24">
+          <h1
+            className="text-5xl md:text-7xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100"
+            style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
+          >
+            Hello World; 我是
+            <br />
+            <span className="text-blue-600 dark:text-blue-300">李衡</span>
+            <br />
+            <br />
+            我在构建 AI 系统
+            <br />
+            而不仅仅是调用模型
+          </h1>
+
+          <p className="mt-8 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg dark:text-slate-300">
+            从 RAG、Agent 到 AI 平台架构，专注把模型能力变成真正可运行的系统，解决复杂业务问题，而不是停留在 Demo。
+          </p>
+      </section>
+
+      <section className="mx-auto -mt-20 mb-16 max-w-4xl px-6">
+        <div className="relative rounded-2xl border border-slate-200 bg-white/50 p-8 shadow-sm backdrop-blur dark:border-slate-500/55 dark:bg-slate-800/45 dark:shadow-[0_8px_24px_rgba(2,6,23,0.35)]">
+          <div className="absolute -top-3 left-6 text-2xl text-slate-300 dark:text-slate-500">“</div>
+          <p className="mt-1 text-[15px] font-medium leading-relaxed text-slate-600 md:text-[17px] dark:text-slate-200">
+            The best systems are not built by adding more, but by removing what shouldn&apos;t exist.
+          </p>
+          <div className="mt-3 text-[11px] uppercase tracking-[0.1em] text-slate-400 dark:text-slate-400">— Engineering Philosophy</div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-[var(--color-foreground)] mb-4" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-          📝 Meblog
-        </h1>
-        <p className="text-lg text-[var(--color-foreground-secondary)] max-w-2xl mx-auto">
-          分享技术与生活，记录成长点滴
-        </p>
-      </div>
+      </section>
 
       {/* Posts */}
       {!error && data?.items.length === 0 ? (
