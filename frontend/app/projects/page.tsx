@@ -12,6 +12,7 @@ function isImageUrl(value: string | null | undefined): boolean {
   return (
     lower.startsWith('http://') ||
     lower.startsWith('https://') ||
+    lower.startsWith('oss://') ||
     lower.startsWith('/') ||
     lower.startsWith('data:image/')
   );
