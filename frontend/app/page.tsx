@@ -35,14 +35,14 @@ export default function Home({ searchParams }: HomeProps) {
   return (
     <div>
       {/* Hero Header */}
-      <section className="mb-10 md:mb-12 px-2 py-16 md:px-4 md:py-24">
+      <section className="mb-10 md:mb-12 px-2 py-7 md:px-4 md:py-12">
           <h1
-            className="text-5xl md:text-7xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100"
+            className="text-[42px] md:text-[64px] font-bold leading-[1.1] tracking-tight text-slate-950 dark:text-slate-100"
             style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
           >
             Hello World; 我是
             <br />
-            <span className="text-blue-600 dark:text-blue-300">李衡</span>
+            <span className="hero-name">李衡</span>
             <br />
             <br />
             我在构建 AI 系统
@@ -50,18 +50,20 @@ export default function Home({ searchParams }: HomeProps) {
             而不仅仅是调用模型
           </h1>
 
-          <p className="mt-8 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg dark:text-slate-300">
-            从 RAG、Agent 到 AI 平台架构，专注把模型能力变成真正可运行的系统，解决复杂业务问题，而不是停留在 Demo。
+          <p className="hero-intro mt-8 max-w-2xl leading-relaxed">
+            从 RAG、Agent 到 AI 平台架构，专注把模型能力变成真正可运行的系统，解决复杂
+            <br />
+            业务问题，而不是停留在 Demo。
           </p>
       </section>
 
-      <section className="mx-auto -mt-20 mb-16 max-w-4xl px-6">
-        <div className="relative rounded-2xl border border-slate-200 bg-white/50 p-8 shadow-sm backdrop-blur dark:border-slate-500/55 dark:bg-slate-800/45 dark:shadow-[0_8px_24px_rgba(2,6,23,0.35)]">
-          <div className="absolute -top-3 left-6 text-2xl text-slate-300 dark:text-slate-500">“</div>
-          <p className="mt-1 text-[15px] font-medium leading-relaxed text-slate-600 md:text-[17px] dark:text-slate-200">
+      <section className="hero-quote-wrap mx-auto mb-20 max-w-4xl px-6">
+        <div className="hero-quote-card relative rounded-2xl border p-8 shadow-[0_8px_22px_rgba(15,23,42,0.07)] backdrop-blur dark:shadow-[0_8px_24px_rgba(2,6,23,0.35)]">
+          <div className="hero-quote-mark absolute -top-3 left-6 text-2xl">“</div>
+          <p className="hero-quote-main mt-1 text-[15px] font-semibold leading-relaxed md:text-[17px]">
             The best systems are not built by adding more, but by removing what shouldn&apos;t exist.
           </p>
-          <div className="mt-3 text-[11px] uppercase tracking-[0.1em] text-slate-400 dark:text-slate-400">— Engineering Philosophy</div>
+          <div className="hero-quote-meta mt-3 text-[11px] uppercase tracking-[0.1em]">— Engineering Philosophy</div>
         </div>
       </section>
 
