@@ -12,12 +12,12 @@ export const tagsApi = {
     return response.data;
   },
 
-  update: async (id: number, data: { name: string }): Promise<Tag> => {
+  update: async (id: string, data: { name: string }): Promise<Tag> => {
     const response = await api.put<Tag>(`/tags/${id}`, data);
     return response.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/tags/${id}`);
   },
 };

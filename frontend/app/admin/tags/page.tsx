@@ -10,10 +10,13 @@ export default function AdminTagsPage() {
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  const { data: tags = [], isLoading } = useQuery({ queryKey: ['tags'], queryFn: tagsApi.getAll });
+  const { data: tags = [], isLoading } = useQuery({
+    queryKey: ['tags'],
+    queryFn: () => tagsApi.getAll(),
+  });
 
   const createMutation = useMutation({
     mutationFn: tagsApi.create,
@@ -25,7 +28,7 @@ export default function AdminTagsPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) => tagsApi.update(id, { name }),
+    mutationFn: ({ id, name }: { id: string; name: string }) => tagsApi.update(id, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags'] });
       closeModal();
@@ -39,7 +42,7 @@ export default function AdminTagsPage() {
     onError: (err: any) => alert(err.response?.data?.detail || '删除失败'),
   });
 
-  const openModal = (tag?: { id: number; name: string }) => {
+  const openModal = (tag?: { id: string; name: string }) => {
     if (tag) {
       setEditingId(tag.id);
       setName(tag.name);
