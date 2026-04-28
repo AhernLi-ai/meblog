@@ -35,8 +35,6 @@ export interface PopularPosts {
 export interface Summary {
   total_posts: number;
   total_views: number;
-  month_visitors: number;
-  month_views: number;
 }
 
 export interface PublicSummary {

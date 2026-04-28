@@ -1,29 +1,14 @@
 'use client';
 
 import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
-import { settingsApi } from '@/api/settings';
-import { useMutation } from '@tanstack/react-query';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
 export default function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const { isAuthenticated } = useAuth();
-
-  const updateSettings = useMutation({
-    mutationFn: (data: { theme: string }) => settingsApi.update(data),
-    onError: () => {
-      setTheme(theme as 'light' | 'dark' | 'system');
-    },
-  });
+  const { setTheme, resolvedTheme } = useTheme();
 
   const handleToggle = () => {
     const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
-    
-    if (isAuthenticated) {
-      updateSettings.mutate({ theme: nextTheme });
-    }
   };
 
   return (

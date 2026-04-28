@@ -13,9 +13,9 @@ export default function WechatQR({ variant = 'article-end' }: WechatQRProps) {
   const { data: siteSettings } = useQuery({
     queryKey: ['site-settings'],
     queryFn: siteSettingsApi.getSiteSettings,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
   const [displayQrUrl, setDisplayQrUrl] = useState('');
 

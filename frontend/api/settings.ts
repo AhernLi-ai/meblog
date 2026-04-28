@@ -1,14 +1,5 @@
 import api from './client';
 
-export interface UserSettings {
-  id: string;
-  user_id: string;
-  theme: string;
-  language: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface SiteSettings {
   id: string;
   wechat_qr_url: string | null;
@@ -18,18 +9,6 @@ export interface SiteSettings {
   footer_github_url: string | null;
   beian_icp: string | null;
 }
-
-export const settingsApi = {
-  get: async (): Promise<UserSettings> => {
-    const response = await api.get<UserSettings>('/settings');
-    return response.data;
-  },
-
-  update: async (data: { theme?: string; language?: string }): Promise<UserSettings> => {
-    const response = await api.patch<UserSettings>('/settings', data);
-    return response.data;
-  },
-};
 
 export const siteSettingsApi = {
   getSiteSettings: async (): Promise<SiteSettings> => {
