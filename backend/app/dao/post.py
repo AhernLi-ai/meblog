@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.models import Post, Project, Tag
 from app.models.tag import post_tags
 from app.schemas import PostCreate, PostUpdate
+from app.services.storage import normalize_media_value
 from app.utils.logger import logger
 from app.utils.slug import generate_unique_slug
 
@@ -125,12 +126,7 @@ class PostDao:
                 Post.is_hidden.is_(False),
                 or_(Post.project_id.is_(None), Project.is_hidden.is_(False)),
             )
-        post = (await db.execute(stmt)).scalar_one_or_none()
-        if post and not include_unpublished:
-            post.view_count += 1
-            await db.commit()
-            await db.refresh(post)
-        return post
+        return (await db.execute(stmt)).scalar_one_or_none()
 
     @staticmethod
     async def create_post(db: AsyncSession, post: PostCreate, creator_id: str) -> Post:
@@ -138,7 +134,7 @@ class PostDao:
         db_post = Post(
             title=post.title,
             slug=slug,
-            cover=post.cover,
+            cover=normalize_media_value(post.cover),
             content=post.content,
             summary=post.summary or (post.content[:200] + "..." if len(post.content) > 200 else post.content),
             project_id=post.project_id,
@@ -178,7 +174,7 @@ class PostDao:
             db_post.title = post.title
             db_post.slug = await generate_unique_slug(db, post.title, exclude_id=post_id)
         if "cover" in post.model_fields_set:
-            db_post.cover = post.cover
+            db_post.cover = normalize_media_value(post.cover)
         if post.content is not None:
             db_post.content = post.content
         if post.summary is not None:

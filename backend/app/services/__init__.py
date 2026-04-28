@@ -10,6 +10,7 @@ from app.services.settings import SettingsService
 from app.services.stats import StatsService
 from app.services.about import AboutService
 from app.services.visitor import VisitorService
+from app.services.file_asset import FileAssetService
 
 __all__ = [
     "ProjectService",
@@ -21,4 +22,5 @@ __all__ = [
     "StatsService",
     "AboutService",
     "VisitorService",
+    "FileAssetService",
 ]

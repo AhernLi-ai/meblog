@@ -1,23 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
-
-
-class UserSettingsUpdate(BaseModel):
-    theme: Optional[str] = None  # light, dark, system
-    language: Optional[str] = None
-
-
-class UserSettingsResponse(BaseModel):
-    id: str
-    user_id: str
-    theme: str
-    language: str
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class SiteSettingsResponse(BaseModel):
@@ -27,6 +9,8 @@ class SiteSettingsResponse(BaseModel):
     wechat_guide_text: str
     wechat_show_on_article: bool
     wechat_show_in_sidebar: bool
+    footer_github_url: Optional[str] = None
+    beian_icp: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -38,3 +22,5 @@ class SiteSettingsUpdate(BaseModel):
     wechat_guide_text: Optional[str] = None
     wechat_show_on_article: Optional[bool] = None
     wechat_show_in_sidebar: Optional[bool] = None
+    footer_github_url: Optional[str] = None
+    beian_icp: Optional[str] = None

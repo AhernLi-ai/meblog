@@ -13,7 +13,7 @@ router = APIRouter(prefix="/settings", tags=["Settings"])
 
 @router.get("/site", response_model=SiteSettingsResponse)
 async def get_site_settings(db: AsyncSession = Depends(get_db)):
-    return await SettingsService.get_or_create_site_settings(db)
+    return await SettingsService.get_site_settings_service(db)
 
 
 @router.put("/site", response_model=SiteSettingsResponse)

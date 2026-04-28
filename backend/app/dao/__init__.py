@@ -9,6 +9,7 @@ from app.dao.comment import CommentDao
 from app.dao.settings import SettingsDao
 from app.dao.stats import StatsDao
 from app.dao.about import AboutDao
+from app.dao.file_asset import FileAssetDao
 
 __all__ = [
     "ProjectDao",
@@ -18,5 +19,6 @@ __all__ = [
     "CommentDao",
     "SettingsDao",
     "StatsDao",
-    "AboutDao"
+    "AboutDao",
+    "FileAssetDao",
 ]

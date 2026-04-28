@@ -7,5 +7,6 @@ from app.models.access_log import PostViewEvent
 from app.models.post_like import PostLike
 from app.models.comment import Comment
 from app.models.visitor import Visitor
+from app.models.file_asset import FileAsset
 
-__all__ = ["Admin", "Project", "Tag", "Post", "SiteSettings", "AuthorProfile", "PostViewEvent", "PostLike", "Comment", "Visitor"]
+__all__ = ["Admin", "Project", "Tag", "Post", "SiteSettings", "AuthorProfile", "PostViewEvent", "PostLike", "Comment", "Visitor", "FileAsset"]

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from configs import settings
 from app.database import engine, Base
-from app.api import auth_router, posts_router, projects_router, tags_router, settings_router, stats_router, about_router, comments_router
+from app.api import auth_router, posts_router, projects_router, tags_router, settings_router, stats_router, about_router, comments_router, files_router
 from app.api.seo import router as seo_router
 
 app = FastAPI(
@@ -37,6 +37,7 @@ app.include_router(settings_router, prefix=settings.API_V1_STR)
 app.include_router(stats_router, prefix=settings.API_V1_STR)
 app.include_router(about_router, prefix=settings.API_V1_STR)
 app.include_router(comments_router, prefix=settings.API_V1_STR)
+app.include_router(files_router, prefix=settings.API_V1_STR)
 
 # SEO endpoints at root level (not under /api/v1)
 app.include_router(seo_router)

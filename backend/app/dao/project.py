@@ -5,6 +5,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Project, Post
 from app.schemas import ProjectCreate, ProjectUpdate
+from app.services.storage import normalize_media_value
 from app.utils.slug import generate_slug
 from app.utils.logger import logger
 
@@ -78,7 +79,7 @@ class ProjectDao:
             db_project = Project(
                 name=project.name,
                 slug=slug,
-                cover=project.cover,
+                cover=normalize_media_value(project.cover),
                 is_hidden=project.is_hidden,
                 is_pinned=project.is_pinned,
                 sort_order=project.sort_order,
@@ -110,7 +111,7 @@ class ProjectDao:
                 db_project.name = project.name
                 db_project.slug = generate_slug(project.name)
             if "cover" in project.model_fields_set:
-                db_project.cover = project.cover
+                db_project.cover = normalize_media_value(project.cover)
             if project.is_hidden is not None:
                 db_project.is_hidden = project.is_hidden
             if project.is_pinned is not None:

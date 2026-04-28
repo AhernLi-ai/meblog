@@ -32,6 +32,15 @@ class BaseSettingsConfig(BaseSettings):
     FRONTEND_REVALIDATE_URL: str = ""
     FRONTEND_REVALIDATE_TOKEN: str = ""
 
+    # Object storage (OSS)
+    OSS_PROVIDER: str = "aliyun_oss"
+    OSS_ENDPOINT: str = ""
+    OSS_ACCESS_KEY_ID: str = ""
+    OSS_ACCESS_KEY_SECRET: str = ""
+    OSS_BUCKET: str = ""
+    OSS_PUBLIC_BASE_URL: str = ""
+    OSS_SIGN_EXPIRE_SECONDS: int = 3600
+
     class Config:
         case_sensitive = True
         env_file_encoding = "utf-8"

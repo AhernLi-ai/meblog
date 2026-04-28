@@ -1,9 +1,10 @@
 """API layer for Stats - HTTP handling."""
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from app.database import get_db
 from app.services import StatsService
+from app.dao import StatsDao
 from app.utils.security import get_current_user
 from app.models import Admin
 
@@ -51,3 +52,23 @@ async def get_summary(
     current_user: Optional[Admin] = Depends(get_current_user)
 ):
     return await StatsService.get_summary_service(db, current_user)
+
+
+@router.get("/public-summary")
+async def get_public_summary(
+    db: AsyncSession = Depends(get_db),
+):
+    return await StatsDao.get_public_summary_data(db)
+
+
+@router.get("/admin-dashboard")
+async def get_admin_dashboard(
+    db: AsyncSession = Depends(get_db),
+    current_user: Optional[Admin] = Depends(get_current_user)
+):
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    return await StatsDao.get_admin_dashboard_data(db)

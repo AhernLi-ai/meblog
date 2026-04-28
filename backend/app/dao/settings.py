@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import SiteSettings
 from app.schemas import SiteSettingsUpdate
+from app.services.storage import normalize_media_value
 
 
 class SettingsDao:
@@ -16,6 +17,8 @@ class SettingsDao:
             wechat_guide_text="扫码关注公众号，获取更多精彩内容",
             wechat_show_on_article=True,
             wechat_show_in_sidebar=True,
+            footer_github_url=None,
+            beian_icp=None,
         )
         db.add(settings)
         await db.commit()
@@ -30,13 +33,17 @@ class SettingsDao:
         admin_id: str | None = None,
     ) -> SiteSettings:
         if payload.wechat_qr_url is not None:
-            settings.wechat_qr_url = payload.wechat_qr_url
+            settings.wechat_qr_url = normalize_media_value(payload.wechat_qr_url)
         if payload.wechat_guide_text is not None:
             settings.wechat_guide_text = payload.wechat_guide_text
         if payload.wechat_show_on_article is not None:
             settings.wechat_show_on_article = payload.wechat_show_on_article
         if payload.wechat_show_in_sidebar is not None:
             settings.wechat_show_in_sidebar = payload.wechat_show_in_sidebar
+        if payload.footer_github_url is not None:
+            settings.footer_github_url = payload.footer_github_url
+        if payload.beian_icp is not None:
+            settings.beian_icp = payload.beian_icp
         if admin_id is not None:
             settings.updated_by = admin_id
 

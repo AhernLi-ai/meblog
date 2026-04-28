@@ -5,10 +5,10 @@ from fastapi import HTTPException
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
-from app.models import Post, Admin, PostViewEvent, PostLike
+from app.models import Post, Admin, PostLike
 from app.schemas import PostCreate, PostUpdate, PostResponse, PostListResponse, LikeStatusResponse
 from app.schemas.post import AuthorInfo
-from app.dao import PostDao
+from app.dao import PostDao, StatsDao
 from app.dao.about import AboutDao
 from app.utils.logger import logger
 from app.utils.revalidate import notify_frontend_revalidate
@@ -123,14 +123,13 @@ class PostService:
 
             if not effective_include_unpublished and not effective_include_hidden:
                 visitor_id = await VisitorService.resolve_visitor_id(db, request)
-                log = PostViewEvent(
+                await StatsDao.log_access(
+                    db=db,
                     post_id=post.id,
                     visitor_id=visitor_id,
-                    user_agent=request.headers.get("user-agent", "")[:500],
-                    referrer=request.headers.get("referer", "")[:500],
+                    user_agent=request.headers.get("user-agent", "")[:500] or None,
+                    referrer=request.headers.get("referer", "")[:500] or None,
                 )
-                db.add(log)
-                await db.commit()
 
             return await PostService._to_post_response(db, post)
         except HTTPException:

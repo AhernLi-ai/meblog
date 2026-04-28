@@ -1,5 +1,5 @@
 """Service layer for Stats - business logic."""
-from fastapi import Request
+from fastapi import HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from app.models import Admin
@@ -51,5 +51,8 @@ class StatsService:
         current_user: Optional[Admin] = None,
     ) -> dict:
         if current_user is None:
-            return {"error": "Authentication required"}
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
+            )
         return await StatsDao.get_summary_data(db)

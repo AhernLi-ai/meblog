@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import AuthorProfile, SiteSettings
 from app.schemas import AboutUpdate
+from app.services.storage import normalize_media_value
 
 
 class AboutDao:
@@ -29,6 +30,8 @@ class AboutDao:
             wechat_guide_text="扫码关注公众号，获取更多精彩内容",
             wechat_show_on_article=True,
             wechat_show_in_sidebar=True,
+            footer_github_url=None,
+            beian_icp=None,
             created_by=admin_id,
             updated_by=admin_id,
         )
@@ -47,11 +50,28 @@ class AboutDao:
         if update_data.username is not None:
             author.username = update_data.username
         if update_data.avatar_url is not None:
-            author.avatar_url = update_data.avatar_url
+            author.avatar_url = normalize_media_value(update_data.avatar_url)
         if update_data.bio is not None:
             author.bio = update_data.bio
         if update_data.tech_stack is not None:
             author.tech_stack_json = json.dumps(update_data.tech_stack, ensure_ascii=False)
+        if update_data.tech_stack_items is not None:
+            tech_stack_items = []
+            for index, item in enumerate(update_data.tech_stack_items):
+                parsed = item.model_dump()
+                parsed["background_image_url"] = normalize_media_value(parsed.get("background_image_url"))
+                if parsed.get("sort_order") is None:
+                    parsed["sort_order"] = index
+                tech_stack_items.append(parsed)
+            author.tech_stack_json = json.dumps(
+                tech_stack_items,
+                ensure_ascii=False,
+            )
+        if update_data.career_timeline is not None:
+            author.career_timeline_json = json.dumps(
+                [item.model_dump() for item in update_data.career_timeline],
+                ensure_ascii=False,
+            )
         if update_data.github_url is not None:
             author.github_url = update_data.github_url
         if update_data.zhihu_url is not None:
@@ -73,6 +93,16 @@ class AboutDao:
         if author.tech_stack_json:
             try:
                 return json.loads(author.tech_stack_json)
+            except json.JSONDecodeError:
+                pass
+        return []
+
+    @staticmethod
+    def parse_career_timeline(author: AuthorProfile) -> list:
+        """Parse career_timeline_json field."""
+        if author.career_timeline_json:
+            try:
+                return json.loads(author.career_timeline_json)
             except json.JSONDecodeError:
                 pass
         return []
