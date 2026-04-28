@@ -7,9 +7,14 @@ rm -rf /var/lib/apt/lists/*
 # 安装 uv（使用 pip + 清华镜像）
 RUN pip install uv --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 ENV PATH="/app/.venv/bin:/root/.local/bin:$PATH"
+
+ENV UV_HTTP_TIMEOUT=120
+ENV UV_HTTP_RETRIES=5
+ENV UV_CACHE_DIR=/root/.cache/uv
+
 # 依赖
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN  uv sync --frozen --no-dev --index-url https://mirrors.aliyun.com/pypi/simple
 # 代码
 COPY . .
 EXPOSE 8000
