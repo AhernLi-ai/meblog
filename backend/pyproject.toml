@@ -19,6 +19,8 @@ dependencies = [
     "psycopg2-binary>=2.9.9",
     "asyncpg>=0.31.0",
     "aiosqlite>=0.22.1",
+    "oss2>=2.19.1",
+    "aliyun-python-sdk-core>=2.16.0",
 ]
 
 [build-system]
