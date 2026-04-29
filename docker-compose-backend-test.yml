@@ -30,3 +30,5 @@ services:
 networks:
   common-network:
     external: true
+
+# docker compose -f docker-compose-frontend-test.yml -p meblog-test up -d --build

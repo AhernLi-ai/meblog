@@ -24,3 +24,5 @@ services:
 networks:
   common-network:
     external: true
+
+# docker compose -f docker-compose-frontend-production.yml -p meblog-prod up -d --build
