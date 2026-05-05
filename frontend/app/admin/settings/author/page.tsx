@@ -45,6 +45,7 @@ export default function AdminAuthorSettingsPage() {
   const queryClient = useQueryClient();
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarThumbUrl, setAvatarThumbUrl] = useState('');
   const [bio, setBio] = useState('');
   const [techStackItems, setTechStackItems] = useState<ParsedTechItem[]>([]);
   const [careerTimelineText, setCareerTimelineText] = useState('');
@@ -64,6 +65,7 @@ export default function AdminAuthorSettingsPage() {
     if (!data) return;
     setUsername(data.username || '');
     setAvatarUrl(data.avatar_url || '');
+    setAvatarThumbUrl(data.avatar_thumb_url || '');
     setBio(data.bio || '');
     setTechStackItems(
       (data.tech_stack_items?.length
@@ -146,6 +148,7 @@ export default function AdminAuthorSettingsPage() {
     updateMutation.mutate({
       username: username.trim() || undefined,
       avatar_url: avatarUrl || null,
+      avatar_thumb_url: avatarThumbUrl || null,
       bio: bio || null,
       tech_stack: normalizedTechStackItems.map((item) => item.name),
       tech_stack_items: normalizedTechStackItems,
@@ -208,6 +211,14 @@ export default function AdminAuthorSettingsPage() {
               onChange={setAvatarUrl}
               folder="author/avatar"
               placeholder="https://example.com/avatar.png"
+            />
+
+            <OssUploadInput
+              label="头像缩略图 URL（用于右侧边栏）"
+              value={avatarThumbUrl}
+              onChange={setAvatarThumbUrl}
+              folder="author/avatar"
+              placeholder="https://example.com/avatar-thumb.png"
             />
 
             <div>

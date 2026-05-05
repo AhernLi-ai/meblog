@@ -22,6 +22,7 @@ class AboutResponse(BaseModel):
     """Public about page data:博主信息 + 站点设置"""
     username: str
     avatar_url: Optional[str] = None
+    avatar_thumb_url: Optional[str] = None
     bio: Optional[str] = None
     tech_stack: Optional[List[str]] = []
     tech_stack_items: List[TechStackItem] = []
@@ -42,6 +43,7 @@ class AboutUpdate(BaseModel):
     """Update about data (admin only)"""
     username: Optional[str] = None
     avatar_url: Optional[str] = None
+    avatar_thumb_url: Optional[str] = None
     bio: Optional[str] = None
     tech_stack: Optional[List[str]] = None
     tech_stack_items: Optional[List[TechStackItem]] = None

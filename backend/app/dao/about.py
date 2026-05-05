@@ -51,6 +51,8 @@ class AboutDao:
             author.username = update_data.username
         if update_data.avatar_url is not None:
             author.avatar_url = normalize_media_value(update_data.avatar_url)
+        if update_data.avatar_thumb_url is not None:
+            author.avatar_thumb_url = normalize_media_value(update_data.avatar_thumb_url)
         if update_data.bio is not None:
             author.bio = update_data.bio
         if update_data.tech_stack is not None:

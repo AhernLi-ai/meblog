@@ -52,15 +52,16 @@ export default function Layout({ children }: LayoutProps) {
     queryKey: ['about'],
     queryFn: aboutApi.getAbout,
   });
+  const sidebarAvatarSource = about?.avatar_thumb_url || about?.avatar_url || '';
 
   useEffect(() => {
     setAvatarBroken(false);
-  }, [about?.avatar_url]);
+  }, [sidebarAvatarSource]);
 
   useEffect(() => {
     let cancelled = false;
     let localBlobUrl = '';
-    const sourceUrl = about?.avatar_url;
+    const sourceUrl = sidebarAvatarSource;
     if (!sourceUrl) {
       setCachedAvatarUrl('');
       return () => {};
@@ -90,7 +91,7 @@ export default function Layout({ children }: LayoutProps) {
         URL.revokeObjectURL(localBlobUrl);
       }
     };
-  }, [about?.avatar_url]);
+  }, [sidebarAvatarSource]);
 
   const { data: summaryData } = useQuery({
     queryKey: [isAdminViewer ? 'admin-summary' : 'public-summary', isAdminViewer],
@@ -147,10 +148,10 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="p-5">
                   <div className="flex items-center gap-4">
                     <Link href="/about" className="w-16 h-16 rounded-full overflow-hidden border border-[var(--color-border)] bg-[var(--color-background-secondary)] shrink-0 block hover:opacity-90 transition-opacity">
-                      {about?.avatar_url && !avatarBroken ? (
+                      {sidebarAvatarSource && !avatarBroken ? (
                         <img
-                          src={cachedAvatarUrl || about.avatar_url}
-                          alt={about.username || '作者头像'}
+                          src={cachedAvatarUrl || sidebarAvatarSource}
+                          alt={about?.username || '作者头像'}
                           className="w-full h-full object-cover"
                           onError={() => setAvatarBroken(true)}
                         />

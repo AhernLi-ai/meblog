@@ -39,6 +39,7 @@ class AuthorProfile(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     username: Mapped[str] = mapped_column(String(50), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    avatar_thumb_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     tech_stack_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     career_timeline_json: Mapped[str | None] = mapped_column(Text, nullable=True)

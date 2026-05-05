@@ -80,6 +80,7 @@ class AboutService:
         return AboutResponse(
             username=author.username,
             avatar_url=resolve_media_url(author.avatar_url),
+            avatar_thumb_url=resolve_media_url(author.avatar_thumb_url),
             bio=author.bio,
             tech_stack=tech_stack,
             tech_stack_items=tech_stack_items,

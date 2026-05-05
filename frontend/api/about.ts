@@ -18,6 +18,7 @@ export interface CareerTimelineItem {
 export interface AboutData {
   username: string;
   avatar_url: string | null;
+  avatar_thumb_url: string | null;
   bio: string | null;
   tech_stack: string[];
   tech_stack_items: TechStackItem[];
