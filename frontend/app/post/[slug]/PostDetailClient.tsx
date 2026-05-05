@@ -193,14 +193,16 @@ export default function PostDetailClient({
               <div className="text-base text-[var(--color-foreground-secondary)]">
                 <span className="inline-block w-12 text-right">标签</span>
                 <span>:</span>
-                {post.tags.map((tag: any) => (
-                  <Link
-                    key={tag.id}
-                    href={`/tag/${tag.slug}`}
-                    className="text-[var(--color-primary)] hover:underline ml-1"
-                  >
-                    {tag.name}
-                  </Link>
+                {post.tags.map((tag: any, index: number) => (
+                  <span key={tag.id} className="ml-1">
+                    {index > 0 && <span className="text-[var(--color-foreground-secondary)]">、</span>}
+                    <Link
+                      href={`/tag/${tag.slug}`}
+                      className="text-[var(--color-primary)] hover:underline"
+                    >
+                      {tag.name}
+                    </Link>
+                  </span>
                 ))}
               </div>
             )}

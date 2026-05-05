@@ -2,7 +2,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from app.schemas import SiteSettingsResponse, SiteSettingsUpdate
+from app.schemas import (
+    SiteSettingsResponse,
+    SiteSettingsUpdate,
+    SeoSettingsResponse,
+    SeoSettingsUpdate,
+)
 from app.services import SettingsService
 from app.utils.security import get_current_admin_user
 from app.models import Admin
@@ -23,3 +28,17 @@ async def update_site_settings(
     current_admin: Admin = Depends(get_current_admin_user),
 ):
     return await SettingsService.update_site_settings_service(db, payload, current_admin)
+
+
+@router.get("/seo", response_model=SeoSettingsResponse)
+async def get_seo_settings(db: AsyncSession = Depends(get_db)):
+    return await SettingsService.get_seo_settings_service(db)
+
+
+@router.put("/seo", response_model=SeoSettingsResponse)
+async def update_seo_settings(
+    payload: SeoSettingsUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin_user),
+):
+    return await SettingsService.update_seo_settings_service(db, payload, current_admin)

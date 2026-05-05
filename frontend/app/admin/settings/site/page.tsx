@@ -10,6 +10,9 @@ import OssUploadInput from '@/components/OssUploadInput';
 
 export default function AdminSiteSettingsPage() {
   const queryClient = useQueryClient();
+  const [siteName, setSiteName] = useState('');
+  const [siteLogoUrl, setSiteLogoUrl] = useState('');
+  const [siteFaviconUrl, setSiteFaviconUrl] = useState('');
   const [wechatQrUrl, setWechatQrUrl] = useState('');
   const [wechatGuideText, setWechatGuideText] = useState('');
   const [showOnArticle, setShowOnArticle] = useState(true);
@@ -26,6 +29,9 @@ export default function AdminSiteSettingsPage() {
 
   useEffect(() => {
     if (!data) return;
+    setSiteName(data.site_name || '');
+    setSiteLogoUrl(data.site_logo_url || '');
+    setSiteFaviconUrl(data.site_favicon_url || '');
     setWechatQrUrl(data.wechat_qr_url || '');
     setWechatGuideText(data.wechat_guide_text || '');
     setShowOnArticle(Boolean(data.wechat_show_on_article));
@@ -53,6 +59,9 @@ export default function AdminSiteSettingsPage() {
     setMessage('');
     setError('');
     updateMutation.mutate({
+      site_name: siteName.trim() || '技术博客',
+      site_logo_url: siteLogoUrl || null,
+      site_favicon_url: siteFaviconUrl || null,
       wechat_qr_url: wechatQrUrl || null,
       wechat_guide_text: wechatGuideText,
       wechat_show_on_article: showOnArticle,
@@ -74,7 +83,7 @@ export default function AdminSiteSettingsPage() {
             网站设置
           </h1>
           <p className="mt-2 text-sm text-[var(--color-foreground-secondary)]">
-            配置公众号二维码、引导文案和不同页面的展示策略。
+            配置站点品牌信息、公众号二维码和展示策略。
           </p>
         </div>
 
@@ -101,6 +110,34 @@ export default function AdminSiteSettingsPage() {
           <form onSubmit={handleSubmit} className="space-y-6 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl p-6 shadow-[var(--shadow-card)]">
             {message && <div className="p-3 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm">{message}</div>}
             {error && <div className="p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">{error}</div>}
+
+            <div className="space-y-1">
+              <label className={labelClass}>网站名称</label>
+              <input
+                type="text"
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+                className={inputClass}
+                placeholder="请输入网站名称"
+              />
+            </div>
+
+            <OssUploadInput
+              label="网站 Logo URL"
+              value={siteLogoUrl}
+              onChange={setSiteLogoUrl}
+              folder="site/branding"
+              placeholder="https://example.com/site-logo.png"
+            />
+
+            <OssUploadInput
+              label="网站 Favicon URL"
+              value={siteFaviconUrl}
+              onChange={setSiteFaviconUrl}
+              folder="site/branding"
+              placeholder="https://example.com/favicon.png"
+              showPreview={false}
+            />
 
             <OssUploadInput
               label="公众号二维码 URL"

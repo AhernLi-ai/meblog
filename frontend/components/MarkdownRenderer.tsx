@@ -4,8 +4,8 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
-import { useState, type ReactNode } from 'react';
-import sanitizeHtml from 'sanitize-html';
+import { useEffect, useState, type ReactNode } from 'react';
+import { resolveSignedMediaUrl, isSignableOssMediaUrl } from '@/app/lib/media-url';
 import 'katex/dist/katex.min.css';
 
 // Extract plain text from React children (handles arrays, elements, etc.)
@@ -62,42 +62,80 @@ interface MarkdownRendererProps {
   content: string;
 }
 
-export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
-  // Sanitize HTML to prevent XSS attacks
-  const sanitizedContent = sanitizeHtml(content, {
-    allowedTags: ['b', 'i', 'em', 'strong', 'a', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'br', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img', 'span', 'div', 'input', 'svg', 'path'],
-    allowedAttributes: {
-      'a': ['href', 'target', 'rel', 'class'],
-      'img': ['src', 'alt', 'class', 'loading', 'width', 'height'],
-      'code': ['class'],
-      'pre': ['class'],
-      'input': ['type', 'checked', 'disabled'],
-      'span': ['class'],
-      'div': ['class'],
-      'td': ['class'],
-      'th': ['class'],
-      'h1': ['id', 'class'],
-      'h2': ['id', 'class'],
-      'h3': ['id', 'class'],
-      'h4': ['id', 'class'],
-      'p': ['class'],
-      'li': ['class'],
-      'ul': ['class'],
-      'ol': ['class'],
-      'blockquote': ['class'],
-      'table': ['class'],
-      'svg': ['class', 'viewBox', 'fill', 'stroke', 'strokeWidth', 'd', 'xmlns'],
-      'path': ['d', 'strokeLinecap', 'strokeLinejoin', 'strokeWidth'],
-    },
-    allowedSchemes: ['http', 'https'],
-    disallowedTagsMode: 'discard',
-  });
+const SAFE_SCHEMES = new Set(['http', 'https', 'mailto', 'tel', 'oss']);
 
+function safeMarkdownUrlTransform(url: string): string {
+  if (!url) return url;
+  if (url.startsWith('#') || url.startsWith('/')) return url;
+  const schemeMatch = url.match(/^([a-zA-Z][a-zA-Z\d+\-.]*):/);
+  if (!schemeMatch) return url;
+  const scheme = schemeMatch[1].toLowerCase();
+  return SAFE_SCHEMES.has(scheme) ? url : '';
+}
+
+function MarkdownImage({
+  src,
+  alt,
+  className,
+  ...props
+}: React.ImgHTMLAttributes<HTMLImageElement>) {
+  const [resolvedSrc, setResolvedSrc] = useState(src || '');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveSrc = async () => {
+      if (!src || typeof src !== 'string') {
+        setResolvedSrc('');
+        return;
+      }
+
+      if (!isSignableOssMediaUrl(src)) {
+        setResolvedSrc(src);
+        return;
+      }
+
+      try {
+        const signedUrl = await resolveSignedMediaUrl(src);
+        if (!cancelled) {
+          setResolvedSrc(signedUrl || src);
+        }
+      } catch {
+        if (!cancelled) {
+          setResolvedSrc(src);
+        }
+      }
+    };
+
+    resolveSrc();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  if (!resolvedSrc) {
+    return null;
+  }
+
+  return (
+    <img
+      src={resolvedSrc}
+      alt={alt || ''}
+      className={className}
+      loading="lazy"
+      {...props}
+    />
+  );
+}
+
+export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <div className="max-w-none">
     <ReactMarkdown
       remarkPlugins={[remarkMath, remarkGfm]}
       rehypePlugins={[rehypeKatex]}
+      urlTransform={safeMarkdownUrlTransform}
       components={{
         h1({ children, ...props }) {
           const id = createHeadingId(children);
@@ -165,11 +203,10 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         },
         img({ node, src, alt, ...props }) {
           return (
-            <img
+            <MarkdownImage
               src={src}
               alt={alt || ''}
               className="max-w-full h-auto rounded-[12px] shadow-[var(--shadow-card)] my-4"
-              loading="lazy"
               {...props}
             />
           );
@@ -191,7 +228,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         blockquote({ children, ...props }) {
           return (
             <blockquote
-              className="border-l-4 border-[var(--color-primary)] bg-[var(--color-background-secondary)] p-4 my-4 rounded-r-[8px]"
+              className="border-l-4 border-[var(--color-primary)] bg-[var(--color-background-secondary)] px-4 py-2.5 my-3 rounded-r-[8px] flex items-center [&>p]:mb-0 [&>p]:leading-7"
               {...props}
             >
               {children}
@@ -262,7 +299,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         },
       }}
     >
-      {sanitizedContent}
+      {content}
     </ReactMarkdown>
     </div>
   );

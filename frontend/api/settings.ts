@@ -2,6 +2,9 @@ import api from './client';
 
 export interface SiteSettings {
   id: string;
+  site_name: string;
+  site_logo_url: string | null;
+  site_favicon_url: string | null;
   wechat_qr_url: string | null;
   wechat_guide_text: string;
   wechat_show_on_article: boolean;

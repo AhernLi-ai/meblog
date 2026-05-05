@@ -26,7 +26,7 @@ function formatTagName(slug: string): string {
 
 async function getTagPosts(slug: string, page: number): Promise<PostListResponse> {
   return fetchFromServerApi<PostListResponse>(
-    `/posts?tag=${encodeURIComponent(slug)}&page=${page}&size=5&include_hidden=true`,
+    `/posts?tag=${encodeURIComponent(slug)}&page=${page}&size=5`,
     { revalidate }
   );
 }
@@ -54,11 +54,22 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
   const page = parseInt(pageStr || '1', 10);
   assertValidPage(page);
   let initialData: PostListResponse = { items: [], total: 0, page, size: 5, pages: 1 };
+  let loadFailed = false;
 
   try {
     initialData = await getTagPosts(slug, page);
   } catch {
-    // Keep tag page render resilient when posts query is temporarily unavailable.
+    loadFailed = true;
+  }
+
+  if (loadFailed) {
+    return (
+      <div className="text-center py-16">
+        <div className="text-6xl mb-4">⚠️</div>
+        <h2 className="text-2xl font-semibold text-[var(--color-foreground)] mb-2">标签文章加载失败</h2>
+        <p className="text-[var(--color-foreground-secondary)]">请稍后刷新页面重试。</p>
+      </div>
+    );
   }
 
   return <TagClient initialTagSlug={slug} initialData={initialData} initialPage={page} />;

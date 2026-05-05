@@ -1,4 +1,5 @@
 """DAO layer for Post - database CRUD operations."""
+import re
 from typing import Optional
 
 from sqlalchemy import func, or_, select
@@ -14,6 +15,13 @@ from app.utils.slug import generate_unique_slug
 
 
 class PostDao:
+    @staticmethod
+    def _normalize_tag_slug(value: str) -> str:
+        normalized = value.strip().lower()
+        normalized = re.sub(r"[\s_]+", "-", normalized)
+        normalized = re.sub(r"-+", "-", normalized)
+        return normalized.strip("-")
+
     @staticmethod
     async def _get_post_with_relations(db: AsyncSession, post_id: str) -> Post | None:
         stmt = (
@@ -72,10 +80,14 @@ class PostDao:
             count_stmt = count_stmt.where(Project.slug == project_slug)
             stmt = stmt.where(Project.slug == project_slug)
         if tag_slug:
+            normalized_tag_slug = PostDao._normalize_tag_slug(tag_slug)
+            tag_filters = [Tag.slug == tag_slug]
+            if normalized_tag_slug and normalized_tag_slug != tag_slug:
+                tag_filters.append(Tag.slug == normalized_tag_slug)
             tagged_post_ids = (
                 select(post_tags.c.post_id)
                 .join(Tag, Tag.id == post_tags.c.tag_id)
-                .where(Tag.slug == tag_slug)
+                .where(or_(*tag_filters))
             )
             count_stmt = count_stmt.where(Post.id.in_(tagged_post_ids))
             stmt = stmt.where(Post.id.in_(tagged_post_ids))

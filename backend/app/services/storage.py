@@ -34,6 +34,8 @@ class AliyunOSSProvider:
         access_key_secret = _setting_str("OSS_ACCESS_KEY_SECRET")
         bucket_name = _setting_str("OSS_BUCKET")
         public_base_url = _setting_str("OSS_PUBLIC_BASE_URL").rstrip("/")
+        if endpoint and not endpoint.startswith(("http://", "https://")):
+            endpoint = f"https://{endpoint}"
 
         if not endpoint or not access_key_id or not access_key_secret or not bucket_name:
             raise RuntimeError("OSS config missing: OSS_ENDPOINT/OSS_ACCESS_KEY_ID/OSS_ACCESS_KEY_SECRET/OSS_BUCKET")
@@ -53,7 +55,8 @@ class AliyunOSSProvider:
         if self._public_base_url:
             url = f"{self._public_base_url}/{object_key}"
         else:
-            url = f"https://{self._bucket_name}.{_setting_str('OSS_ENDPOINT')}/{object_key}"
+            endpoint_host = _normalize_endpoint(_setting_str("OSS_ENDPOINT"))
+            url = f"https://{self._bucket_name}.{endpoint_host}/{object_key}"
 
         return ObjectStorageResult(
             provider=self.provider_name,

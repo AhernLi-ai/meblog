@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { siteSettingsApi } from '@/api/settings';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -20,6 +22,12 @@ import {
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const pathname = usePathname();
+  const { data: siteSettings } = useQuery({
+    queryKey: ['site-settings'],
+    queryFn: siteSettingsApi.getSiteSettings,
+  });
+  const siteName = siteSettings?.site_name || '技术博客';
+  const siteLogo = siteSettings?.site_logo_url || '/bugoo-logo.png';
 
   const handleLogout = () => {
     logout();
@@ -37,11 +45,11 @@ export default function Navbar() {
             style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
           >
             <img
-              src="/bugoo-logo.png"
-              alt="Bugoo logo"
+              src={siteLogo}
+              alt={`${siteName} logo`}
               className="w-10 h-10 rounded-full object-cover border border-[var(--color-border)]"
             />
-            <span className="inline-block">AhernLi</span>
+            <span className="inline-block">{siteName}</span>
           </Link>
 
           {/* Desktop Nav (centered) */}

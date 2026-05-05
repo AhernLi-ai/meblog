@@ -1,13 +1,13 @@
 """
 DAO layer for Tag - database CRUD operations.
 """
-import re
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Tag, Post, Project
 from app.models.tag import post_tags
 from app.schemas import TagCreate, TagUpdate
 from app.utils.logger import logger
+from app.utils.slug import generate_slug
 
 
 class TagDao:
@@ -16,11 +16,7 @@ class TagDao:
     @staticmethod
     def generate_slug(text: str) -> str:
         """Generate a URL-friendly slug from text."""
-        text = text.lower()
-        text = re.sub(r'[^\w\s-]', '', text)
-        text = re.sub(r'[\s_-]+', '-', text)
-        text = re.sub(r'^-+|-+$', '', text)
-        return text
+        return generate_slug(text, max_length=50)
 
     @staticmethod
     async def get_tags(

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { buildCoverFallbackCandidates } from '@/app/lib/cover-fallback';
-import { filesApi } from '@/api/files';
+import { isSignableOssMediaUrl, resolveSignedMediaUrl } from '@/app/lib/media-url';
 
 interface CoverImageProps {
   src: string;
@@ -22,13 +22,13 @@ export default function CoverImage({
   useEffect(() => {
     let cancelled = false;
     const resolveSrc = async () => {
-      if (!src?.startsWith('oss://')) {
+      if (!src || !isSignableOssMediaUrl(src)) {
         setResolvedSrc(src);
         return;
       }
       try {
-        const signed = await filesApi.getSignedUrl(src);
-        if (!cancelled) setResolvedSrc(signed.signed_url);
+        const signedUrl = await resolveSignedMediaUrl(src);
+        if (!cancelled) setResolvedSrc(signedUrl);
       } catch {
         if (!cancelled) setResolvedSrc(src);
       }

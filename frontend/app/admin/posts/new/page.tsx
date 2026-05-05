@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -10,6 +10,7 @@ import { tagsApi } from '@/api/tags';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import AdminGuard from '@/components/AdminGuard';
 import OssUploadInput from '@/components/OssUploadInput';
+import { filesApi } from '@/api/files';
 
 export default function AdminPostNewPage() {
   const router = useRouter();
@@ -23,6 +24,9 @@ export default function AdminPostNewPage() {
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [isHidden, setIsHidden] = useState(false);
   const [error, setError] = useState('');
+  const [uploadingInlineImage, setUploadingInlineImage] = useState(false);
+  const inlineImageInputRef = useRef<HTMLInputElement | null>(null);
+  const contentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects', 'admin-visible'],
@@ -62,6 +66,50 @@ export default function AdminPostNewPage() {
 
   const handleTagToggle = (tagId: string) => {
     setTagIds((prev) => (prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]));
+  };
+
+  const insertInlineImageMarkdown = (imageUrl: string, filename: string) => {
+    const textarea = contentTextareaRef.current;
+    const safeFilename = filename.replace(/\.[^/.]+$/, '') || '图片';
+    const markdown = `\n![${safeFilename}](${imageUrl})\n`;
+    if (!textarea) {
+      setContent((prev) => `${prev}${markdown}`);
+      return;
+    }
+
+    const start = textarea.selectionStart ?? content.length;
+    const end = textarea.selectionEnd ?? content.length;
+    const nextContent = `${content.slice(0, start)}${markdown}${content.slice(end)}`;
+    const nextCursor = start + markdown.length;
+    setContent(nextContent);
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(nextCursor, nextCursor);
+    });
+  };
+
+  const handlePickInlineImage = () => {
+    inlineImageInputRef.current?.click();
+  };
+
+  const handleInlineImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setError('');
+    setUploadingInlineImage(true);
+    try {
+      const uploaded = await filesApi.upload(file, 'posts/content');
+      const imageUrl = uploaded.storage_key || uploaded.url;
+      if (!imageUrl) {
+        throw new Error('图片上传成功但未返回可用地址');
+      }
+      insertInlineImageMarkdown(imageUrl, file.name);
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || err?.message || '正文图片上传失败');
+    } finally {
+      setUploadingInlineImage(false);
+      event.target.value = '';
+    }
   };
 
   const inputClass = 'w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-background)] text-[var(--color-foreground)] focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]';
@@ -155,9 +203,33 @@ export default function AdminPostNewPage() {
 
           <div className={sectionClass}>
             <h2 className="text-base font-semibold text-[var(--color-foreground)]">正文内容</h2>
-            <label className={labelClass}>正文 (Markdown)</label>
+            <div className="flex items-center justify-between gap-3">
+              <label className={labelClass}>正文 (Markdown)</label>
+              <button
+                type="button"
+                onClick={handlePickInlineImage}
+                disabled={uploadingInlineImage}
+                className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:opacity-60 transition-colors"
+              >
+                {uploadingInlineImage ? '上传中...' : '插入图片'}
+              </button>
+              <input
+                ref={inlineImageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleInlineImageChange}
+              />
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <textarea value={content} onChange={(e) => setContent(e.target.value)} className={`${inputClass} h-96 font-mono text-sm`} placeholder="在这里编写 Markdown 内容..." required />
+              <textarea
+                ref={contentTextareaRef}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className={`${inputClass} h-96 font-mono text-sm`}
+                placeholder="在这里编写 Markdown 内容..."
+                required
+              />
               <div className="h-96 overflow-auto bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4">
                 <MarkdownRenderer content={content || '*预览区域*'} />
               </div>

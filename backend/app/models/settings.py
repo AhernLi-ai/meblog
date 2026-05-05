@@ -12,6 +12,12 @@ class SiteSettings(Base):
     __tablename__ = "site_settings"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    site_name: Mapped[str] = mapped_column(String(120), default="技术博客")
+    site_logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    site_favicon_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    site_description: Mapped[str] = mapped_column(String(300), default="分享技术与生活的个人博客")
+    site_keywords: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    default_og_image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     wechat_qr_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     wechat_guide_text: Mapped[str] = mapped_column(String(200), default="扫码关注公众号，获取更多精彩内容")
     wechat_show_on_article: Mapped[bool] = mapped_column(Boolean, default=True)
