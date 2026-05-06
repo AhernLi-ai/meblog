@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
+from datetime import datetime, timezone
 from app.models import Post, Admin, PostLike
 from app.schemas import PostCreate, PostUpdate, PostResponse, PostListResponse, LikeStatusResponse
 from app.schemas.post import AuthorInfo
@@ -40,6 +41,9 @@ class PostService:
     @staticmethod
     async def _to_post_response(db: AsyncSession, post: Post) -> PostResponse:
         author_info = await PostService._build_author_info(db)
+        # Keep legacy rows renderable when audit timestamps are missing.
+        safe_created_at = post.created_at or datetime.now(timezone.utc)
+        safe_updated_at = post.updated_at or safe_created_at
         return PostResponse(
             id=post.id,
             title=post.title,
@@ -52,8 +56,8 @@ class PostService:
             status=post.status,
             created_by=post.created_by,
             updated_by=post.updated_by,
-            created_at=post.created_at,
-            updated_at=post.updated_at,
+            created_at=safe_created_at,
+            updated_at=safe_updated_at,
             project=post.project,
             tags=post.tags,
             author=author_info,
@@ -122,14 +126,19 @@ class PostService:
                 raise HTTPException(status_code=404, detail="Post not found")
 
             if not effective_include_unpublished and not effective_include_hidden:
-                visitor_id = await VisitorService.resolve_visitor_id(db, request)
-                await StatsDao.log_access(
-                    db=db,
-                    post_id=post.id,
-                    visitor_id=visitor_id,
-                    user_agent=request.headers.get("user-agent", "")[:500] or None,
-                    referrer=request.headers.get("referer", "")[:500] or None,
-                )
+                try:
+                    visitor_id = await VisitorService.resolve_visitor_id(db, request)
+                    await StatsDao.log_access(
+                        db=db,
+                        post_id=post.id,
+                        visitor_id=visitor_id,
+                        user_agent=request.headers.get("user-agent", "")[:500] or None,
+                        referrer=request.headers.get("referer", "")[:500] or None,
+                    )
+                except Exception as access_error:
+                    # Access analytics should never block article rendering.
+                    await db.rollback()
+                    logger.warning(f"Skip access logging for post {id_or_slug}: {access_error}")
 
             return await PostService._to_post_response(db, post)
         except HTTPException:
