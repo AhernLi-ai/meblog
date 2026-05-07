@@ -44,14 +44,9 @@ class PostService:
         # Keep legacy rows renderable when audit timestamps are missing.
         safe_created_at = post.created_at or datetime.now(timezone.utc)
         safe_updated_at = post.updated_at or safe_created_at
-        try:
-            safe_project = post.project
-            safe_tags = list(post.tags or [])
-        except Exception as relation_error:
-            # Never fail article rendering because a lazy relation cannot be loaded.
-            logger.warning(f"Skip lazy relation load for post {post.id}: {relation_error}")
-            safe_project = None
-            safe_tags = []
+        # Avoid async lazy-load failures from ORM relations in response serialization.
+        safe_project = None
+        safe_tags = []
         return PostResponse(
             id=post.id,
             title=post.title,
