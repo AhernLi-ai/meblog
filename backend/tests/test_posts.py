@@ -152,6 +152,33 @@ class TestGetPost:
         assert response.status_code == 200
         assert response.json()["title"] == "Slug Post"
 
+    def test_get_post_with_null_updated_at(self, client, admin_user, db):
+        """Legacy rows with null updated_at should still be readable."""
+        from sqlalchemy import text
+        from app.models import Post
+
+        post = Post(
+            title="Legacy Timestamp Post",
+            slug="legacy-null-updated-at",
+            content="Content",
+            status="published",
+            user_id=admin_user.id,
+        )
+        db.add(post)
+        db.commit()
+
+        db.execute(
+            text("UPDATE posts SET updated_at = NULL WHERE id = :post_id"),
+            {"post_id": post.id},
+        )
+        db.commit()
+
+        response = client.get("/api/v1/posts/legacy-null-updated-at")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["slug"] == "legacy-null-updated-at"
+        assert data["updated_at"] is not None
+
     def test_get_post_not_found(self, client):
         """Test getting a non-existent post."""
         response = client.get("/api/v1/posts/99999")
