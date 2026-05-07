@@ -6,7 +6,8 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
 from datetime import datetime, timezone
-from app.models import Post, Admin, PostLike
+from app.models import Post, Admin, PostLike, Project, Tag
+from app.models.tag import post_tags
 from app.schemas import PostCreate, PostUpdate, PostResponse, PostListResponse, LikeStatusResponse
 from app.schemas.post import AuthorInfo
 from app.dao import PostDao, StatsDao
@@ -44,9 +45,19 @@ class PostService:
         # Keep legacy rows renderable when audit timestamps are missing.
         safe_created_at = post.created_at or datetime.now(timezone.utc)
         safe_updated_at = post.updated_at or safe_created_at
-        # Avoid async lazy-load failures from ORM relations in response serialization.
+        # Resolve relation data explicitly to avoid async lazy-load greenlet errors.
         safe_project = None
-        safe_tags = []
+        if post.project_id:
+            safe_project = (
+                await db.execute(select(Project).where(Project.id == post.project_id))
+            ).scalar_one_or_none()
+        safe_tags = (
+            await db.execute(
+                select(Tag)
+                .join(post_tags, post_tags.c.tag_id == Tag.id)
+                .where(post_tags.c.post_id == post.id)
+            )
+        ).scalars().all()
         return PostResponse(
             id=post.id,
             title=post.title,
