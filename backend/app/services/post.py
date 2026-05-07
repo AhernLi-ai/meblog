@@ -143,7 +143,13 @@ class PostService:
                     await db.rollback()
                     logger.warning(f"Skip access logging for post {id_or_slug}: {access_error}")
 
-            return await PostService._to_post_response(db, post)
+            refreshed_post = await PostDao.get_post_by_id(
+                db,
+                post.id,
+                include_unpublished=True,
+                include_hidden=True,
+            )
+            return await PostService._to_post_response(db, refreshed_post or post)
         except HTTPException:
             raise
         except Exception as e:
