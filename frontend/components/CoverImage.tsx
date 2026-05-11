@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { buildCoverFallbackCandidates } from '@/app/lib/cover-fallback';
 import { isSignableOssMediaUrl, resolveSignedMediaUrl } from '@/app/lib/media-url';
 
@@ -17,20 +17,39 @@ export default function CoverImage({
   className,
   placeholderSrc = '/cover-placeholder.svg',
 }: CoverImageProps) {
-  const [resolvedSrc, setResolvedSrc] = useState(src);
+  // Cache signed URL per src to avoid repeated resolution calls.
+  const cacheRef = useRef<Record<string, string>>({});
+  const [resolvedSrc, setResolvedSrc] = useState<string>(() => {
+    // Hydration-safe initial value: use src directly; signed resolution runs in useEffect.
+    if (cacheRef.current[src]) return cacheRef.current[src];
+    return src;
+  });
 
   useEffect(() => {
+    // Return early if already cached.
+    if (cacheRef.current[src]) {
+      setResolvedSrc(cacheRef.current[src]);
+      return;
+    }
+
     let cancelled = false;
     const resolveSrc = async () => {
       if (!src || !isSignableOssMediaUrl(src)) {
-        setResolvedSrc(src);
+        cacheRef.current[src] = src;
+        if (!cancelled) setResolvedSrc(src);
         return;
       }
       try {
         const signedUrl = await resolveSignedMediaUrl(src);
-        if (!cancelled) setResolvedSrc(signedUrl);
+        if (!cancelled) {
+          cacheRef.current[src] = signedUrl;
+          setResolvedSrc(signedUrl);
+        }
       } catch {
-        if (!cancelled) setResolvedSrc(src);
+        if (!cancelled) {
+          cacheRef.current[src] = src;
+          setResolvedSrc(src);
+        }
       }
     };
     resolveSrc();

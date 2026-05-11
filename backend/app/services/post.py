@@ -171,12 +171,10 @@ class PostService:
     async def create_post(
         db: AsyncSession,
         post: PostCreate,
-        current_user: Admin
+        current_user: Admin,
     ) -> PostResponse:
-        """Create a new post. Requires authentication."""
+        """Create a new post. Requires authentication (caller must verify)."""
         try:
-            if current_user is None:
-                raise HTTPException(status_code=401, detail="Not authenticated")
             result = await PostDao.create_post(db, post, creator_id=current_user.id)
             await PostService._notify_frontend_for_post(result)
             logger.info(f"Admin {current_user.id} created post {result.id}")
@@ -192,12 +190,10 @@ class PostService:
         db: AsyncSession,
         post_id: str,
         post: PostUpdate,
-        current_user: Admin
+        current_user: Admin,
     ) -> PostResponse:
-        """Update an existing post. Requires authentication and ownership."""
+        """Update an existing post. Requires authentication and ownership (caller must verify)."""
         try:
-            if current_user is None:
-                raise HTTPException(status_code=401, detail="Not authenticated")
             existing = await PostDao.get_post_by_id(
                 db,
                 post_id,
@@ -230,12 +226,10 @@ class PostService:
     async def delete_post(
         db: AsyncSession,
         post_id: str,
-        current_user: Admin
+        current_user: Admin,
     ) -> None:
-        """Delete a post. Requires authentication and ownership."""
+        """Delete a post. Requires authentication and ownership (caller must verify)."""
         try:
-            if current_user is None:
-                raise HTTPException(status_code=401, detail="Not authenticated")
             existing = await PostDao.get_post_by_id(
                 db,
                 post_id,

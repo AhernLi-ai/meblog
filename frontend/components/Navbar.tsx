@@ -6,8 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { siteSettingsApi } from '@/api/settings';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Menu } from '@headlessui/react';
 import {
   HomeIcon,
   FolderIcon,
@@ -72,53 +71,43 @@ export default function Navbar() {
                   <UserCircleIcon className="w-6 h-6" strokeWidth={1.5} />
                   <span className="font-medium">{user?.username}</span>
                 </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--color-border)]/40 focus:outline-none border border-[var(--color-border)] overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[var(--color-border)]">
-                      <p className="text-sm font-medium text-[var(--color-foreground)]">{user?.username}</p>
-                    </div>
-                    <div className="py-1">
-                      <Menu.Item>
-                        {({ active }) => (
-                          <Link
-                            href="/admin"
-                            className={`flex items-center gap-2 px-4 py-2 text-sm ${
-                              active
-                                ? 'bg-[var(--color-primary)] text-white'
-                                : 'text-[var(--color-foreground)]'
-                            }`}
-                          >
-                            <Cog6ToothIcon className="w-4 h-4" />
-                            管理后台
-                          </Link>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <button
-                            onClick={handleLogout}
-                            className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-left ${
-                              active
-                                ? 'bg-[var(--color-danger)] text-white'
-                                : 'text-[var(--color-foreground)]'
-                            }`}
-                          >
-                            <ArrowRightOnRectangleIcon className="w-4 h-4" />
-                            退出登录
-                          </button>
-                        )}
-                      </Menu.Item>
-                    </div>
-                  </Menu.Items>
-                </Transition>
+                <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--color-border)]/40 focus:outline-none border border-[var(--color-border)] overflow-hidden">
+                  <div className="px-4 py-3 border-b border-[var(--color-border)]">
+                    <p className="text-sm font-medium text-[var(--color-foreground)]">{user?.username}</p>
+                  </div>
+                  <div className="py-1">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href="/admin"
+                          className={`flex items-center gap-2 px-4 py-2 text-sm ${
+                            active
+                              ? 'bg-[var(--color-primary)] text-white'
+                              : 'text-[var(--color-foreground)]'
+                          }`}
+                        >
+                          <Cog6ToothIcon className="w-4 h-4" />
+                          管理后台
+                        </Link>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          onClick={handleLogout}
+                          className={`flex items-center gap-2 w-full px-4 py-2 text-sm text-left ${
+                            active
+                              ? 'bg-[var(--color-danger)] text-white'
+                              : 'text-[var(--color-foreground)]'
+                          }`}
+                        >
+                          <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                          退出登录
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
+                </Menu.Items>
               </Menu>
             )}
             <div className="md:hidden flex items-center gap-2">
@@ -164,60 +153,50 @@ function MobileMenu({ isAuthenticated: _isAuthenticated }: { isAuthenticated: bo
       <Menu.Button className="p-2 text-[var(--color-foreground)] hover:bg-[var(--color-background-secondary)] rounded-[8px] transition-colors">
         <Bars3Icon className="w-6 h-6" />
       </Menu.Button>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-1rem)] origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--color-border)]/40 focus:outline-none border border-[var(--color-border)] overflow-hidden">
-          <div className="py-2">
-            <Menu.Item>
-              {({ active }) => (
-                <Link prefetch={false} href="/" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
-                  <HomeIcon className="w-5 h-5" />
-                  Home
-                </Link>
-              )}
-            </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <Link prefetch={false} href="/projects" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
-                  <FolderIcon className="w-5 h-5" />
-                  Projects
-                </Link>
-              )}
-            </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <Link prefetch={false} href="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
-                  <TagIcon className="w-5 h-5" />
-                  Tags
-                </Link>
-              )}
-            </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <Link prefetch={false} href="/archive" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
-                  <ClockIcon className="w-5 h-5" />
-                  Archives
-                </Link>
-              )}
-            </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <Link prefetch={false} href="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
-                  <UserCircleIcon className="w-5 h-5" />
-                  About
-                </Link>
-              )}
-            </Menu.Item>
-          </div>
-        </Menu.Items>
-      </Transition>
+      <Menu.Items className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-1rem)] origin-top-right bg-[var(--color-background)] rounded-[12px] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--color-border)]/40 focus:outline-none border border-[var(--color-border)] overflow-hidden">
+        <div className="py-2">
+          <Menu.Item>
+            {({ active }) => (
+              <Link prefetch={false} href="/" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <HomeIcon className="w-5 h-5" />
+                Home
+              </Link>
+            )}
+          </Menu.Item>
+          <Menu.Item>
+            {({ active }) => (
+              <Link prefetch={false} href="/projects" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <FolderIcon className="w-5 h-5" />
+                Projects
+              </Link>
+            )}
+          </Menu.Item>
+          <Menu.Item>
+            {({ active }) => (
+              <Link prefetch={false} href="/tags" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <TagIcon className="w-5 h-5" />
+                Tags
+              </Link>
+            )}
+          </Menu.Item>
+          <Menu.Item>
+            {({ active }) => (
+              <Link prefetch={false} href="/archive" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <ClockIcon className="w-5 h-5" />
+                Archives
+              </Link>
+            )}
+          </Menu.Item>
+          <Menu.Item>
+            {({ active }) => (
+              <Link prefetch={false} href="/about" className={`flex items-center gap-2 px-4 py-3 text-sm ${active ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--color-foreground)]'}`}>
+                <UserCircleIcon className="w-5 h-5" />
+                About
+              </Link>
+            )}
+          </Menu.Item>
+        </div>
+      </Menu.Items>
     </Menu>
   );
 }

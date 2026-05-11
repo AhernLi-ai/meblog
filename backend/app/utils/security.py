@@ -43,6 +43,18 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 
+async def _decode_admin_id_from_token(token: str) -> Optional[str]:
+    """Decode and validate admin ID from a JWT token. Returns admin_id or None."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        admin_id: str | None = payload.get("sub")
+        if admin_id is None:
+            return None
+        return admin_id
+    except JWTError:
+        return None
+
+
 async def get_current_user(
     request: Request,
     db: AsyncSession = Depends(get_db),
@@ -51,15 +63,10 @@ async def get_current_user(
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header.split(" ")[1]
-    
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        admin_id: str | None = payload.get("sub")
-        if admin_id is None:
-            return None
-    except JWTError:
+    admin_id = await _decode_admin_id_from_token(token)
+    if admin_id is None:
         return None
 
     return (await db.execute(select(Admin).where(Admin.id == admin_id))).scalar_one_or_none()
@@ -70,15 +77,10 @@ async def get_current_user_from_request(request: Request, db: AsyncSession) -> O
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header.split(" ")[1]
-    
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        admin_id: str | None = payload.get("sub")
-        if admin_id is None:
-            return None
-    except JWTError:
+    admin_id = await _decode_admin_id_from_token(token)
+    if admin_id is None:
         return None
 
     return (await db.execute(select(Admin).where(Admin.id == admin_id))).scalar_one_or_none()

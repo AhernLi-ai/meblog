@@ -5,7 +5,7 @@ from typing import Optional
 from app.database import get_db
 from app.schemas import PostCreate, PostUpdate, PostResponse, PostListResponse, LikeStatusResponse
 from app.services import PostService
-from app.utils.security import get_current_user
+from app.utils.security import get_current_user, get_current_admin_user
 from app.models import Admin
 
 
@@ -22,7 +22,7 @@ async def list_posts(
     include_unpublished: bool = Query(False),
     include_hidden: bool = Query(False),
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[Admin] = Depends(get_current_user)
+    current_user: Optional[Admin] = Depends(get_current_user),
 ):
     return await PostService.list_posts(
         db,
@@ -60,7 +60,7 @@ async def get_post(
 async def create_new_post(
     post: PostCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[Admin] = Depends(get_current_user)
+    current_user: Admin = Depends(get_current_admin_user),
 ):
     return await PostService.create_post(db, post, current_user)
 
@@ -70,7 +70,7 @@ async def update_existing_post(
     post_id: str,
     post: PostUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[Admin] = Depends(get_current_user)
+    current_user: Admin = Depends(get_current_admin_user),
 ):
     return await PostService.update_post(db, post_id, post, current_user)
 
@@ -79,7 +79,7 @@ async def update_existing_post(
 async def delete_existing_post(
     post_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[Admin] = Depends(get_current_user)
+    current_user: Admin = Depends(get_current_admin_user),
 ):
     await PostService.delete_post(db, post_id, current_user)
     return None

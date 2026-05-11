@@ -157,13 +157,17 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           return <p className="text-[var(--color-foreground)] leading-relaxed mb-4" style={{ lineHeight: '1.8' }} {...props}>{children}</p>;
         },
         ul({ children, ...props }) {
-          return <ul className="list-disc list-inside space-y-1 my-4 text-[var(--color-foreground)]" {...props}>{children}</ul>;
+          return <ul className="list-disc list-inside my-4 text-[var(--color-foreground)]" {...props}>{children}</ul>;
         },
         ol({ children, ...props }) {
-          return <ol className="list-decimal list-inside space-y-1 my-4 text-[var(--color-foreground)]" {...props}>{children}</ol>;
+          return <ol className="list-decimal list-inside my-4 text-[var(--color-foreground)]" {...props}>{children}</ol>;
         },
         li({ children, ...props }) {
-          return <li className="text-[var(--color-foreground)]" {...props}>{children}</li>;
+          return (
+            <li className="text-[var(--color-foreground)] [&>p]:mt-2 [&>p]:mb-2 [&>ul]:pl-5 [&>ol]:pl-5" {...props}>
+              {children}
+            </li>
+          );
         },
         code({ node, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');
